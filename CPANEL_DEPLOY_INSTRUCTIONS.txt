@@ -1,0 +1,50 @@
+========================================================================
+CARITAS LUXURY – EASY CPANEL UPLOAD & HOSTING INSTRUCTIONS
+========================================================================
+
+File Created For You:
+cpanel_public_html_caritas_luxury.zip
+(Located in your project root folder)
+
+This ZIP file contains the entire ready-to-run website configured specifically
+for cPanel Apache/LiteSpeed web servers, including clean URLs and the pre-configured
+.htaccess file.
+
+------------------------------------------------------------------------
+STEP-BY-STEP UPLOAD GUIDE (Takes less than 2 minutes)
+------------------------------------------------------------------------
+
+STEP 1: Log in to your cPanel
+- Open your hosting cPanel account (e.g., https://yourdomain.com:2083 or via your host dashboard like Namecheap, Hostinger, Bluehost, GoDaddy, etc.).
+
+STEP 2: Open File Manager
+- In the cPanel search bar or under the "Files" section, click on "File Manager".
+
+STEP 3: Go to "public_html"
+- On the left sidebar or file list, double-click on the "public_html" folder.
+  (Note: If you have old default files like "index.php" or "default.html" from your host, you can delete or move them).
+
+STEP 4: Upload the ZIP file
+- Click the "Upload" button in the top toolbar of File Manager.
+- Drag and drop or select:
+  cpanel_public_html_caritas_luxury.zip
+- Wait for the upload progress bar to turn green (100%).
+
+STEP 5: Extract the ZIP file
+- Go back to the "public_html" directory tab.
+- Click "Reload" if you don't see the file yet.
+- Click once on "cpanel_public_html_caritas_luxury.zip".
+- Click "Extract" in the top toolbar (or right-click -> "Extract").
+- Make sure the extraction directory says "/public_html" and click "Extract File(s)".
+
+STEP 6: Done!
+- You can now delete the ZIP file from public_html to save disk space.
+- Open your domain in any browser (e.g. https://yourdomain.com).
+- Your Caritas Luxury website is live!
+
+========================================================================
+TECHNICAL DETAILS INCLUDED:
+- Clean URLs: /diamonds, /about-us, /contact, etc. work seamlessly.
+- Ready-configured .htaccess with automatic HTTPS support, Gzip compression, and browser caching.
+- Zero server setup needed (no Node.js installation or PM2 commands required on cPanel).
+========================================================================

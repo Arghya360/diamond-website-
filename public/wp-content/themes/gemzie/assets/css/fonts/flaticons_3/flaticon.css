@@ -1,0 +1,91 @@
+/*!
+*    ______ _       _   _
+*    |  ____| |     | | (_)
+*    | |__  | | __ _| |_ _  ___ ___  _ __
+*    |  __| | |/ _` | __| |/ __/ _ \| '_ \
+*    | |    | | (_| | |_| | (_| (_) | | | |
+*    |_|    |_|\__,_|\__|_|\___\___/|_| |_|
+*
+*         https://www.flaticon.com
+*/
+
+@font-face {
+    font-family: "flaticon";
+    src: url("./flaticon.woff2?fd09ff6e27b5631ffe3c581cc0465300") format("woff2"), url("./flaticon.woff?fd09ff6e27b5631ffe3c581cc0465300") format("woff"), url("./flaticon.eot?fd09ff6e27b5631ffe3c581cc0465300#iefix") format("embedded-opentype"), url("./flaticon.ttf?fd09ff6e27b5631ffe3c581cc0465300") format("truetype"), url("./flaticon.svg?fd09ff6e27b5631ffe3c581cc0465300#flaticon") format("svg")
+}
+
+i[class^="flaticon-"]:before,
+i[class*=" flaticon-"]:before {
+    font-family: flaticon !important;
+    font-style: normal;
+    font-weight: normal !important;
+    font-variant: normal;
+    text-transform: none;
+    /*    line-height: 1;*/
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.flaticon-laser-cutting:before {
+    content: "\f101";
+}
+
+.flaticon-laser-cutting-machine:before {
+    content: "\f102";
+}
+
+.flaticon-diamond:before {
+    content: "\f103";
+}
+
+.flaticon-cut:before {
+    content: "\f104";
+}
+
+.flaticon-diamond-1:before {
+    content: "\f105";
+}
+
+.flaticon-hard-work:before {
+    content: "\f106";
+}
+
+.flaticon-saw:before {
+    content: "\f107";
+}
+
+.flaticon-diamond-2:before {
+    content: "\f108";
+}
+
+.flaticon-diamond-3:before {
+    content: "\f109";
+}
+
+.flaticon-diamond-4:before {
+    content: "\f10a";
+}
+
+.flaticon-diamond-5:before {
+    content: "\f10b";
+}
+
+.flaticon-jewellery:before {
+    content: "\f10c";
+}
+
+.flaticon-diamond-6:before {
+    content: "\f10d";
+}
+
+.flaticon-diamond-7:before {
+    content: "\f10e";
+}
+
+.flaticon-diamond-8:before {
+    content: "\f10f";
+}
+
+.flaticon-diamond-9:before {
+    content: "\f110";
+}

@@ -1,0 +1,64 @@
+/* Existing WordPress styles are loaded from their original local stylesheets. */
+
+/* ==========================================================================
+   Homepage Header Slider — Subtle Dark Shadow & High-Contrast Text
+   ========================================================================== */
+
+/* Dark shadow overlay over the slider pictures so the picture has shadow and text is clearly visible */
+#rev_slider_1_1 rs-slide::before,
+.elementor-element-de7f16b rs-slide::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(0, 0, 0, 0.48) 50%,
+    rgba(0, 0, 0, 0.65) 100%
+  ) !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+}
+
+/* Subtle dimming on the background image itself */
+#rev_slider_1_1 .rev-slidebg,
+#rev_slider_1_1 rs-sbg,
+#rev_slider_1_1 rs-sbg-wrap,
+#rev_slider_1_1 rs-sbg-wrap img {
+  filter: brightness(0.82) contrast(1.05) !important;
+}
+
+/* Ensure main text on all slider layers is crisp white with soft readable shadow */
+#rev_slider_1_1 rs-layer#slider-1-slide-1-layer-1,
+#rev_slider_1_1 rs-layer#slider-1-slide-20-layer-1,
+#rev_slider_1_1 rs-layer#slider-1-slide-21-layer-1,
+.elementor-element-de7f16b rs-layer[id*="layer-1"] {
+  color: #ffffff !important;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Subtitle gold layers */
+#rev_slider_1_1 rs-layer#slider-1-slide-1-layer-0,
+#rev_slider_1_1 rs-layer#slider-1-slide-20-layer-0,
+#rev_slider_1_1 rs-layer#slider-1-slide-21-layer-0,
+.elementor-element-de7f16b rs-layer[id*="layer-0"] {
+  color: #d4b88f !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Slider button shadow */
+#rev_slider_1_1 a.rev-btn,
+.elementor-element-de7f16b a.rev-btn {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Hide fake founder / CEO block from home page */
+.elementor-element-d60f2d0,
+[data-id="d60f2d0"] {
+  display: none !important;
+}
