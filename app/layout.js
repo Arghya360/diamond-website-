@@ -20,15 +20,20 @@ export const metadata = {
   }
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
-    <html lang={site.lang}>
+    <html lang={site.lang} suppressHydrationWarning>
       <head>
         {/* Polyfill URL.canParse for older browsers / Next.js 16 Turbopack HMR */}
         <script dangerouslySetInnerHTML={{ __html: `if(typeof URL.canParse!=='function'){URL.canParse=function(u,b){try{new URL(u,b);return true;}catch(e){return false;}}}` }} />
         <LegacyStyles resources={site.stylesheets} />
       </head>
-      <body className={site.bodyClass}>{children}</body>
+      <body className={site.bodyClass} suppressHydrationWarning>{children}</body>
     </html>
   );
 }

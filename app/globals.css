@@ -1,6 +1,55 @@
 /* Existing WordPress styles are loaded from their original local stylesheets. */
 
 /* ==========================================================================
+   Mobile-First Base Reset
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+img, video, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==========================================================================
+   Container responsiveness
+   ========================================================================== */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 768px) {
+  .container { padding-left: 24px; padding-right: 24px; }
+}
+
+/* ==========================================================================
+   Header / Navigation — mobile fixes
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Ensure the top nav doesn't overflow */
+  header, nav { overflow-x: hidden; max-width: 100vw; }
+
+  /* WordPress mega-menu: collapse to hamburger handled by existing JS;
+     but prevent horizontal scroll caused by absolute-positioned items */
+  .mega-menu, .sub-menu, .dropdown-menu {
+    position: static !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ==========================================================================
    Homepage Header Slider — Subtle Dark Shadow & High-Contrast Text
    ========================================================================== */
 
