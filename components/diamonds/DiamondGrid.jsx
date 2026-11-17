@@ -523,6 +523,17 @@ export default function DiamondGrid({ prefilterColour }) {
         @media (min-width: 769px) {
           .dg-sidebar { width: 290px !important; }
         }
+        /* ── Range Slider Styling ── */
+        .dg-range { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: transparent; outline: none; cursor: pointer; position: absolute; top: 0; left: 0; pointer-events: none; }
+        .dg-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #0b4d45; cursor: pointer; pointer-events: all; box-shadow: 0 1px 4px rgba(0,0,0,0.3); border: 2px solid #fff; }
+        .dg-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #0b4d45; cursor: pointer; pointer-events: all; box-shadow: 0 1px 4px rgba(0,0,0,0.3); border: 2px solid #fff; }
+        .dg-range-wrap { position: relative; height: 18px; margin: 10px 4px 20px; }
+        .dg-range-track { position: absolute; top: 7px; left: 0; right: 0; height: 4px; background: #e5e7eb; border-radius: 2px; }
+        .dg-range-fill { position: absolute; top: 7px; height: 4px; background: #0b4d45; border-radius: 2px; }
+        .dg-step-labels { display: flex; justify-content: space-between; padding: 0 2px; margin-top: 4px; }
+        .dg-step-label { font-size: 10px; color: #6b7280; cursor: pointer; text-align: center; padding: 2px 0; border-radius: 3px; transition: color 0.15s; }
+        .dg-step-label:hover { color: #0b4d45; font-weight: 700; }
+        .dg-step-label.active { color: #0b4d45; font-weight: 700; }
       `}</style>
       <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px' }}>
 
@@ -733,68 +744,52 @@ export default function DiamondGrid({ prefilterColour }) {
                   {openSections.carat ? '⌃' : '⌄'}
                 </span>
               </div>
-              {openSections.carat && (
-                <div>
-                  {/* Visual slider track */}
-                  <div
-                    style={{
-                      position: 'relative',
-                      height: '4px',
-                      backgroundColor: teal,
-                      borderRadius: '2px',
-                      margin: '16px 8px 20px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
+              {openSections.carat && (() => {
+                const CARAT_MIN_BOUND = 0.25;
+                const CARAT_MAX_BOUND = 25.17;
+                const leftPct = ((caratMin - CARAT_MIN_BOUND) / (CARAT_MAX_BOUND - CARAT_MIN_BOUND)) * 100;
+                const rightPct = ((caratMax - CARAT_MIN_BOUND) / (CARAT_MAX_BOUND - CARAT_MIN_BOUND)) * 100;
+                return (
+                  <div>
+                    <div className="dg-range-wrap">
+                      <div className="dg-range-track" />
+                      <div className="dg-range-fill" style={{ left: `${leftPct}%`, right: `${100 - rightPct}%` }} />
+                      <input
+                        type="range" className="dg-range"
+                        min={CARAT_MIN_BOUND} max={CARAT_MAX_BOUND} step={0.05}
+                        value={caratMin}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          if (v < caratMax) setCaratMin(v);
+                        }}
+                      />
+                      <input
+                        type="range" className="dg-range"
+                        min={CARAT_MIN_BOUND} max={CARAT_MAX_BOUND} step={0.05}
+                        value={caratMax}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          if (v > caratMin) setCaratMax(v);
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                      <input
+                        type="number" step="0.05" min={CARAT_MIN_BOUND} max={caratMax}
+                        value={caratMin}
+                        onChange={(e) => { const v = Number(e.target.value); if (v >= CARAT_MIN_BOUND && v < caratMax) setCaratMin(v); }}
+                        style={sliderInputStyle}
+                      />
+                      <input
+                        type="number" step="0.05" min={caratMin} max={CARAT_MAX_BOUND}
+                        value={caratMax}
+                        onChange={(e) => { const v = Number(e.target.value); if (v <= CARAT_MAX_BOUND && v > caratMin) setCaratMax(v); }}
+                        style={sliderInputStyle}
+                      />
+                    </div>
                   </div>
-                  {/* Two Input Boxes */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                    <input
-                      type="number"
-                      step="0.05"
-                      min="0.25"
-                      max={caratMax}
-                      value={caratMin}
-                      onChange={(e) => setCaratMin(Number(e.target.value) || 0.25)}
-                      style={sliderInputStyle}
-                    />
-                    <input
-                      type="number"
-                      step="0.05"
-                      min={caratMin}
-                      max="25.17"
-                      value={caratMax}
-                      onChange={(e) => setCaratMax(Number(e.target.value) || 25.17)}
-                      style={sliderInputStyle}
-                    />
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* 4. Diamond Price Slider */}
@@ -817,70 +812,46 @@ export default function DiamondGrid({ prefilterColour }) {
                   {openSections.price ? '⌃' : '⌄'}
                 </span>
               </div>
-              {openSections.price && (
-                <div>
-                  <div
-                    style={{
-                      position: 'relative',
-                      height: '4px',
-                      backgroundColor: teal,
-                      borderRadius: '2px',
-                      margin: '16px 8px 20px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                    <div style={{ position: 'relative', flex: 1 }}>
+              {openSections.price && (() => {
+                const PRICE_MIN_BOUND = 180;
+                const PRICE_MAX_BOUND = 2353410;
+                const leftPct = ((priceMin - PRICE_MIN_BOUND) / (PRICE_MAX_BOUND - PRICE_MIN_BOUND)) * 100;
+                const rightPct = ((priceMax - PRICE_MIN_BOUND) / (PRICE_MAX_BOUND - PRICE_MIN_BOUND)) * 100;
+                return (
+                  <div>
+                    <div className="dg-range-wrap">
+                      <div className="dg-range-track" />
+                      <div className="dg-range-fill" style={{ left: `${leftPct}%`, right: `${100 - rightPct}%` }} />
+                      <input
+                        type="range" className="dg-range"
+                        min={PRICE_MIN_BOUND} max={PRICE_MAX_BOUND} step={100}
+                        value={priceMin}
+                        onChange={(e) => { const v = Number(e.target.value); if (v < priceMax) setPriceMin(v); }}
+                      />
+                      <input
+                        type="range" className="dg-range"
+                        min={PRICE_MIN_BOUND} max={PRICE_MAX_BOUND} step={100}
+                        value={priceMax}
+                        onChange={(e) => { const v = Number(e.target.value); if (v > priceMin) setPriceMax(v); }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
                       <input
                         type="text"
                         value={`$${priceMin.toLocaleString()}`}
-                        onChange={(e) => {
-                          const v = parseInt(e.target.value.replace(/[^0-9]/g, '')) || 0;
-                          setPriceMin(v);
-                        }}
+                        onChange={(e) => { const v = parseInt(e.target.value.replace(/[^0-9]/g, '')) || 180; if (v < priceMax) setPriceMin(v); }}
                         style={sliderInputStyle}
                       />
-                    </div>
-                    <div style={{ position: 'relative', flex: 1 }}>
                       <input
                         type="text"
                         value={`$${priceMax.toLocaleString()}`}
-                        onChange={(e) => {
-                          const v = parseInt(e.target.value.replace(/[^0-9]/g, '')) || 2353410;
-                          setPriceMax(v);
-                        }}
+                        onChange={(e) => { const v = parseInt(e.target.value.replace(/[^0-9]/g, '')) || 2353410; if (v > priceMin) setPriceMax(v); }}
                         style={sliderInputStyle}
                       />
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* 5. What are you looking for? */}
@@ -958,64 +929,48 @@ export default function DiamondGrid({ prefilterColour }) {
                   {openSections.cut ? '⌃' : '⌄'}
                 </span>
               </div>
-              {openSections.cut && (
-                <div>
-                  <div
-                    style={{
-                      position: 'relative',
-                      height: '4px',
-                      backgroundColor: teal,
-                      borderRadius: '2px',
-                      margin: '16px 8px 10px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
+              {openSections.cut && (() => {
+                const steps = CUT_STEPS;
+                const leftPct = (cutMinIdx / (steps.length - 1)) * 100;
+                const rightPct = (cutMaxIdx / (steps.length - 1)) * 100;
+                return (
+                  <div>
+                    <div className="dg-range-wrap">
+                      <div className="dg-range-track" />
+                      <div className="dg-range-fill" style={{ left: `${leftPct}%`, right: `${100 - rightPct}%` }} />
+                      <input
+                        type="range" className="dg-range"
+                        min={0} max={steps.length - 1} step={1}
+                        value={cutMinIdx}
+                        onChange={(e) => { const v = Number(e.target.value); if (v <= cutMaxIdx) setCutMinIdx(v); }}
+                      />
+                      <input
+                        type="range" className="dg-range"
+                        min={0} max={steps.length - 1} step={1}
+                        value={cutMaxIdx}
+                        onChange={(e) => { const v = Number(e.target.value); if (v >= cutMinIdx) setCutMaxIdx(v); }}
+                      />
+                    </div>
+                    <div className="dg-step-labels">
+                      {steps.map((step, idx) => (
+                        <span
+                          key={step}
+                          className={`dg-step-label${idx >= cutMinIdx && idx <= cutMaxIdx ? ' active' : ''}`}
+                          onClick={() => {
+                            if (idx < cutMinIdx) setCutMinIdx(idx);
+                            else if (idx > cutMaxIdx) setCutMaxIdx(idx);
+                            else if (idx === cutMinIdx && idx < cutMaxIdx) setCutMinIdx(idx + 1);
+                            else setCutMaxIdx(idx - 1);
+                          }}
+                        >{step}</span>
+                      ))}
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '12px', color: teal, fontWeight: 600 }}>
+                      {steps[cutMinIdx]}{cutMinIdx !== cutMaxIdx ? ` → ${steps[cutMaxIdx]}` : ''}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px' }}>
-                    {CUT_STEPS.map((step, idx) => (
-                      <span
-                        key={step}
-                        onClick={() => {
-                          setCutMinIdx(idx);
-                        }}
-                        style={{
-                          fontSize: '10px',
-                          color: '#4b5563',
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          maxWidth: '46px',
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {step}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* 7. Color Stepped Slider */}
@@ -1038,58 +993,46 @@ export default function DiamondGrid({ prefilterColour }) {
                   {openSections.color ? '⌃' : '⌄'}
                 </span>
               </div>
-              {openSections.color && (
-                <div>
-                  <div
-                    style={{
-                      position: 'relative',
-                      height: '4px',
-                      backgroundColor: teal,
-                      borderRadius: '2px',
-                      margin: '16px 8px 10px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
+              {openSections.color && (() => {
+                const steps = COLOR_STEPS;
+                const leftPct = (colorMinIdx / (steps.length - 1)) * 100;
+                const rightPct = (colorMaxIdx / (steps.length - 1)) * 100;
+                return (
+                  <div>
+                    <div className="dg-range-wrap">
+                      <div className="dg-range-track" />
+                      <div className="dg-range-fill" style={{ left: `${leftPct}%`, right: `${100 - rightPct}%` }} />
+                      <input
+                        type="range" className="dg-range"
+                        min={0} max={steps.length - 1} step={1}
+                        value={colorMinIdx}
+                        onChange={(e) => { const v = Number(e.target.value); if (v <= colorMaxIdx) setColorMinIdx(v); }}
+                      />
+                      <input
+                        type="range" className="dg-range"
+                        min={0} max={steps.length - 1} step={1}
+                        value={colorMaxIdx}
+                        onChange={(e) => { const v = Number(e.target.value); if (v >= colorMinIdx) setColorMaxIdx(v); }}
+                      />
+                    </div>
+                    <div className="dg-step-labels">
+                      {steps.map((col, idx) => (
+                        <span
+                          key={col}
+                          className={`dg-step-label${idx >= colorMinIdx && idx <= colorMaxIdx ? ' active' : ''}`}
+                          onClick={() => {
+                            if (idx < colorMinIdx) setColorMinIdx(idx);
+                            else if (idx > colorMaxIdx) setColorMaxIdx(idx);
+                          }}
+                        >{col}</span>
+                      ))}
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '12px', color: teal, fontWeight: 600 }}>
+                      {steps[colorMinIdx]}{colorMinIdx !== colorMaxIdx ? ` → ${steps[colorMaxIdx]}` : ''}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px' }}>
-                    {COLOR_STEPS.map((col) => (
-                      <span
-                        key={col}
-                        style={{
-                          fontSize: '11px',
-                          color: '#4b5563',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {col}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* 8. Clarity Stepped Slider */}
@@ -1112,58 +1055,46 @@ export default function DiamondGrid({ prefilterColour }) {
                   {openSections.clarity ? '⌃' : '⌄'}
                 </span>
               </div>
-              {openSections.clarity && (
-                <div>
-                  <div
-                    style={{
-                      position: 'relative',
-                      height: '4px',
-                      backgroundColor: teal,
-                      borderRadius: '2px',
-                      margin: '16px 8px 10px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: '0%',
-                        top: '-6px',
-                        width: '16px',
-                        height: '16px',
-                        borderRadius: '50%',
-                        backgroundColor: teal,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                      }}
-                    />
+              {openSections.clarity && (() => {
+                const steps = CLARITY_STEPS;
+                const leftPct = (clarityMinIdx / (steps.length - 1)) * 100;
+                const rightPct = (clarityMaxIdx / (steps.length - 1)) * 100;
+                return (
+                  <div>
+                    <div className="dg-range-wrap">
+                      <div className="dg-range-track" />
+                      <div className="dg-range-fill" style={{ left: `${leftPct}%`, right: `${100 - rightPct}%` }} />
+                      <input
+                        type="range" className="dg-range"
+                        min={0} max={steps.length - 1} step={1}
+                        value={clarityMinIdx}
+                        onChange={(e) => { const v = Number(e.target.value); if (v <= clarityMaxIdx) setClarityMinIdx(v); }}
+                      />
+                      <input
+                        type="range" className="dg-range"
+                        min={0} max={steps.length - 1} step={1}
+                        value={clarityMaxIdx}
+                        onChange={(e) => { const v = Number(e.target.value); if (v >= clarityMinIdx) setClarityMaxIdx(v); }}
+                      />
+                    </div>
+                    <div className="dg-step-labels">
+                      {steps.map((clr, idx) => (
+                        <span
+                          key={clr}
+                          className={`dg-step-label${idx >= clarityMinIdx && idx <= clarityMaxIdx ? ' active' : ''}`}
+                          onClick={() => {
+                            if (idx < clarityMinIdx) setClarityMinIdx(idx);
+                            else if (idx > clarityMaxIdx) setClarityMaxIdx(idx);
+                          }}
+                        >{clr}</span>
+                      ))}
+                    </div>
+                    <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '12px', color: teal, fontWeight: 600 }}>
+                      {steps[clarityMinIdx]}{clarityMinIdx !== clarityMaxIdx ? ` → ${steps[clarityMaxIdx]}` : ''}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px' }}>
-                    {CLARITY_STEPS.map((clr) => (
-                      <span
-                        key={clr}
-                        style={{
-                          fontSize: '10px',
-                          color: '#4b5563',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {clr}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* Reset Filters Link */}
