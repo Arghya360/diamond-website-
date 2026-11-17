@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { Fragment } from 'react';
 
 const LOGOS = [
   { src: '/wp-content/uploads/2024/02/h1-client-logo-001.png', hover: '/wp-content/uploads/2024/02/h1-client-hover-logo-001.png', alt: 'Brand 1' },
@@ -50,12 +51,12 @@ export default function CrystoBrandLogos() {
         }}
       >
         {LOGOS.map((logo, i) => (
-          <>
-            <div key={logo.alt} className="brand-logo-item">
+          <Fragment key={logo.alt}>
+            <div className="brand-logo-item">
               <Image src={logo.src} alt={logo.alt} width={120} height={50} style={{ objectFit: 'contain', maxWidth: '100%', maxHeight: '44px' }} />
             </div>
-            {i < LOGOS.length - 1 && <div key={`sep-${i}`} className="brand-sep" />}
-          </>
+            {i < LOGOS.length - 1 && <div className="brand-sep" />}
+          </Fragment>
         ))}
       </div>
     </section>
