@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 // ── Complete Diamonds Catalog ─────────────────────────────────────
 const DIAMONDS_CATALOG = [
@@ -365,6 +365,16 @@ export default function DiamondGrid({ prefilterColour }) {
   const [compareList, setCompareList] = useState({});
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  useEffect(() => {
+    if (filtersOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [filtersOpen]);
+
   // ── Accordion Collapsible State ──
   const [openSections, setOpenSections] = useState({
     origin: true,
@@ -506,19 +516,20 @@ export default function DiamondGrid({ prefilterColour }) {
             top: 0; left: 0;
             width: 85vw; max-width: 320px;
             height: 100vh; overflow-y: auto;
-            background: #fff; z-index: 9999;
-            padding: 20px !important;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            -webkit-overflow-scrolling: touch;
+            background: #ffffff; z-index: 9999;
+            padding: 24px 20px 40px !important;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.2);
             transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-right: none !important;
           }
           .dg-sidebar.open { transform: translateX(0); }
-          .dg-sidebar-overlay { display: block !important; }
           .dg-filter-btn { display: flex !important; }
           .dg-sidebar-close { display: flex !important; }
-          .dg-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; gap: 12px !important; }
-          .dg-topbar { flex-wrap: wrap; gap: 10px; }
+          .dg-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 12px !important; }
+          .dg-topbar { flex-direction: column; align-items: stretch !important; gap: 12px !important; }
+          .dg-container { padding: 0 16px !important; }
         }
         @media (min-width: 769px) {
           .dg-sidebar { width: 290px !important; }
@@ -535,7 +546,7 @@ export default function DiamondGrid({ prefilterColour }) {
         .dg-step-label:hover { color: #0b4d45; font-weight: 700; }
         .dg-step-label.active { color: #0b4d45; font-weight: 700; }
       `}</style>
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px' }}>
+      <div className="dg-container" style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px' }}>
 
         {/* ── Outer 2-Column Layout ── */}
         <div className="dg-layout" style={{ display: 'flex', flexDirection: 'row', gap: '32px', alignItems: 'flex-start' }}>
@@ -543,12 +554,23 @@ export default function DiamondGrid({ prefilterColour }) {
           {/* ══════════════════════════════════════════════════════════
               LEFT SIDEBAR: FILTERS
           ══════════════════════════════════════════════════════════ */}
-          {/* Mobile overlay backdrop */}
-          <div
-            className="dg-sidebar-overlay"
-            onClick={() => setFiltersOpen(false)}
-            style={{ display: 'none', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998 }}
-          />
+          {/* Mobile overlay backdrop - only active when drawer is open */}
+          {filtersOpen && (
+            <div
+              className="dg-sidebar-overlay"
+              onClick={() => setFiltersOpen(false)}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 9998,
+                cursor: 'pointer',
+              }}
+            />
+          )}
           <aside
             className={`dg-sidebar${filtersOpen ? ' open' : ''}`}
             style={{
@@ -1125,23 +1147,38 @@ export default function DiamondGrid({ prefilterColour }) {
             {/* Mobile: Show Filters button */}
             <button
               className="dg-filter-btn"
+              type="button"
               onClick={() => setFiltersOpen(true)}
               style={{
                 display: 'none',
-                marginBottom: '12px',
-                padding: '10px 20px',
-                backgroundColor: '#0b4d45',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
+                width: '100%',
+                justifyContent: 'center',
                 alignItems: 'center',
                 gap: '8px',
+                marginBottom: '16px',
+                padding: '12px 20px',
+                backgroundColor: '#0b4d45',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '15px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(11, 77, 69, 0.25)',
               }}
             >
-              ☰ Filters
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14" />
+                <line x1="4" y1="10" x2="4" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12" y2="3" />
+                <line x1="20" y1="21" x2="20" y2="16" />
+                <line x1="20" y1="12" x2="20" y2="3" />
+                <line x1="1" y1="14" x2="7" y2="14" />
+                <line x1="9" y1="8" x2="15" y2="8" />
+                <line x1="17" y1="16" x2="23" y2="16" />
+              </svg>
+              Filter Diamonds
             </button>
 
             {/* ── Top Bar: Visual/List, Quick Ship, Sort By ── */}

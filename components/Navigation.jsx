@@ -398,6 +398,19 @@ export default function Navigation({ currentPath = '/' }) {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
+  useEffect(() => {
+    const handleToggleClick = (e) => {
+      const toggle = e.target.closest('.menu-toggle, .pt-toggle-btn');
+      if (toggle) {
+        e.preventDefault();
+        e.stopPropagation();
+        setMobileOpen(true);
+      }
+    };
+    document.addEventListener('click', handleToggleClick);
+    return () => document.removeEventListener('click', handleToggleClick);
+  }, []);
+
   return (
     <div id="mega-menu-wrap-primary" className="mega-menu-wrap">
       <style>{`
@@ -536,18 +549,48 @@ export default function Navigation({ currentPath = '/' }) {
           }
           #mega-menu-wrap-primary .mega-menu-toggle {
             display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             cursor: pointer !important;
             background: transparent !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
+            padding: 8px !important;
+            z-index: 100 !important;
           }
           #mega-menu-wrap-primary .mega-menu-toggle:after,
           #mega-menu-wrap-primary .mega-menu-toggle.mega-menu-open:after {
             display: none !important;
             content: none !important;
           }
+          #mega-menu-wrap-primary .mega-menu-toggle .mega-toggle-animated-box {
+            width: 30px !important;
+            height: 22px !important;
+            display: inline-block !important;
+            position: relative !important;
+          }
           #mega-menu-wrap-primary .mega-menu-toggle .mega-toggle-animated-inner,
           #mega-menu-wrap-primary .mega-menu-toggle .mega-toggle-animated-inner::before,
           #mega-menu-wrap-primary .mega-menu-toggle .mega-toggle-animated-inner::after {
+            display: block !important;
+            width: 30px !important;
+            height: 3px !important;
             background-color: #ffffff !important;
+            border-radius: 2px !important;
+            position: absolute !important;
+            left: 0 !important;
+          }
+          #mega-menu-wrap-primary .mega-menu-toggle .mega-toggle-animated-inner {
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+          }
+          #mega-menu-wrap-primary .mega-menu-toggle .mega-toggle-animated-inner::before {
+            content: "" !important;
+            top: -8px !important;
+          }
+          #mega-menu-wrap-primary .mega-menu-toggle .mega-toggle-animated-inner::after {
+            content: "" !important;
+            top: 8px !important;
           }
         }
         @media (min-width: 1024px) {
