@@ -24,6 +24,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang={site.lang}>
       <head>
+        {/* Polyfill URL.canParse for older browsers / Next.js 16 Turbopack HMR */}
+        <script dangerouslySetInnerHTML={{ __html: `if(typeof URL.canParse!=='function'){URL.canParse=function(u,b){try{new URL(u,b);return true;}catch(e){return false;}}}` }} />
         <LegacyStyles resources={site.stylesheets} />
       </head>
       <body className={site.bodyClass}>{children}</body>
