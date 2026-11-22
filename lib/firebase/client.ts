@@ -3,20 +3,38 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyCvC3wnHMNfQyGePH-BVDjhK5-M9CaTqn4',
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'hopeful-dryad-l9brs.firebaseapp.com',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'hopeful-dryad-l9brs',
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'hopeful-dryad-l9brs.firebasestorage.app',
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '654845419262',
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:654845419262:web:5f3c518ff67de2c4024faf',
-};
+const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '';
+const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '';
+const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '';
+const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '';
+const messagingSenderId = process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '';
+const appId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '';
+const databaseId = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_ID || '';
 
-// Initialize Firebase safely for SSR & client environments
-const app: FirebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth: Auth = getAuth(app);
-const databaseId = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_ID || 'ai-studio-joyantogoldwebsi-e2b9b878-71fe-412d-8565-8bc02b33ea8c';
-const db: Firestore = getFirestore(app, databaseId);
-const storage: FirebaseStorage = getStorage(app);
+export const isFirebaseConfigured = Boolean(apiKey && projectId);
 
-export { app, auth, db, storage, databaseId };
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
+let storage: FirebaseStorage | null = null;
+
+if (isFirebaseConfigured) {
+  try {
+    const config = {
+      apiKey,
+      authDomain: authDomain || `${projectId}.firebaseapp.com`,
+      projectId,
+      storageBucket: storageBucket || `${projectId}.firebasestorage.app`,
+      messagingSenderId,
+      appId,
+    };
+    app = getApps().length > 0 ? getApp() : initializeApp(config);
+    auth = getAuth(app);
+    db = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
+    storage = getStorage(app);
+  } catch (error) {
+    console.warn('Firebase initialization error, running in standalone mode:', error);
+  }
+}
+
+export { app, auth, db, storage, databaseId, projectId };

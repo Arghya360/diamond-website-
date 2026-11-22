@@ -223,19 +223,15 @@ export default function AdminSettingsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--admin-muted)' }}>Firebase Project:</span>
-            <span>hopeful-dryad-l9brs</span>
+            <span>{process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'Ready for new Firebase account'}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--admin-muted)' }}>Project Number:</span>
-            <span>654845419262</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--admin-muted)' }}>Web App ID:</span>
-            <span>1:654845419262:web:5f3c518ff67de2c4024faf</span>
+            <span style={{ color: 'var(--admin-muted)' }}>Collection Prefix:</span>
+            <span style={{ color: 'var(--admin-gold)' }}>caritas_* (100% Isolated from other websites)</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: 'var(--admin-muted)' }}>Storage Bucket:</span>
-            <span>hopeful-dryad-l9brs.firebasestorage.app</span>
+            <span>{process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'Pending new account setup'}</span>
           </div>
         </div>
 

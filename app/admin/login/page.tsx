@@ -3,25 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminAuth } from '../../../lib/firebase/auth-context';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../../lib/firebase/client';
 import '../admin.css';
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const { user, isAdmin, login, resetPassword, error: authError } = useAdminAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('Caritas360');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isSetupMode, setIsSetupMode] = useState(false);
 
   useEffect(() => {
-    if (user && isAdmin) {
+    if (isAdmin) {
       router.push('/admin');
     }
-  }, [user, isAdmin, router]);
+  }, [isAdmin, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,48 +27,31 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      if (isSetupMode) {
-        // Initial setup for the authorized owner
-        if (email.trim().toLowerCase() !== 'arghyabiswas0792@gmail.com') {
-          setLocalError('Initial admin setup is reserved for authorized owner arghyabiswas0792@gmail.com.');
-          setLoading(false);
-          return;
-        }
-        await createUserWithEmailAndPassword(auth, email.trim(), password);
-        setSuccessMessage('Administrator account created successfully! Signing you in...');
-        const success = await login(email.trim(), password);
-        if (success) router.push('/admin');
-      } else {
-        const success = await login(email.trim(), password);
-        if (success) {
+      const success = await login(username.trim(), password);
+      if (success) {
+        setSuccessMessage('Authenticated successfully! Redirecting...');
+        setTimeout(() => {
           router.push('/admin');
-        } else {
-          setLocalError('Authentication failed. Check your email and password, or use Initial Setup if creating your first login.');
-        }
+        }, 300);
+      } else {
+        setLocalError('Invalid username or password. Please verify your credentials.');
       }
     } catch (err: any) {
-      console.error('Login/Setup error:', err);
-      if (err.code === 'auth/email-already-in-use') {
-        setLocalError('This email already has an account. Please sign in normally using your password.');
-        setIsSetupMode(false);
-      } else if (err.code === 'auth/weak-password') {
-        setLocalError('Password must be at least 6 characters.');
-      } else {
-        setLocalError(err.message || 'Error occurred during authentication.');
-      }
+      console.error('Login error:', err);
+      setLocalError(err.message || 'Error occurred during authentication.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleForgotPassword = async () => {
-    if (!email) {
-      setLocalError('Please enter your email address first.');
+    if (!username) {
+      setLocalError('Please enter your username or email address first.');
       return;
     }
     try {
-      await resetPassword(email);
-      setSuccessMessage('Password reset link sent to your email.');
+      await resetPassword(username);
+      setSuccessMessage('Password reset instructions sent.');
     } catch (err: any) {
       setLocalError('Failed to send reset email. ' + (err.message || ''));
     }
@@ -101,11 +81,19 @@ export default function AdminLoginPage() {
       >
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ color: 'var(--admin-gold)', fontWeight: 700, fontSize: '20px', letterSpacing: '1.5px', marginBottom: '6px' }}>
+          <div
+            style={{
+              color: 'var(--admin-gold)',
+              fontWeight: 700,
+              fontSize: '20px',
+              letterSpacing: '1.5px',
+              marginBottom: '6px',
+            }}
+          >
             CARITAS LUXURY
           </div>
           <p style={{ margin: 0, color: 'var(--admin-muted)', fontSize: '13px' }}>
-            {isSetupMode ? 'Initial Super Admin Provisioning' : 'Secure Management Portal'}
+            Administrative Control Panel
           </p>
         </div>
 
@@ -145,29 +133,44 @@ export default function AdminLoginPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <div>
-            <label className="admin-label">Administrator Email</label>
+            <label className="admin-label">Username or Email</label>
             <input
-              type="email"
+              type="text"
               required
               className="admin-input"
-              placeholder="e.g. arghyabiswas0792@gmail.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="e.g. Caritas360"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
             />
           </div>
 
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label className="admin-label" style={{ margin: 0 }}>Password</label>
-              {!isSetupMode && (
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  style={{ background: 'none', border: 'none', color: 'var(--admin-gold)', fontSize: '11px', cursor: 'pointer', padding: 0 }}
-                >
-                  Forgot password?
-                </button>
-              )}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '6px',
+              }}
+            >
+              <label className="admin-label" style={{ margin: 0 }}>
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--admin-gold)',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+              >
+                Forgot password?
+              </button>
             </div>
             <input
               type="password"
@@ -176,6 +179,7 @@ export default function AdminLoginPage() {
               placeholder="••••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
             />
           </div>
 
@@ -191,33 +195,11 @@ export default function AdminLoginPage() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? 'Authenticating...' : isSetupMode ? 'Create Super Admin & Sign In' : 'Sign In to Dashboard'}
+            {loading ? 'Authenticating...' : 'Sign In to Dashboard'}
           </button>
         </form>
 
-        {/* Setup toggle */}
-        <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid var(--admin-border)', textAlign: 'center' }}>
-          <button
-            type="button"
-            onClick={() => {
-              setIsSetupMode(!isSetupMode);
-              setLocalError(null);
-              setSuccessMessage(null);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--admin-muted)',
-              fontSize: '12px',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-            }}
-          >
-            {isSetupMode ? 'Already created? Switch to Standard Sign In' : 'First time? Initialize Initial Super Admin Account'}
-          </button>
-        </div>
-
-        <div style={{ marginTop: '16px', textAlign: 'center' }}>
+        <div style={{ marginTop: '24px', textAlign: 'center' }}>
           <a
             href="/"
             style={{ color: '#6b7280', fontSize: '12px', textDecoration: 'none' }}

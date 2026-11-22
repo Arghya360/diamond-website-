@@ -409,7 +409,7 @@ export default function AddProductPage() {
                 {uploadingImg ? 'Uploading image to Firebase Storage...' : 'Click or Drag files here to upload to Firebase Storage'}
               </div>
               <div style={{ color: 'var(--admin-muted)', fontSize: '12px', marginTop: '4px' }}>
-                Supports PNG, JPG, WEBP (stored in hopeful-dryad-l9brs.firebasestorage.app)
+                Supports PNG, JPG, WEBP (stored in Firebase Storage)
               </div>
               <input
                 type="file"

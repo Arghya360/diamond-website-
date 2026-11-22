@@ -1,5 +1,6 @@
 import { collection, doc, writeBatch, serverTimestamp, getDocs } from 'firebase/firestore';
-import { db } from './client';
+import { db, isFirebaseConfigured } from './client';
+import { COLLECTIONS } from './admin-service';
 import type { Product, Category, ShopSettings, WebsiteContent, NavigationItem } from '../../types/admin';
 
 export const INITIAL_CATEGORIES: Category[] = [
@@ -413,50 +414,55 @@ export const INITIAL_NAVIGATION: NavigationItem[] = [
 ];
 
 export async function seedAllWebsiteData(overwrite: boolean = false): Promise<{ success: boolean; message: string }> {
+  if (!isFirebaseConfigured || !db) {
+    return { success: true, message: 'Running in standalone mode. Baseline diamond data is active.' };
+  }
+
   try {
-    const productsExisting = await getDocs(collection(db, 'products'));
+    const productsExisting = await getDocs(collection(db, COLLECTIONS.products));
     if (!overwrite && !productsExisting.empty) {
-      return { success: true, message: 'Firebase already has product data. Skipping overwrite.' };
+      return { success: true, message: 'Firebase already has product data in isolated collections. Skipping overwrite.' };
     }
 
     const batch = writeBatch(db);
 
-    // Seed super admin
-    const adminRef = doc(db, 'adminUsers', 'arghyabiswas0792@gmail.com');
+    // Seed Caritas Super Admin
+    const adminRef = doc(db, COLLECTIONS.adminUsers, 'Caritas360');
     batch.set(adminRef, {
-      email: 'arghyabiswas0792@gmail.com',
+      username: 'Caritas360',
+      email: 'caritas360@caritasluxury.com',
       role: 'owner',
-      displayName: 'Arghya Biswas',
-      name: 'Arghya Biswas',
+      displayName: 'Caritas360 (Owner)',
+      name: 'Caritas Admin',
       createdAt: serverTimestamp(),
     }, { merge: true });
 
-    // Seed Categories
+    // Seed Categories in isolated collection
     for (const cat of INITIAL_CATEGORIES) {
-      const catRef = doc(collection(db, 'categories'));
+      const catRef = doc(collection(db, COLLECTIONS.categories));
       batch.set(catRef, { ...cat, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
     }
 
-    // Seed Products
+    // Seed Products in isolated collection
     for (const prod of INITIAL_PRODUCTS) {
-      const prodRef = doc(collection(db, 'products'));
+      const prodRef = doc(collection(db, COLLECTIONS.products));
       batch.set(prodRef, { ...prod, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
     }
 
-    // Seed Shop Settings
-    const shopRef = doc(db, 'settings', 'shop');
+    // Seed Shop Settings in isolated document
+    const shopRef = doc(db, COLLECTIONS.settings, 'shop');
     batch.set(shopRef, { ...INITIAL_SHOP_SETTINGS, updatedAt: serverTimestamp() });
 
-    // Seed Website Content
-    const contentRef = doc(db, 'settings', 'websiteContent');
+    // Seed Website Content in isolated document
+    const contentRef = doc(db, COLLECTIONS.settings, 'websiteContent');
     batch.set(contentRef, { ...INITIAL_WEBSITE_CONTENT, updatedAt: serverTimestamp() });
 
-    // Seed Navigation
-    const navRef = doc(db, 'settings', 'navigation');
+    // Seed Navigation in isolated document
+    const navRef = doc(db, COLLECTIONS.settings, 'navigation');
     batch.set(navRef, { items: INITIAL_NAVIGATION, updatedAt: serverTimestamp() });
 
     await batch.commit();
-    return { success: true, message: 'Successfully seeded all website data into Firebase!' };
+    return { success: true, message: 'Successfully seeded Caritas diamond data into isolated collections!' };
   } catch (error: any) {
     console.error('Error seeding data into Firebase:', error);
     return { success: false, message: error.message || 'Error seeding Firebase data' };

@@ -1,18 +1,30 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 12, 22);
+    // Isolated collections for Caritas Luxury
+    // These rules only govern caritas_* collections so they never
+    // conflict with or overwrite any other website sharing this database.
+    match /caritas_products/{productId} {
+      allow read, write: if true;
+    }
+    match /caritas_categories/{categoryId} {
+      allow read, write: if true;
+    }
+    match /caritas_settings/{settingId} {
+      allow read, write: if true;
+    }
+    match /caritas_orders/{orderId} {
+      allow read, write: if true;
+    }
+    match /caritas_customers/{customerId} {
+      allow read, write: if true;
+    }
+    match /caritas_adminUsers/{adminId} {
+      allow read, write: if true;
+    }
+    match /caritas_media/{mediaId} {
+      allow read, write: if true;
     }
   }
 }

@@ -8,8 +8,9 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail,
 } from 'firebase/auth';
-import { auth, db } from './client';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db, isFirebaseConfigured } from './client';
+import { doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { COLLECTIONS } from './admin-service';
 import type { AdminUser } from '../../types/admin';
 
 interface AuthContextType {
@@ -18,7 +19,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   error: string | null;
-  login: (email: string, pass: string) => Promise<boolean>;
+  login: (identifier: string, pass: string) => Promise<boolean>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -42,54 +43,81 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check local session storage for active admin
+    if (typeof window !== 'undefined') {
+      const stored =
+        sessionStorage.getItem('caritas_admin_session') ||
+        localStorage.getItem('caritas_admin_session');
+      if (stored === 'active') {
+        setIsAdmin(true);
+        setAdminProfile({
+          uid: 'caritas360-owner',
+          email: 'Caritas360',
+          displayName: 'Caritas360 (Super Admin)',
+          role: 'super_admin',
+        });
+      }
+    }
+
+    if (!isFirebaseConfigured || !auth) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser && currentUser.email) {
         try {
           const email = currentUser.email.toLowerCase();
-          // Check admin doc
-          const emailDoc = await getDoc(doc(db, 'admins', email));
-          const isSuperOwner = email === 'arghyabiswas0792@gmail.com';
+          const isSuperOwner =
+            email === 'caritas360@caritasluxury.com' ||
+            email === 'arghyabiswas0792@gmail.com';
 
-          if (emailDoc.exists() || isSuperOwner) {
-            setIsAdmin(true);
-            const data = emailDoc.data();
-            setAdminProfile({
-              uid: currentUser.uid,
-              email: currentUser.email,
-              displayName: currentUser.displayName || email.split('@')[0],
-              role: (data?.role as any) || (isSuperOwner ? 'super_admin' : 'admin'),
-            });
+          if (db) {
+            const userDoc = await getDoc(doc(db, COLLECTIONS.adminUsers, currentUser.uid));
+            const emailDoc = await getDoc(doc(db, COLLECTIONS.adminUsers, email));
 
-            // Ensure super_admin record exists
-            if (isSuperOwner && !emailDoc.exists()) {
-              await setDoc(doc(db, 'admins', email), {
-                email,
-                role: 'super_admin',
-                displayName: 'Master Administrator',
-                createdAt: serverTimestamp(),
+            if (userDoc.exists() || emailDoc.exists() || isSuperOwner) {
+              setIsAdmin(true);
+              const data = userDoc.exists()
+                ? userDoc.data()
+                : emailDoc.exists()
+                ? emailDoc.data()
+                : null;
+              setAdminProfile({
+                uid: currentUser.uid,
+                email: currentUser.email,
+                displayName:
+                  data?.name ||
+                  data?.displayName ||
+                  (isSuperOwner ? 'Caritas360 (Super Admin)' : email.split('@')[0]),
+                role: (data?.role as any) || (isSuperOwner ? 'super_admin' : 'admin'),
               });
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('caritas_admin_session', 'active');
+                localStorage.setItem('caritas_admin_session', 'active');
+              }
+            } else {
+              setIsAdmin(false);
+              setAdminProfile(null);
             }
-          } else {
-            setIsAdmin(false);
-            setAdminProfile(null);
-          }
-        } catch (err: any) {
-          console.error('Error verifying admin authorization:', err);
-          // If Firestore is still provisioning or restricted, super owner is still recognized
-          if (currentUser.email.toLowerCase() === 'arghyabiswas0792@gmail.com') {
+          } else if (isSuperOwner) {
             setIsAdmin(true);
             setAdminProfile({
               uid: currentUser.uid,
               email: currentUser.email,
-              displayName: 'Master Administrator',
+              displayName: 'Caritas360 (Super Admin)',
               role: 'super_admin',
             });
           }
+        } catch (err: any) {
+          console.warn('Admin check error:', err);
         }
       } else {
-        setIsAdmin(false);
-        setAdminProfile(null);
+        if (typeof window !== 'undefined' && sessionStorage.getItem('caritas_admin_session') !== 'active') {
+          setIsAdmin(false);
+          setAdminProfile(null);
+        }
       }
       setLoading(false);
     });
@@ -97,37 +125,93 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, pass: string): Promise<boolean> => {
+  const login = async (identifier: string, pass: string): Promise<boolean> => {
     setError(null);
-    try {
-      const cred = await signInWithEmailAndPassword(auth, email, pass);
-      return !!cred.user;
-    } catch (err: any) {
-      console.error('Admin login error:', err);
-      let msg = 'Failed to sign in. Please verify your credentials.';
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        msg = 'Invalid email or password.';
-      } else if (err.code === 'auth/too-many-requests') {
-        msg = 'Too many attempts. Please try again later.';
+    const trimmedId = identifier.trim();
+
+    // 1. Direct credentials verification for Caritas360
+    if (
+      (trimmedId.toLowerCase() === 'caritas360' ||
+        trimmedId.toLowerCase() === 'caritas360@caritasluxury.com') &&
+      pass === 'Caritas1234!@#'
+    ) {
+      setIsAdmin(true);
+      setAdminProfile({
+        uid: 'caritas360-owner',
+        email: 'Caritas360',
+        displayName: 'Caritas360 (Super Admin)',
+        role: 'super_admin',
+      });
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('caritas_admin_session', 'active');
+        localStorage.setItem('caritas_admin_session', 'active');
       }
-      setError(msg);
-      return false;
+      return true;
     }
+
+    // 2. Firebase Auth verification if configured
+    if (isFirebaseConfigured && auth) {
+      let resolvedEmail = trimmedId;
+      if (!resolvedEmail.includes('@')) {
+        resolvedEmail = `${resolvedEmail.toLowerCase()}@caritasluxury.com`;
+      }
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, resolvedEmail, pass);
+        if (cred.user) {
+          setIsAdmin(true);
+          setAdminProfile({
+            uid: cred.user.uid,
+            email: cred.user.email || resolvedEmail,
+            displayName: cred.user.displayName || 'Admin',
+            role: 'super_admin',
+          });
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('caritas_admin_session', 'active');
+            localStorage.setItem('caritas_admin_session', 'active');
+          }
+          return true;
+        }
+      } catch (err: any) {
+        console.error('Firebase Auth error:', err);
+        let msg = 'Invalid username or password.';
+        if (err.code === 'auth/too-many-requests') {
+          msg = 'Too many attempts. Please try again later.';
+        }
+        setError(msg);
+        return false;
+      }
+    }
+
+    setError('Invalid username or password.');
+    return false;
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      await fbSignOut(auth);
-      setUser(null);
-      setAdminProfile(null);
-      setIsAdmin(false);
-    } catch (err: any) {
-      console.error('Logout error:', err);
+    if (auth) {
+      try {
+        await fbSignOut(auth);
+      } catch (err: any) {
+        console.error('Logout error:', err);
+      }
     }
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('caritas_admin_session');
+      localStorage.removeItem('caritas_admin_session');
+    }
+    setUser(null);
+    setAdminProfile(null);
+    setIsAdmin(false);
   };
 
   const resetPassword = async (email: string): Promise<void> => {
-    await sendPasswordResetEmail(auth, email);
+    if (auth) {
+      let target = email.trim();
+      if (!target.includes('@')) {
+        target = `${target.toLowerCase()}@caritasluxury.com`;
+      }
+      await sendPasswordResetEmail(auth, target);
+    }
   };
 
   return (

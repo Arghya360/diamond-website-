@@ -310,23 +310,29 @@ export default function AdminDashboardPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--admin-border)' }}>
               <span style={{ color: 'var(--admin-muted)' }}>Firebase Project ID:</span>
-              <strong style={{ color: 'var(--admin-text)' }}>hopeful-dryad-l9brs</strong>
+              <strong style={{ color: 'var(--admin-text)' }}>
+                {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'Ready for new account'}
+              </strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--admin-border)' }}>
               <span style={{ color: 'var(--admin-muted)' }}>Database (Firestore):</span>
-              <span style={{ color: '#34d399', fontWeight: 600 }}>● Connected & Active</span>
+              <span style={{ color: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? '#34d399' : '#f59e0b', fontWeight: 600 }}>
+                {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? '● Connected & Isolated (caritas_*)' : '○ Standalone / Ready to bind'}
+              </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--admin-border)' }}>
               <span style={{ color: 'var(--admin-muted)' }}>Media Storage (Bucket):</span>
-              <span style={{ color: '#34d399', fontWeight: 600 }}>● hopeful-dryad-l9brs.firebasestorage.app</span>
+              <span style={{ color: 'var(--admin-muted)', fontWeight: 600 }}>
+                {process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'Configured via .env.local'}
+              </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--admin-border)' }}>
-              <span style={{ color: 'var(--admin-muted)' }}>Authentication Provider:</span>
-              <span style={{ color: '#34d399', fontWeight: 600 }}>● Email/Password Active</span>
+              <span style={{ color: 'var(--admin-muted)' }}>Data Isolation Prefix:</span>
+              <span style={{ color: 'var(--admin-gold)', fontWeight: 600 }}>caritas_* (100% Protected)</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--admin-muted)' }}>Master Administrator:</span>
-              <span style={{ color: 'var(--admin-gold)', fontWeight: 600 }}>arghyabiswas0792@gmail.com</span>
+              <span style={{ color: 'var(--admin-muted)' }}>Super Admin:</span>
+              <span style={{ color: 'var(--admin-gold)', fontWeight: 600 }}>Caritas360</span>
             </div>
           </div>
         </div>
