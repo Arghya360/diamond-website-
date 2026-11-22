@@ -144,169 +144,192 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: 'var(--admin-text)' }}>
-            Category Management
-          </h1>
-          <p style={{ margin: '4px 0 0', color: 'var(--admin-muted)', fontSize: '13px' }}>
-            Manage diamond and fine jewellery categories shown on the /shop banner grid and navigation.
-          </p>
-        </div>
-
-        <button onClick={openAddModal} className="btn-gold">
-          <span>+</span> Add Category
-        </button>
-      </div>
-
+    <>
       {notice && (
         <div
           style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            color: '#34d399',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            marginBottom: '20px',
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            background: 'var(--dark-obsidian)',
+            color: '#FFFFFF',
+            border: '1px solid var(--primary-gold-border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '12px 20px',
+            boxShadow: 'var(--shadow-lg)',
+            zIndex: 9999,
             fontSize: '13px',
+            fontFamily: 'var(--font-title)',
           }}
         >
           {notice}
         </div>
       )}
 
-      {/* Categories Table */}
-      <div className="admin-card" style={{ padding: 0, overflowX: 'auto' }}>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th style={{ width: '80px' }}>Banner</th>
-              <th>Category Name & Slug</th>
-              <th>Subcategories</th>
-              <th>Items Label</th>
-              <th>Order</th>
-              <th>Status</th>
-              <th style={{ textAlign: 'right', paddingRight: '20px' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--admin-muted)' }}>
-                  Loading categories...
-                </td>
-              </tr>
-            ) : categories.length === 0 ? (
-              <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: 'var(--admin-muted)' }}>
-                  No categories found. Click "Add Category" to create your first category.
-                </td>
-              </tr>
-            ) : (
-              categories.map((cat) => (
-                <tr key={cat.id}>
-                  <td>
-                    <div
-                      style={{
-                        width: '70px',
-                        height: '46px',
-                        borderRadius: '6px',
-                        backgroundColor: '#1a2226',
-                        backgroundImage: cat.image ? `url("${cat.image}")` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        border: '1px solid var(--admin-border)',
-                      }}
-                    />
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: 600, color: 'var(--admin-text)' }}>{cat.name}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--admin-muted)' }}>/{cat.slug}</div>
-                  </td>
-                  <td>
-                    {cat.subcategories && cat.subcategories.length > 0 ? (
-                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                        {cat.subcategories.map((sub, i) => (
-                          <span key={i} className="badge-status badge-gold" style={{ fontSize: '10px' }}>
-                            {sub}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span style={{ color: 'var(--admin-muted)', fontSize: '12px' }}>None</span>
-                    )}
-                  </td>
-                  <td>
-                    <span style={{ color: 'var(--admin-muted)', fontSize: '12px' }}>
-                      {cat.itemsCountText || 'N/A'}
-                    </span>
-                  </td>
-                  <td>
-                    <strong>#{cat.displayOrder || 1}</strong>
-                  </td>
-                  <td>
-                    <span className={`badge-status ${cat.published ? 'badge-published' : 'badge-draft'}`}>
-                      {cat.published ? 'Published' : 'Hidden'}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right', paddingRight: '20px' }}>
-                    <div style={{ display: 'inline-flex', gap: '8px' }}>
-                      <button
-                        onClick={() => openEditModal(cat)}
-                        className="btn-secondary"
-                        style={{ padding: '5px 10px', fontSize: '12px' }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(cat)}
-                        className="btn-danger"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      {/* Page Header */}
+      <div className="admin-page-hero">
+        <div>
+          <span className="admin-hero-eyebrow">— MERCHANDISE ARCHITECTURE</span>
+          <h1 className="admin-hero-title">Diamond Jewelry Categories</h1>
+          <p className="admin-hero-subtitle">
+            Configure diamond categories, banner cards, subcategory filters, and storefront navigation hierarchy.
+          </p>
+        </div>
+
+        <div className="admin-hero-actions">
+          <button onClick={openAddModal} className="btn-caritas-gold">
+            <span>+</span>
+            <span>Add New Category</span>
+          </button>
+        </div>
       </div>
 
-      {/* Modal Dialog */}
+      {/* Categories Table Card */}
+      <div className="admin-card" style={{ padding: 0 }}>
+        <div className="admin-table-container">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th style={{ width: '56px' }}>Banner</th>
+                <th>Category Name</th>
+                <th>Slug</th>
+                <th>Subcategories</th>
+                <th>Item Count Text</th>
+                <th>Display Order</th>
+                <th>Storefront Status</th>
+                <th style={{ textAlign: 'right', paddingRight: '20px' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                    Loading categories...
+                  </td>
+                </tr>
+              ) : categories.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏷️</div>
+                    <p style={{ margin: '0 0 4px', fontWeight: 600, color: 'var(--text-main)' }}>No categories configured</p>
+                    <button onClick={openAddModal} className="btn-caritas-gold" style={{ marginTop: '12px', fontSize: '12px' }}>
+                      Add Your First Category
+                    </button>
+                  </td>
+                </tr>
+              ) : (
+                categories.map((c) => (
+                  <tr key={c.id || c.name}>
+                    <td>
+                      <div
+                        className="admin-prod-thumb"
+                        style={{
+                          backgroundImage: c.image ? `url("${c.image}")` : 'none',
+                        }}
+                      />
+                    </td>
+                    <td>
+                      <div className="admin-prod-name">{c.name}</div>
+                      {c.description && (
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', maxWidth: '240px', whiteSpace: 'normal' }}>
+                          {c.description}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                        /{c.slug}
+                      </span>
+                    </td>
+                    <td>
+                      {c.subcategories && c.subcategories.length > 0 ? (
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', maxWidth: '220px' }}>
+                          {c.subcategories.map((sub, i) => (
+                            <span key={i} className="badge-caritas badge-gold" style={{ fontSize: '10px' }}>
+                              {sub}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>—</span>
+                      )}
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '12.5px', fontWeight: 600 }}>
+                        {c.itemsCountText || '—'}
+                      </span>
+                    </td>
+                    <td>
+                      <span style={{ fontFamily: 'var(--font-title)', fontWeight: 700 }}>
+                        #{c.displayOrder || 1}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge-caritas ${c.published !== false ? 'badge-published' : 'badge-draft'}`}>
+                        {c.published !== false ? '● Live on Store' : '○ Draft'}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                      <div style={{ display: 'inline-flex', gap: '8px' }}>
+                        <button
+                          onClick={() => openEditModal(c)}
+                          className="btn-caritas-secondary"
+                          style={{ padding: '6px 14px', fontSize: '12px' }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(c)}
+                          className="btn-caritas-danger"
+                          title="Delete category"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── MODAL: CREATE / EDIT CATEGORY ── */}
       {showModal && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.7)',
+            backgroundColor: 'rgba(12, 19, 21, 0.65)',
+            backdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px',
-            zIndex: 200,
+            padding: '24px',
+            zIndex: 1000,
           }}
         >
           <div
             style={{
-              backgroundColor: 'var(--admin-card)',
-              border: '1px solid var(--admin-border)',
-              borderRadius: '12px',
+              backgroundColor: '#FFFFFF',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border-line)',
               width: '100%',
               maxWidth: '560px',
               maxHeight: '90vh',
               overflowY: 'auto',
+              boxShadow: 'var(--shadow-lg)',
               padding: '28px',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0, fontSize: '18px', color: 'var(--admin-text)' }}>
-                {editingCat ? 'Edit Category' : 'Create New Category'}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h2 style={{ margin: 0, fontFamily: 'var(--font-title)', fontSize: '18px', color: 'var(--dark-obsidian)' }}>
+                {editingCat ? `Edit Category: ${editingCat.name}` : 'Create New Category'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: 'var(--text-muted)' }}
               >
                 ✕
               </button>
@@ -337,60 +360,31 @@ export default function AdminCategoriesPage() {
               </div>
 
               <div>
-                <label className="admin-label">Subcategories (comma separated)</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  placeholder="Solitaire, Halo, Eternity Bands, Three-Stone"
-                  value={subcategoriesStr}
-                  onChange={(e) => setSubcategoriesStr(e.target.value)}
+                <label className="admin-label">Description</label>
+                <textarea
+                  rows={2}
+                  className="admin-textarea"
+                  placeholder="Bespoke diamond engagement rings..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
 
               <div>
-                <label className="admin-label">Category Banner Image</label>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
-                  <input
-                    type="text"
-                    className="admin-input"
-                    placeholder="URL or select image to upload..."
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                  />
-                  <label
-                    className="btn-secondary"
-                    style={{ cursor: 'pointer', whiteSpace: 'nowrap', padding: '9px 12px', fontSize: '13px' }}
-                  >
-                    Upload File
-                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
-                  </label>
+                <label className="admin-label">Banner Image URL</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  placeholder="/wp-content/uploads/shop page/banner-01.jpg"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                />
+                <div style={{ marginTop: '8px' }}>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '12px' }} />
                 </div>
-                {image && (
-                  <div
-                    style={{
-                      height: '80px',
-                      borderRadius: '6px',
-                      backgroundImage: `url("${image}")`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      border: '1px solid var(--admin-border)',
-                    }}
-                  />
-                )}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label className="admin-label">Display Order</label>
-                  <input
-                    type="number"
-                    min="1"
-                    className="admin-input"
-                    value={displayOrder}
-                    onChange={(e) => setDisplayOrder(Number(e.target.value))}
-                  />
-                </div>
-
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label className="admin-label">Items Count Text</label>
                   <input
@@ -401,61 +395,69 @@ export default function AdminCategoriesPage() {
                     onChange={(e) => setItemsCountText(e.target.value)}
                   />
                 </div>
+                <div>
+                  <label className="admin-label">Display Order</label>
+                  <input
+                    type="number"
+                    min={1}
+                    className="admin-input"
+                    value={displayOrder}
+                    onChange={(e) => setDisplayOrder(Number(e.target.value))}
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="admin-label">Description</label>
-                <textarea
-                  rows={2}
-                  className="admin-textarea"
-                  placeholder="Category description..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                <label className="admin-label">Subcategories (comma separated)</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  placeholder="Engagement Rings, Eternity Bands, Solitaire Rings"
+                  value={subcategoriesStr}
+                  onChange={(e) => setSubcategoriesStr(e.target.value)}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '20px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={published}
                     onChange={(e) => setPublished(e.target.checked)}
-                    style={{ accentColor: 'var(--admin-gold)' }}
                   />
-                  Published on Website
+                  <span>Published on Storefront</span>
                 </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={textDark}
                     onChange={(e) => setTextDark(e.target.checked)}
-                    style={{ accentColor: 'var(--admin-gold)' }}
                   />
-                  Use Dark Text (for light card backgrounds)
+                  <span>Dark Text on Banner (for light images)</span>
                 </label>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px', paddingTop: '16px', borderTop: '1px solid var(--border-line)' }}>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="btn-secondary"
+                  className="btn-caritas-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn-gold"
+                  className="btn-caritas-gold"
                 >
-                  {saving ? 'Saving...' : editingCat ? 'Update Category' : 'Create Category'}
+                  {saving ? 'Saving Category...' : 'Save Category'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

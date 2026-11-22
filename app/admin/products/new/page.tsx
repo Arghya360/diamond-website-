@@ -179,15 +179,20 @@ export default function AddProductPage() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      {/* Back button & Heading */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+      {/* Page Header */}
+      <div className="admin-page-hero">
         <div>
-          <Link href="/admin/products" style={{ color: 'var(--admin-gold)', fontSize: '13px', textDecoration: 'none' }}>
-            ← Back to Products List
+          <span className="admin-hero-eyebrow">— ATELIER &amp; VAULT CATALOG</span>
+          <h1 className="admin-hero-title">Create New Fine Jewelry Piece</h1>
+          <p className="admin-hero-subtitle">
+            Catalog a bespoke diamond creation with pricing, vault specifications, multiple gallery photographs, and live storefront publishing.
+          </p>
+        </div>
+
+        <div className="admin-hero-actions">
+          <Link href="/admin/products" className="btn-caritas-secondary">
+            ← Return to Catalog
           </Link>
-          <h1 style={{ margin: '8px 0 0', fontSize: '24px', fontWeight: 700, color: 'var(--admin-text)' }}>
-            Add New Product
-          </h1>
         </div>
       </div>
 

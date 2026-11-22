@@ -65,40 +65,6 @@ export default function AdminNavigationPage() {
     handleItemChange(parentIndex, 'children', updatedChildren);
   };
 
-  const handleAddItem = () => {
-    setItems((prev) => [
-      ...prev,
-      {
-        id: `mi-${Date.now()}`,
-        label: 'New Menu Item',
-        href: '/shop',
-        hasChildren: false,
-        order: prev.length + 1,
-        active: true,
-      },
-    ]);
-  };
-
-  const handleRemoveItem = (index: number) => {
-    if (!confirm('Remove this top-level menu item?')) return;
-    setItems((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleMove = (index: number, direction: 'up' | 'down') => {
-    if (
-      (direction === 'up' && index === 0) ||
-      (direction === 'down' && index === items.length - 1)
-    ) {
-      return;
-    }
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    const reordered = [...items];
-    const temp = reordered[index];
-    reordered[index] = reordered[targetIndex];
-    reordered[targetIndex] = temp;
-    setItems(reordered);
-  };
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -106,200 +72,188 @@ export default function AdminNavigationPage() {
 
     try {
       await updateNavigation(items);
-      setNotice('Header navigation menu successfully updated in Firebase!');
-      setTimeout(() => setNotice(null), 4000);
+      setNotice('Storefront navigation hierarchy saved successfully.');
+      setTimeout(() => setNotice(null), 3500);
     } catch (err: any) {
-      alert('Error updating navigation: ' + err.message);
+      alert('Error saving navigation: ' + err.message);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ padding: '60px', textAlign: 'center', color: 'var(--admin-muted)' }}>
-        Loading navigation items...
-      </div>
-    );
-  }
-
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: 'var(--admin-text)' }}>
-            Header Navigation Menu Management
-          </h1>
-          <p style={{ margin: '4px 0 0', color: 'var(--admin-muted)', fontSize: '13px' }}>
-            Edit labels, destinations, and dropdown menus for the site header navigation.
-          </p>
-        </div>
-
-        <button type="button" onClick={handleAddItem} className="btn-gold">
-          <span>+</span> Add Menu Item
-        </button>
-      </div>
-
+    <>
       {notice && (
         <div
           style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            color: '#34d399',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            marginBottom: '20px',
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            background: 'var(--dark-obsidian)',
+            color: '#FFFFFF',
+            border: '1px solid var(--primary-gold-border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '12px 20px',
+            boxShadow: 'var(--shadow-lg)',
+            zIndex: 9999,
             fontSize: '13px',
+            fontFamily: 'var(--font-title)',
           }}
         >
           {notice}
         </div>
       )}
 
-      <form onSubmit={handleSave}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
-          {items.map((item, idx) => (
-            <div
-              key={item.id || idx}
-              className="admin-card"
-              style={{ margin: 0, border: '1px solid var(--admin-border)' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button
-                    type="button"
-                    disabled={idx === 0}
-                    onClick={() => handleMove(idx, 'up')}
-                    style={{ background: 'none', border: '1px solid var(--admin-border)', color: '#fff', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    ▲
-                  </button>
-                  <button
-                    type="button"
-                    disabled={idx === items.length - 1}
-                    onClick={() => handleMove(idx, 'down')}
-                    style={{ background: 'none', border: '1px solid var(--admin-border)', color: '#fff', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    ▼
-                  </button>
-                  <strong style={{ color: 'var(--admin-gold)', fontSize: '14px' }}>
-                    Menu #{idx + 1}
-                  </strong>
-                </div>
+      {/* Header */}
+      <div className="admin-page-hero">
+        <div>
+          <span className="admin-hero-eyebrow">— STOREFRONT ARCHITECTURE</span>
+          <h1 className="admin-hero-title">Header Navigation Menu</h1>
+          <p className="admin-hero-subtitle">
+            Configure the 6 core navigation items, dropdown mega-menus, destination URLs, and visibility states.
+          </p>
+        </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+        <div className="admin-hero-actions">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-caritas-secondary"
+          >
+            <span>↗</span> Preview Live Navigation
+          </a>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="admin-card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>
+          Loading navigation menu...
+        </div>
+      ) : (
+        <form onSubmit={handleSave} style={{ maxWidth: '960px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {items.map((item, pIdx) => (
+              <div key={item.id || pIdx} className="admin-card" style={{ marginBottom: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className="badge-caritas badge-gold">Item #{pIdx + 1}</span>
+                    <strong style={{ fontFamily: 'var(--font-title)', fontSize: '15px' }}>{item.label}</strong>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>({item.href})</span>
+                  </div>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', cursor: 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={item.active}
-                      onChange={(e) => handleItemChange(idx, 'active', e.target.checked)}
-                      style={{ accentColor: 'var(--admin-gold)' }}
+                      onChange={(e) => handleItemChange(pIdx, 'active', e.target.checked)}
                     />
-                    Visible
+                    <span>Visible in Header</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveItem(idx)}
-                    className="btn-danger"
-                    style={{ padding: '4px 8px', fontSize: '11px' }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              {/* Main item inputs */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '12px' }}>
-                <div>
-                  <label className="admin-label">Menu Label</label>
-                  <input
-                    type="text"
-                    required
-                    className="admin-input"
-                    value={item.label}
-                    onChange={(e) => handleItemChange(idx, 'label', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="admin-label">Destination URL</label>
-                  <input
-                    type="text"
-                    required
-                    className="admin-input"
-                    value={item.href}
-                    onChange={(e) => handleItemChange(idx, 'href', e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Sub-menu Dropdowns */}
-              <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#0c1315', borderRadius: '6px', border: '1px solid var(--admin-border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--admin-muted)', fontWeight: 600 }}>
-                    Sub-menu Dropdown Items ({item.children?.length || 0})
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleAddChild(idx)}
-                    className="btn-secondary"
-                    style={{ padding: '3px 8px', fontSize: '11px' }}
-                  >
-                    + Add Dropdown Item
-                  </button>
                 </div>
 
-                {item.children && item.children.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {item.children.map((child, cIdx) => (
-                      <div key={child.id || cIdx} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <input
-                          type="text"
-                          placeholder="Sub-item Label"
-                          className="admin-input"
-                          style={{ flex: 1, padding: '7px 10px', fontSize: '12px' }}
-                          value={child.label}
-                          onChange={(e) => handleChildChange(idx, cIdx, 'label', e.target.value)}
-                        />
-                        <input
-                          type="text"
-                          placeholder="/path"
-                          className="admin-input"
-                          style={{ flex: 1, padding: '7px 10px', fontSize: '12px' }}
-                          value={child.href}
-                          onChange={(e) => handleChildChange(idx, cIdx, 'href', e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveChild(idx, cIdx)}
-                          className="btn-danger"
-                          style={{ padding: '6px 10px' }}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '16px' }}>
+                  <div>
+                    <label className="admin-label">Menu Item Title</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      value={item.label}
+                      onChange={(e) => handleItemChange(pIdx, 'label', e.target.value)}
+                    />
                   </div>
-                ) : (
-                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--admin-muted)' }}>
-                    No dropdown sub-items. This item functions as a single direct link.
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                  <div>
+                    <label className="admin-label">Link Destination URL</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      value={item.href}
+                      onChange={(e) => handleItemChange(pIdx, 'href', e.target.value)}
+                    />
+                  </div>
+                </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
-          <button
-            type="submit"
-            disabled={saving}
-            className="btn-gold"
-            style={{ padding: '12px 36px', fontSize: '15px', opacity: saving ? 0.7 : 1 }}
-          >
-            {saving ? 'Updating Firebase...' : 'Save Navigation Menu'}
-          </button>
-        </div>
-      </form>
-    </div>
+                {/* Sub-menu Dropdowns */}
+                <div style={{ borderTop: '1px solid var(--border-line)', paddingTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, fontFamily: 'var(--font-title)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      Dropdown Sub-Menu Links ({item.children?.length || 0})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleAddChild(pIdx)}
+                      className="btn-caritas-secondary"
+                      style={{ padding: '4px 12px', fontSize: '11px' }}
+                    >
+                      + Add Dropdown Link
+                    </button>
+                  </div>
+
+                  {item.children && item.children.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {item.children.map((child, cIdx) => (
+                        <div
+                          key={child.id || cIdx}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            background: 'var(--surface-bg)',
+                            padding: '10px 14px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border-line)',
+                          }}
+                        >
+                          <span style={{ color: 'var(--primary-gold)', fontSize: '14px' }}>↳</span>
+                          <input
+                            type="text"
+                            placeholder="Link Title"
+                            className="admin-input"
+                            style={{ flex: 1, padding: '7px 10px', fontSize: '12.5px' }}
+                            value={child.label}
+                            onChange={(e) => handleChildChange(pIdx, cIdx, 'label', e.target.value)}
+                          />
+                          <input
+                            type="text"
+                            placeholder="URL Path"
+                            className="admin-input"
+                            style={{ flex: 1, padding: '7px 10px', fontSize: '12.5px' }}
+                            value={child.href}
+                            onChange={(e) => handleChildChange(pIdx, cIdx, 'href', e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveChild(pIdx, cIdx)}
+                            className="btn-caritas-danger"
+                            style={{ padding: '6px 10px', fontSize: '11px' }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                      Single menu item without dropdown children.
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn-caritas-gold"
+              style={{ padding: '12px 32px' }}
+            >
+              {saving ? 'Publishing Menu...' : 'Save & Publish Navigation'}
+            </button>
+          </div>
+        </form>
+      )}
+    </>
   );
 }

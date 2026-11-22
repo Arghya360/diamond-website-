@@ -76,259 +76,255 @@ export default function AdminShopSettingsPage() {
         bannerImage,
         announcementText,
         defaultSorting,
-        productsPerPage,
+        productsPerPage: Number(productsPerPage) || 12,
         enableFilters,
         seoTitle,
         seoDescription,
       });
-
-      setNotice('Shop page settings successfully saved and applied to live /shop page!');
-      setTimeout(() => setNotice(null), 4000);
+      setNotice('Shop page settings saved to Firestore successfully.');
+      setTimeout(() => setNotice(null), 3500);
     } catch (err: any) {
-      alert('Error saving settings: ' + err.message);
+      alert('Failed to save settings: ' + err.message);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ padding: '60px', textAlign: 'center', color: 'var(--admin-muted)' }}>
-        Loading shop settings...
-      </div>
-    );
-  }
-
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: 'var(--admin-text)' }}>
-            Shop Page Configuration
-          </h1>
-          <p style={{ margin: '4px 0 0', color: 'var(--admin-muted)', fontSize: '13px' }}>
-            Control hero text, banners, sorting defaults, and announcements for the live /shop page.
-          </p>
-        </div>
-
-        <a
-          href="/shop"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-secondary"
-          style={{ fontSize: '13px' }}
-        >
-          ↗ View Live Shop
-        </a>
-      </div>
-
+    <>
       {notice && (
         <div
           style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            color: '#34d399',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            marginBottom: '20px',
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            background: 'var(--dark-obsidian)',
+            color: '#FFFFFF',
+            border: '1px solid var(--primary-gold-border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '12px 20px',
+            boxShadow: 'var(--shadow-lg)',
+            zIndex: 9999,
             fontSize: '13px',
+            fontFamily: 'var(--font-title)',
           }}
         >
           {notice}
         </div>
       )}
 
-      <form onSubmit={handleSave}>
-        {/* Hero Section */}
-        <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            1. Shop Hero Section Banner & Content
-          </h3>
+      {/* Header */}
+      <div className="admin-page-hero">
+        <div>
+          <span className="admin-hero-eyebrow">— STOREFRONT CONFIGURATION</span>
+          <h1 className="admin-hero-title">Shop Page &amp; Hero Settings</h1>
+          <p className="admin-hero-subtitle">
+            Customize the live /shop showcase banner, announcements, product sorting rules, and search engine metadata.
+          </p>
+        </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label className="admin-label">Hero Badge / Subtitle Tag</label>
-            <input
-              type="text"
-              className="admin-input"
-              value={heroBadge}
-              onChange={(e) => setHeroBadge(e.target.value)}
-            />
-          </div>
+        <div className="admin-hero-actions">
+          <a
+            href="/shop"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-caritas-secondary"
+          >
+            <span>↗</span> Preview Live /shop
+          </a>
+        </div>
+      </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label className="admin-label">Main Hero Title *</label>
-            <input
-              type="text"
-              required
-              className="admin-input"
-              value={heroTitle}
-              onChange={(e) => setHeroTitle(e.target.value)}
-            />
-          </div>
+      {loading ? (
+        <div className="admin-card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>
+          Loading shop settings...
+        </div>
+      ) : (
+        <form onSubmit={handleSave} style={{ maxWidth: '960px' }}>
+          {/* Hero Banner Section */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">
+                <span>1. Hero Showcase Banner</span>
+              </h2>
+            </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label className="admin-label">Hero Subtitle Paragraph</label>
-            <textarea
-              rows={3}
-              className="admin-textarea"
-              value={heroSubtitle}
-              onChange={(e) => setHeroSubtitle(e.target.value)}
-            />
-          </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              <div>
+                <label className="admin-label">Eyebrow Badge</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={heroBadge}
+                  onChange={(e) => setHeroBadge(e.target.value)}
+                />
+              </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-            <div>
-              <label className="admin-label">Hero CTA Button Text</label>
-              <input
-                type="text"
-                className="admin-input"
-                value={heroButtonText}
-                onChange={(e) => setHeroButtonText(e.target.value)}
+              <div>
+                <label className="admin-label">Main Hero Title</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={heroTitle}
+                  onChange={(e) => setHeroTitle(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label className="admin-label">Hero Subtitle</label>
+              <textarea
+                rows={3}
+                className="admin-textarea"
+                value={heroSubtitle}
+                onChange={(e) => setHeroSubtitle(e.target.value)}
               />
             </div>
-            <div>
-              <label className="admin-label">Hero CTA Button Link</label>
-              <input
-                type="text"
-                className="admin-input"
-                value={heroButtonLink}
-                onChange={(e) => setHeroButtonLink(e.target.value)}
-              />
-            </div>
-          </div>
 
-          <div>
-            <label className="admin-label">Shop Banner / Background Image</label>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              <div>
+                <label className="admin-label">Call-to-Action Text</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={heroButtonText}
+                  onChange={(e) => setHeroButtonText(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="admin-label">Call-to-Action Destination URL</label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={heroButtonLink}
+                  onChange={(e) => setHeroButtonLink(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="admin-label">Banner Image URL</label>
               <input
                 type="text"
                 className="admin-input"
                 value={bannerImage}
                 onChange={(e) => setBannerImage(e.target.value)}
               />
-              <label className="btn-secondary" style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                Upload Image
-                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerUpload} />
-              </label>
+              <div style={{ marginTop: '8px' }}>
+                <input type="file" accept="image/*" onChange={handleBannerUpload} style={{ fontSize: '12px' }} />
+              </div>
+              {bannerImage && (
+                <div style={{ marginTop: '12px', width: '100%', height: '140px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-line)' }}>
+                  <img src={bannerImage} alt="Banner Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
             </div>
-            {bannerImage && (
-              <div
-                style={{
-                  height: '100px',
-                  borderRadius: '6px',
-                  backgroundImage: `url("${bannerImage}")`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  border: '1px solid var(--admin-border)',
-                }}
-              />
-            )}
           </div>
-        </div>
 
-        {/* Announcement Bar */}
-        <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            2. Announcement Bar / Shipping Notice
-          </h3>
-
-          <div>
-            <label className="admin-label">Top Promotional / Announcement Text</label>
-            <input
-              type="text"
-              className="admin-input"
-              value={announcementText}
-              onChange={(e) => setAnnouncementText(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Display & Filters Settings */}
-        <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            3. Catalog Display & Sorting Preferences
-          </h3>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-            <div>
-              <label className="admin-label">Default Product Sorting</label>
-              <select
-                className="admin-select"
-                value={defaultSorting}
-                onChange={(e) => setDefaultSorting(e.target.value as any)}
-              >
-                <option value="featured">Featured / Curated</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="newest">New Arrivals First</option>
-              </select>
+          {/* Announcement Bar */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">
+                <span>2. Store Announcement Banner</span>
+              </h2>
             </div>
-
             <div>
-              <label className="admin-label">Products Per Page / Grid Count</label>
+              <label className="admin-label">Top Banner Message</label>
               <input
-                type="number"
-                min="3"
-                max="48"
+                type="text"
                 className="admin-input"
-                value={productsPerPage}
-                onChange={(e) => setProductsPerPage(Number(e.target.value))}
+                value={announcementText}
+                onChange={(e) => setAnnouncementText(e.target.value)}
               />
             </div>
           </div>
 
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
+          {/* Catalog Display Options */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">
+                <span>3. Catalog Display &amp; Filtering</span>
+              </h2>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              <div>
+                <label className="admin-label">Default Product Sorting</label>
+                <select
+                  className="admin-select"
+                  value={defaultSorting}
+                  onChange={(e) => setDefaultSorting(e.target.value as any)}
+                >
+                  <option value="featured">Featured First</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                  <option value="newest">Newest Arrivals</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="admin-label">Products Per Page</label>
+                <input
+                  type="number"
+                  min={4}
+                  max={48}
+                  className="admin-input"
+                  value={productsPerPage}
+                  onChange={(e) => setProductsPerPage(Number(e.target.value))}
+                />
+              </div>
+            </div>
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={enableFilters}
                 onChange={(e) => setEnableFilters(e.target.checked)}
-                style={{ accentColor: 'var(--admin-gold)', width: '18px', height: '18px' }}
               />
-              <span>Enable Category & Filter Tabs on Shop Page</span>
+              <span>Enable Category &amp; Shape Filter Tabs on /shop</span>
             </label>
           </div>
-        </div>
 
-        {/* SEO Meta */}
-        <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            4. Search Engine Optimization (SEO)
-          </h3>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label className="admin-label">Meta Title Tag</label>
-            <input
-              type="text"
-              className="admin-input"
-              value={seoTitle}
-              onChange={(e) => setSeoTitle(e.target.value)}
-            />
+          {/* Search Engine Optimization */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">
+                <span>4. SEO &amp; Search Engine Indexing</span>
+              </h2>
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <label className="admin-label">Meta Title</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="admin-label">Meta Description</label>
+              <textarea
+                rows={2}
+                className="admin-textarea"
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="admin-label">Meta Description</label>
-            <textarea
-              rows={2}
-              className="admin-textarea"
-              value={seoDescription}
-              onChange={(e) => setSeoDescription(e.target.value)}
-            />
+          {/* Submit */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn-caritas-gold"
+              style={{ padding: '12px 32px' }}
+            >
+              {saving ? 'Publishing Settings...' : 'Save & Publish Store Settings'}
+            </button>
           </div>
-        </div>
-
-        {/* Submit */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
-          <button
-            type="submit"
-            disabled={saving}
-            className="btn-gold"
-            style={{ padding: '12px 36px', fontSize: '15px', opacity: saving ? 0.7 : 1 }}
-          >
-            {saving ? 'Saving...' : 'Save Shop Page Settings'}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      )}
+    </>
   );
 }

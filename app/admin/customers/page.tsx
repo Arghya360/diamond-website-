@@ -10,56 +10,105 @@ export default function AdminCustomersPage() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    getCustomers().then(setCustomers).catch(console.error).finally(() => setLoading(false));
+    async function load() {
+      try {
+        const data = await getCustomers();
+        setCustomers(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
-  const filtered = customers.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase())
+  const filtered = customers.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.email.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+      {/* Header */}
+      <div className="admin-page-hero">
         <div>
-          <h1 style={{ font: '600 28px Playfair Display, Georgia, serif', margin: '0 0 4px' }}>Customers &amp; Inquiries</h1>
-          <p style={{ margin: 0, color: '#777b82', fontSize: 13 }}>Client directory, contact requests, and purchase history.</p>
+          <span className="admin-hero-eyebrow">— CLIENT RELATIONSHIPS &amp; INQUIRIES</span>
+          <h1 className="admin-hero-title">Client Directory &amp; Concierge</h1>
+          <p className="admin-hero-subtitle">
+            Private client dossiers, bespoke jewellery consultation inquiries, and lifetime diamond purchase histories.
+          </p>
         </div>
-        <input type="text" placeholder="Search by name or email…" className="admin-input" style={{ width: 260 }} value={search} onChange={e => setSearch(e.target.value)} />
+
+        <div className="admin-hero-actions">
+          <input
+            type="text"
+            placeholder="Search by client name or email..."
+            className="admin-input"
+            style={{ width: '280px' }}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
-      <div className="al-card" style={{ padding: 0, overflowX: 'auto' }}>
-        <table className="al">
-          <thead>
-            <tr>
-              <th>Client</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Type</th>
-              <th>Orders</th>
-              <th>Total Spent</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: 36, color: '#777' }}>Loading customers…</td></tr>
-            ) : filtered.length === 0 ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: 36, color: '#777' }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>👥</div>
-                <div>No customers yet. Clients who place orders or submit inquiries appear here.</div>
-              </td></tr>
-            ) : filtered.map(c => (
-              <tr key={c.id}>
-                <td><strong style={{ fontSize: 12 }}>{c.name}</strong></td>
-                <td style={{ fontSize: 11 }}>{c.email}</td>
-                <td style={{ fontSize: 11 }}>{c.phone || '—'}</td>
-                <td><span className="badge-gold">{c.type || 'customer'}</span></td>
-                <td>{c.totalOrders || 0}</td>
-                <td className="al-price">${(c.totalSpent || 0).toLocaleString()}</td>
+      {/* Table Card */}
+      <div className="admin-card" style={{ padding: 0 }}>
+        <div className="admin-table-container">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Client Name</th>
+                <th>Email Address</th>
+                <th>Phone Contact</th>
+                <th>Client Tier</th>
+                <th>Orders Placed</th>
+                <th>Lifetime Value</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                    Loading client records...
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>👥</div>
+                    <p style={{ margin: '0 0 4px', fontWeight: 600, color: 'var(--text-main)' }}>No client records currently registered</p>
+                    <p style={{ margin: 0, fontSize: '12px' }}>
+                      Clients submitting contact requests or purchasing diamond pieces will automatically appear in this directory.
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((c) => (
+                  <tr key={c.id}>
+                    <td>
+                      <div className="admin-prod-name">{c.name}</div>
+                    </td>
+                    <td>{c.email}</td>
+                    <td>{c.phone || '—'}</td>
+                    <td>
+                      <span className="badge-caritas badge-gold">
+                        {c.type === 'inquiry' ? 'Concierge Inquiry' : 'Registered Client'}
+                      </span>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{c.totalOrders || 0}</td>
+                    <td>
+                      <strong style={{ fontFamily: 'var(--font-title)', color: 'var(--primary-gold)' }}>
+                        ${(c.totalSpent || 0).toLocaleString()}
+                      </strong>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );

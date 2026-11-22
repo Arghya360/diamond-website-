@@ -2,230 +2,339 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getProducts, getCategories, getOrders, updateProduct, deleteProduct } from '../../lib/firebase/admin-service';
+import { getProducts, getCategories, getOrders, deleteProduct } from '../../lib/firebase/admin-service';
+import { seedAllWebsiteData } from '../../lib/firebase/seed-data';
 import type { Product, Category, Order } from '../../types/admin';
-
-const THUMB_COLORS = ['', 'teal', 'rose', 'green', '', 'teal', 'rose'];
 
 export default function AdminDashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    loadAll();
+    loadDashboardData();
   }, []);
 
-  async function loadAll() {
+  async function loadDashboardData() {
     setLoading(true);
     try {
-      const [prods, cats, ords] = await Promise.all([getProducts(), getCategories(), getOrders()]);
+      const [prods, cats, ords] = await Promise.all([
+        getProducts(),
+        getCategories(),
+        getOrders(),
+      ]);
       setProducts(prods);
       setCategories(cats);
       setOrders(ords);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to load dashboard data:', err);
     } finally {
       setLoading(false);
     }
   }
 
-  const showNotice = (msg: string) => {
-    setNotice(msg);
-    setTimeout(() => setNotice(null), 3000);
-  };
-
-  const totalProducts = products.length;
-  const publishedProducts = products.filter((p) => p.published).length;
-  const draftProducts = products.filter((p) => !p.published).length;
-  const lowStock = products.filter((p) => (p.stock || 0) <= 3);
-  const recentProducts = products.slice(0, 5);
-  const recentOrders = orders.slice(0, 5);
-  const pendingOrders = orders.filter((o) => o.orderStatus === 'pending').length;
-
-  const handleEditProduct = (p: Product) => {
-    window.location.href = `/admin/products/edit?id=${p.id}`;
-  };
-
-  const handleDeleteProduct = async (p: Product) => {
-    if (!p.id) return;
-    if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+  const handleSeedData = async () => {
+    if (!confirm('This will seed the complete baseline catalog (33 products, 12 categories, hero slides, navigation) into Firestore. Continue?')) {
+      return;
+    }
+    setSeeding(true);
+    setNotice(null);
     try {
-      await deleteProduct(p.id);
-      setProducts((prev) => prev.filter((x) => x.id !== p.id));
-      showNotice(`"${p.name}" deleted.`);
+      const res = await seedAllWebsiteData(true);
+      setNotice(res.message);
+      await loadDashboardData();
     } catch (err: any) {
-      showNotice('Delete failed: ' + err.message);
+      setNotice('Failed to seed: ' + err.message);
+    } finally {
+      setSeeding(false);
     }
   };
 
+  const handleDeleteProduct = async (p: Product) => {
+    if (!p.id || !confirm(`Permanently remove "${p.name}" from catalog?`)) return;
+    try {
+      await deleteProduct(p.id);
+      setProducts((prev) => prev.filter((item) => item.id !== p.id));
+      setNotice(`"${p.name}" has been deleted.`);
+      setTimeout(() => setNotice(null), 3000);
+    } catch (err: any) {
+      alert('Delete failed: ' + err.message);
+    }
+  };
+
+  // Metrics
+  const totalProducts = products.length;
+  const publishedProducts = products.filter((p) => p.published).length;
+  const draftProducts = products.filter((p) => !p.published).length;
+  const lowStockProducts = products.filter((p) => (p.stock || 0) <= 3);
+  const pendingOrders = orders.filter((o) => o.orderStatus === 'pending').length;
+  const recentProducts = products.slice(0, 5);
+  const recentOrders = orders.slice(0, 5);
+
   return (
     <>
-      {/* Notice */}
+      {/* Toast Notice */}
       {notice && (
-        <div style={{
-          position: 'fixed', bottom: 22, right: 22, background: '#1c1c1c', color: '#fff',
-          padding: '12px 16px', borderRadius: 8, fontSize: 13, zIndex: 999,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-        }}>
-          {notice}
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            background: 'var(--dark-obsidian)',
+            color: '#FFFFFF',
+            border: '1px solid var(--primary-gold-border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '12px 20px',
+            boxShadow: 'var(--shadow-lg)',
+            zIndex: 9999,
+            fontSize: '13px',
+            fontFamily: 'var(--font-title)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          <span>✦</span>
+          <span>{notice}</span>
         </div>
       )}
 
-      {/* ── HERO BANNER ── */}
-      <section className="admin-hero">
-        <div className="admin-eyebrow">WELCOME TO CARITAS LUXURY</div>
-        <h1>Admin Portal</h1>
-        <p>Real-time management portal for Caritas Luxury Diamonds &amp; Fine Jewellery.</p>
-        <svg className="admin-hero-diamond" viewBox="0 0 260 190" aria-hidden="true">
-          <defs>
-            <linearGradient id="dg" x1="0" y1="0" x2="1" y2="1">
-              <stop stopColor="#fff" />
-              <stop offset=".5" stopColor="#b8c8d4" />
-              <stop offset=".75" stopColor="#fff" />
-              <stop offset="1" stopColor="#b08a48" />
-            </linearGradient>
-          </defs>
-          <path d="M55 34 91 9h79l36 25 39 40-105 104L15 74l40-40Z" fill="url(#dg)" stroke="#b6a17f" strokeWidth="2" />
-          <path d="m15 74 225 0M55 34l75 144 40-169M91 9l39 169 40-169M55 34l-40 40 115 104 105-104-35-40" fill="none" stroke="#81909a" strokeWidth="1.5" />
-        </svg>
-      </section>
+      {/* ── 1. LUXURY WELCOME HERO ── */}
+      <section className="admin-page-hero">
+        <div>
+          <span className="admin-hero-eyebrow">— MASTER DIAMOND CURATORS</span>
+          <h1 className="admin-hero-title">Executive Administration Portal</h1>
+          <p className="admin-hero-subtitle">
+            Real-time management for Caritas Luxury Diamonds, bespoke jewelry catalog, client orders, and digital storefront content.
+          </p>
+        </div>
 
-      {/* ── STAT CARDS ── */}
-      <section className="admin-stats">
-        <div className="admin-stat">
-          <div className="admin-stat-icon">◇</div>
-          <div>
-            <span className="label">Total Products</span>
-            <strong>{loading ? '…' : totalProducts}</strong>
-            <small>{publishedProducts} Published · {draftProducts} Draft</small>
-          </div>
-          <span className="admin-trend">↑ 12%</span>
-        </div>
-        <div className="admin-stat">
-          <div className="admin-stat-icon">◆</div>
-          <div>
-            <span className="label">Categories</span>
-            <strong>{loading ? '…' : categories.length}</strong>
-            <small>Active on site</small>
-          </div>
-          <span className="admin-trend">↑ 0%</span>
-        </div>
-        <div className="admin-stat">
-          <div className="admin-stat-icon">🛒</div>
-          <div>
-            <span className="label">Orders</span>
-            <strong>{loading ? '…' : orders.length}</strong>
-            <small>{pendingOrders} Pending fulfillment</small>
-          </div>
-          <span className="admin-trend">↑ 0%</span>
-        </div>
-        <div className="admin-stat">
-          <div className="admin-stat-icon">⚠</div>
-          <div>
-            <span className="label">Low Stock Alerts</span>
-            <strong style={{ color: lowStock.length > 0 ? '#d52e38' : undefined }}>
-              {loading ? '…' : lowStock.length}
-            </strong>
-            <small>Items with 3 or fewer units</small>
-          </div>
-          <span className="admin-trend">↑ 0%</span>
-        </div>
-      </section>
+        <div className="admin-hero-actions">
+          <button
+            onClick={handleSeedData}
+            disabled={seeding}
+            className="btn-caritas-secondary"
+            title="Populate baseline products and categories into Firestore"
+          >
+            <span>⚡</span>
+            <span>{seeding ? 'Syncing...' : 'Sync Catalog Data'}</span>
+          </button>
 
-      {/* ── QUICK ACTIONS ── */}
-      <section className="admin-panel admin-panel-padded" style={{ marginBottom: 18 }}>
-        <div className="admin-heading">
-          <h2><span className="admin-spark">ϟ</span> Quick Website Management Actions</h2>
-          <a href="/admin/settings">View All Actions →</a>
-        </div>
-        <div className="admin-actions">
-          <Link href="/admin/products/new" className="admin-action primary">
-            <span className="ico">＋</span>Add New Product
-          </Link>
-          <Link href="/admin/categories" className="admin-action">
-            <span className="ico">◆</span>Manage Categories
-          </Link>
-          <Link href="/admin/shop" className="admin-action">
-            <span className="ico">🛒</span>Edit Shop Page Settings
-          </Link>
-          <Link href="/admin/content" className="admin-action">
-            <span className="ico">▧</span>Update Hero Slides &amp; Banners
-          </Link>
-          <Link href="/admin/navigation" className="admin-action">
-            <span className="ico">✎</span>Reorder Navigation Menu
-          </Link>
-          <Link href="/admin/footer" className="admin-action">
-            <span className="ico">▤</span>Edit Footer &amp; Social Links
+          <Link href="/admin/products/new" className="btn-caritas-gold">
+            <span>+</span>
+            <span>Add New Product</span>
           </Link>
         </div>
       </section>
 
-      {/* ── TABLES ── */}
-      <div className="admin-tables">
-        {/* Recent Products */}
-        <article className="admin-panel admin-table-panel">
-          <div className="admin-heading">
-            <h2>◇ &nbsp;Recent Products</h2>
-            <Link href="/admin/products">View All ({totalProducts}) →</Link>
+      {/* ── 2. METRIC CARDS GRID ── */}
+      <section className="admin-metric-grid">
+        {/* Products Metric */}
+        <div className="admin-metric-card">
+          <div>
+            <div className="admin-metric-label">Total Catalog</div>
+            <div className="admin-metric-value">{loading ? '...' : totalProducts}</div>
+            <div className="admin-metric-desc">
+              <span className="admin-metric-badge green">{publishedProducts} Published</span>
+              <span>{draftProducts} Draft</span>
+            </div>
           </div>
-          <div className="admin-tablewrap">
-            {loading ? (
-              <p style={{ color: '#777', fontSize: 12, margin: '12px 0' }}>Loading products…</p>
-            ) : recentProducts.length === 0 ? (
-              <p style={{ color: '#777', fontSize: 12, margin: '12px 0' }}>No products yet. <Link href="/admin/products/new" style={{ color: '#bd914d' }}>Add one →</Link></p>
-            ) : (
-              <table className="al">
+          <div className="admin-metric-icon-wrap">💎</div>
+        </div>
+
+        {/* Categories Metric */}
+        <div className="admin-metric-card">
+          <div>
+            <div className="admin-metric-label">Active Categories</div>
+            <div className="admin-metric-value">{loading ? '...' : categories.length}</div>
+            <div className="admin-metric-desc">
+              <span style={{ color: 'var(--primary-gold)', fontWeight: 600 }}>Live on /shop menu</span>
+            </div>
+          </div>
+          <div className="admin-metric-icon-wrap">🏷️</div>
+        </div>
+
+        {/* Orders Metric */}
+        <div className="admin-metric-card">
+          <div>
+            <div className="admin-metric-label">Client Orders</div>
+            <div className="admin-metric-value">{loading ? '...' : orders.length}</div>
+            <div className="admin-metric-desc">
+              <span className="admin-metric-badge amber">{pendingOrders} Pending Fulfillment</span>
+            </div>
+          </div>
+          <div className="admin-metric-icon-wrap">📦</div>
+        </div>
+
+        {/* Low Stock Metric */}
+        <div className="admin-metric-card">
+          <div>
+            <div className="admin-metric-label">Inventory Alerts</div>
+            <div
+              className="admin-metric-value"
+              style={{ color: lowStockProducts.length > 0 ? 'var(--amber)' : undefined }}
+            >
+              {loading ? '...' : lowStockProducts.length}
+            </div>
+            <div className="admin-metric-desc">
+              <span>Units ≤ 3 in vault inventory</span>
+            </div>
+          </div>
+          <div className="admin-metric-icon-wrap">⚠️</div>
+        </div>
+      </section>
+
+      {/* ── 3. QUICK ACTIONS GRID ── */}
+      <section className="admin-card">
+        <div className="admin-card-header">
+          <h2 className="admin-card-title">
+            <span style={{ color: 'var(--primary-gold)' }}>✦</span>
+            <span>Storefront Management Shortcuts</span>
+          </h2>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Quick direct-access tools</span>
+        </div>
+
+        <div className="admin-actions-grid" style={{ marginBottom: 0 }}>
+          <Link href="/admin/products/new" className="admin-quick-action primary">
+            <span>+ Add Product</span>
+          </Link>
+          <Link href="/admin/categories" className="admin-quick-action">
+            <span>🏷️ Categories</span>
+          </Link>
+          <Link href="/admin/shop" className="admin-quick-action">
+            <span>🛍️ Shop Settings</span>
+          </Link>
+          <Link href="/admin/content" className="admin-quick-action">
+            <span>🖼️ Hero Banners</span>
+          </Link>
+          <Link href="/admin/navigation" className="admin-quick-action">
+            <span>🧭 Menu Hierarchy</span>
+          </Link>
+          <Link href="/admin/footer" className="admin-quick-action">
+            <span>📄 Footer & Legal</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 4. TWO-COLUMN DATA TABLES (Recent Products & Orders) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+        {/* Recent Products Card */}
+        <div className="admin-card" style={{ marginBottom: 0 }}>
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <span>💎 Recent Products</span>
+            </h2>
+            <Link href="/admin/products" className="admin-card-link">
+              View All Products ({totalProducts}) →
+            </Link>
+          </div>
+
+          {loading ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '16px 0' }}>Loading products...</p>
+          ) : recentProducts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
+              <p style={{ margin: '0 0 12px' }}>No products found in Firestore.</p>
+              <button onClick={handleSeedData} className="btn-caritas-gold" style={{ fontSize: '12px' }}>
+                Seed Storefront Products
+              </button>
+            </div>
+          ) : (
+            <div className="admin-table-container">
+              <table className="admin-table">
                 <thead>
                   <tr>
                     <th>Product</th>
                     <th>Category</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentProducts.map((p, i) => (
-                    <tr key={p.id}>
-                      <td>
-                        <span className={`al-thumb ${THUMB_COLORS[i % THUMB_COLORS.length]}`}>♢</span>
-                        {p.name}
-                      </td>
-                      <td>{p.category}</td>
-                      <td className="al-price">${(p.price || 0).toLocaleString()}</td>
-                      <td>
-                        <span className={`al-status ${p.published ? 'published' : 'draft'}`}>
-                          {p.published ? 'Published' : 'Draft'}
-                        </span>
-                      </td>
-                      <td>
-                        <button className="al-rowbtn" title="Edit" onClick={() => handleEditProduct(p)}>✎</button>
-                        <button className="al-rowbtn" title="Delete" onClick={() => handleDeleteProduct(p)}>✕</button>
-                      </td>
-                    </tr>
-                  ))}
+                  {recentProducts.map((p) => {
+                    const imgUrl = p.images?.[0]?.url || '/wp-content/uploads/shop page/pro-21-300x300.png';
+                    return (
+                      <tr key={p.id}>
+                        <td>
+                          <div className="admin-prod-cell">
+                            <div
+                              className="admin-prod-thumb"
+                              style={{ backgroundImage: `url("${imgUrl}")` }}
+                            />
+                            <div>
+                              <div className="admin-prod-name">{p.name}</div>
+                              <div className="admin-prod-meta">SKU: {p.sku || 'N/A'}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge-caritas badge-gold">{p.category}</span>
+                        </td>
+                        <td>
+                          <strong style={{ fontFamily: 'var(--font-title)' }}>
+                            ${(p.price || 0).toLocaleString()}
+                          </strong>
+                        </td>
+                        <td>
+                          <span className={`badge-caritas ${p.published ? 'badge-published' : 'badge-draft'}`}>
+                            {p.published ? 'Published' : 'Draft'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
+                            <Link
+                              href={`/admin/products/edit?id=${p.id}`}
+                              className="btn-caritas-secondary"
+                              style={{ padding: '4px 10px', fontSize: '11px' }}
+                            >
+                              Edit
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteProduct(p)}
+                              className="btn-caritas-danger"
+                              style={{ padding: '4px 8px', fontSize: '11px' }}
+                              title="Delete product"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
-            )}
-          </div>
-        </article>
+            </div>
+          )}
+        </div>
 
-        {/* Recent Orders */}
-        <article className="admin-panel admin-table-panel">
-          <div className="admin-heading">
-            <h2>♧ &nbsp;Recent Orders</h2>
-            <Link href="/admin/orders">View All Orders →</Link>
+        {/* Recent Orders Card */}
+        <div className="admin-card" style={{ marginBottom: 0 }}>
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <span>📦 Recent Orders</span>
+            </h2>
+            <Link href="/admin/orders" className="admin-card-link">
+              View All Orders →
+            </Link>
           </div>
-          <div className="admin-tablewrap">
-            {loading ? (
-              <p style={{ color: '#777', fontSize: 12, margin: '12px 0' }}>Loading orders…</p>
-            ) : recentOrders.length === 0 ? (
-              <p style={{ color: '#777', fontSize: 12, margin: '12px 0' }}>No orders yet.</p>
-            ) : (
-              <table className="al">
+
+          {loading ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '16px 0' }}>Loading orders...</p>
+          ) : recentOrders.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: '32px', marginBottom: '8px' }}>📦</div>
+              <p style={{ margin: '0 0 4px', fontWeight: 600, color: 'var(--text-main)' }}>No Client Orders Yet</p>
+              <p style={{ margin: 0, fontSize: '12px' }}>
+                Incoming orders from the storefront will automatically register here in real time.
+              </p>
+            </div>
+          ) : (
+            <div className="admin-table-container">
+              <table className="admin-table">
                 <thead>
                   <tr>
                     <th>Order #</th>
@@ -238,53 +347,85 @@ export default function AdminDashboardPage() {
                 <tbody>
                   {recentOrders.map((o) => (
                     <tr key={o.id}>
-                      <td className="al-orderid">#{o.orderNumber || o.id?.slice(0, 7)}</td>
-                      <td>{o.customerName || '—'}</td>
-                      <td className="al-price">${(o.total || 0).toLocaleString()}</td>
                       <td>
-                        <span className={`al-status ${o.orderStatus || 'pending'}`}>
-                          {o.orderStatus?.charAt(0).toUpperCase() + (o.orderStatus?.slice(1) || '') || 'Pending'}
+                        <strong style={{ color: 'var(--primary-gold)', fontFamily: 'var(--font-title)' }}>
+                          #{o.orderNumber || o.id?.slice(0, 8)}
+                        </strong>
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>{o.customerName || 'Guest'}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{o.customerEmail}</div>
+                      </td>
+                      <td>
+                        <strong style={{ fontFamily: 'var(--font-title)' }}>
+                          ${(o.total || 0).toLocaleString()}
+                        </strong>
+                      </td>
+                      <td>
+                        <span className={`badge-caritas ${o.orderStatus === 'delivered' ? 'badge-published' : 'badge-amber'}`}>
+                          {o.orderStatus || 'Pending'}
                         </span>
                       </td>
-                      <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                      <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        {o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '—'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
-        </article>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* ── FIREBASE STATUS ── */}
-      <div className="admin-panel admin-firebase">
-        <div className="admin-firebase-intro">
-          <div className="admin-stat-icon">◇</div>
+      {/* ── 5. FIREBASE BACKEND INFRASTRUCTURE BANNER ── */}
+      <section className="admin-infra-banner">
+        <div className="admin-infra-intro">
+          <div className="admin-infra-icon">🔥</div>
           <div>
-            <h3>Firebase Backend Infrastructure Status</h3>
-            <p>Your website is securely connected to Firebase.</p>
+            <h3 className="admin-infra-title">Firebase Infrastructure</h3>
+            <p className="admin-infra-sub">Active &amp; Multi-Tenant Isolated</p>
           </div>
         </div>
-        <div className="admin-infra">
-          <span>♧ &nbsp;Firebase Project ID</span>
-          <strong>{process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'caritas-luxury-diamonds'}</strong>
-        </div>
-        <div className="admin-infra">
-          <span>▤ &nbsp;Database (Firestore)</span>
-          <strong className="connected">● &nbsp;Connected &amp; Isolated (caritas_*)</strong>
-        </div>
-        <div className="admin-infra">
-          <span>▣ &nbsp;Media Storage (Bucket)</span>
-          <strong>● &nbsp;{process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'caritas-luxury-diamonds.firebasestorage.app'}</strong>
-        </div>
-        <div className="admin-infra">
-          <span>◈ &nbsp;Data Isolation Prefix</span>
-          <strong>caritas_* (100% Protected)</strong>
-        </div>
-        <div className="admin-all-online">✓ All Systems Online</div>
-      </div>
 
-      <div className="admin-foot">© 2025 Caritas Luxury. Crafted for an exceptional experience.</div>
+        <div className="admin-infra-col">
+          <span className="admin-infra-label">Project ID</span>
+          <span className="admin-infra-val">
+            {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'caritas-luxury-diamonds'}
+          </span>
+        </div>
+
+        <div className="admin-infra-col">
+          <span className="admin-infra-label">Firestore Status</span>
+          <span className="admin-infra-val green">● Connected &amp; Isolated</span>
+        </div>
+
+        <div className="admin-infra-col">
+          <span className="admin-infra-label">Storage Bucket</span>
+          <span className="admin-infra-val" title={process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}>
+            {process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'caritas-luxury-diamonds.firebasestorage.app'}
+          </span>
+        </div>
+
+        <div className="admin-infra-col">
+          <span className="admin-infra-label">Collection Prefix</span>
+          <span className="admin-infra-val" style={{ color: 'var(--primary-gold)' }}>
+            caritas_* (100% Protected)
+          </span>
+        </div>
+
+        <div>
+          <div className="admin-all-systems-pill">
+            <span>✓</span>
+            <span>All Systems Online</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer copyright */}
+      <div style={{ textAlign: 'center', marginTop: '32px', color: 'var(--text-muted)', fontSize: '11px', fontFamily: 'var(--font-title)' }}>
+        © 2026 CARITAS LUXURY — Master Diamond Curators. All administrative rights reserved.
+      </div>
     </>
   );
 }

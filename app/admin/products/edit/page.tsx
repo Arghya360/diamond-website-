@@ -218,25 +218,29 @@ function EditProductForm() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+      {/* Header */}
+      <div className="admin-page-hero">
         <div>
-          <Link href="/admin/products" style={{ color: 'var(--admin-gold)', fontSize: '13px', textDecoration: 'none' }}>
-            ← Back to Products List
-          </Link>
-          <h1 style={{ margin: '8px 0 0', fontSize: '24px', fontWeight: 700, color: 'var(--admin-text)' }}>
-            Edit Product: {name || 'Product'}
-          </h1>
+          <span className="admin-hero-eyebrow">— ATELIER &amp; VAULT CATALOG</span>
+          <h1 className="admin-hero-title">Edit Piece: {name || 'Product'}</h1>
+          <p className="admin-hero-subtitle">
+            Update pricing, vault specifications, photography, and live customer visibility.
+          </p>
         </div>
 
-        <a
-          href="/shop"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-secondary"
-          style={{ fontSize: '12px' }}
-        >
-          ↗ View in Live Shop
-        </a>
+        <div className="admin-hero-actions">
+          <Link href="/admin/products" className="btn-caritas-secondary">
+            ← Return to Catalog
+          </Link>
+          <a
+            href="/shop"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-caritas-gold"
+          >
+            <span>↗</span> View in Live Shop
+          </a>
+        </div>
       </div>
 
       {successMsg && (

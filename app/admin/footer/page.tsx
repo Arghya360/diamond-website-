@@ -64,150 +64,171 @@ export default function AdminFooterPage() {
         copyrightText,
         legalLinks,
       });
-      setNotice('Footer configuration saved successfully!');
-      setTimeout(() => setNotice(null), 4000);
+      setNotice('Footer & legal configurations saved successfully.');
+      setTimeout(() => setNotice(null), 3500);
     } catch (err: any) {
-      alert('Error saving footer config: ' + err.message);
+      alert('Error saving footer: ' + err.message);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ padding: '60px', textAlign: 'center', color: 'var(--admin-muted)' }}>
-        Loading footer configuration...
-      </div>
-    );
-  }
-
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: 'var(--admin-text)' }}>
-            Footer Configuration Management
-          </h1>
-          <p style={{ margin: '4px 0 0', color: 'var(--admin-muted)', fontSize: '13px' }}>
-            Manage newsletter subscriber invitation texts, copyright notices, and legal navigation links.
-          </p>
-        </div>
-      </div>
-
+    <>
       {notice && (
         <div
           style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            color: '#34d399',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            marginBottom: '20px',
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            background: 'var(--dark-obsidian)',
+            color: '#FFFFFF',
+            border: '1px solid var(--primary-gold-border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '12px 20px',
+            boxShadow: 'var(--shadow-lg)',
+            zIndex: 9999,
             fontSize: '13px',
+            fontFamily: 'var(--font-title)',
           }}
         >
           {notice}
         </div>
       )}
 
-      <form onSubmit={handleSave}>
-        {/* Newsletter Section */}
-        <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            1. Newsletter Subscription Invitation
-          </h3>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label className="admin-label">Newsletter Title</label>
-            <input
-              type="text"
-              className="admin-input"
-              value={newsletterTitle}
-              onChange={(e) => setNewsletterTitle(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="admin-label">Newsletter Subtitle Paragraph</label>
-            <textarea
-              rows={2}
-              className="admin-textarea"
-              value={newsletterSubtitle}
-              onChange={(e) => setNewsletterSubtitle(e.target.value)}
-            />
-          </div>
+      {/* Header */}
+      <div className="admin-page-hero">
+        <div>
+          <span className="admin-hero-eyebrow">— STOREFRONT BASE &amp; LEGAL</span>
+          <h1 className="admin-hero-title">Footer &amp; Newsletter Settings</h1>
+          <p className="admin-hero-subtitle">
+            Configure the newsletter invitation banner, copyright notice, and legal links across all storefront pages.
+          </p>
         </div>
+      </div>
 
-        {/* Legal Links */}
-        <div className="admin-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--admin-text)' }}>
-              2. Footer Policy & Legal Links
-            </h3>
-            <button type="button" onClick={handleAddLink} className="btn-secondary" style={{ fontSize: '12px' }}>
-              + Add Link
+      {loading ? (
+        <div className="admin-card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>
+          Loading footer settings...
+        </div>
+      ) : (
+        <form onSubmit={handleSave} style={{ maxWidth: '960px' }}>
+          {/* Newsletter Box */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">
+                <span>1. Newsletter Invitation Section</span>
+              </h2>
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <label className="admin-label">Section Heading</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={newsletterTitle}
+                onChange={(e) => setNewsletterTitle(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="admin-label">Invitation Description</label>
+              <textarea
+                rows={2}
+                className="admin-textarea"
+                value={newsletterSubtitle}
+                onChange={(e) => setNewsletterSubtitle(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Legal Links Box */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">
+                <span>2. Legal &amp; Policy Links</span>
+              </h2>
+              <button
+                type="button"
+                onClick={handleAddLink}
+                className="btn-caritas-secondary"
+                style={{ padding: '6px 14px', fontSize: '11.5px' }}
+              >
+                + Add Policy Link
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {legalLinks.map((link, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    background: 'var(--surface-bg)',
+                    padding: '10px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-line)',
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Link Label"
+                    className="admin-input"
+                    style={{ flex: 1, padding: '7px 10px', fontSize: '13px' }}
+                    value={link.label}
+                    onChange={(e) => handleLinkChange(idx, 'label', e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="URL Path"
+                    className="admin-input"
+                    style={{ flex: 1, padding: '7px 10px', fontSize: '13px' }}
+                    value={link.href}
+                    onChange={(e) => handleLinkChange(idx, 'href', e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveLink(idx)}
+                    className="btn-caritas-danger"
+                    style={{ padding: '6px 12px', fontSize: '11px' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Copyright Box */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">
+                <span>3. Copyright &amp; Atelier Attribution</span>
+              </h2>
+            </div>
+            <div>
+              <label className="admin-label">Copyright Text</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={copyrightText}
+                onChange={(e) => setCopyrightText(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn-caritas-gold"
+              style={{ padding: '12px 32px' }}
+            >
+              {saving ? 'Saving Footer...' : 'Save & Publish Footer'}
             </button>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {legalLinks.map((link, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  placeholder="Link Label"
-                  className="admin-input"
-                  style={{ flex: 1 }}
-                  value={link.label}
-                  onChange={(e) => handleLinkChange(idx, 'label', e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="URL Destination"
-                  className="admin-input"
-                  style={{ flex: 1 }}
-                  value={link.href}
-                  onChange={(e) => handleLinkChange(idx, 'href', e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveLink(idx)}
-                  className="btn-danger"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Copyright */}
-        <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            3. Copyright Notice
-          </h3>
-
-          <div>
-            <label className="admin-label">Copyright Text Line</label>
-            <input
-              type="text"
-              className="admin-input"
-              value={copyrightText}
-              onChange={(e) => setCopyrightText(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
-          <button
-            type="submit"
-            disabled={saving}
-            className="btn-gold"
-            style={{ padding: '12px 36px', fontSize: '15px', opacity: saving ? 0.7 : 1 }}
-          >
-            {saving ? 'Updating Firebase...' : 'Save Footer Settings'}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      )}
+    </>
   );
 }
