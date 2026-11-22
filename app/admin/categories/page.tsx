@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getCategories, createCategory, updateCategory, deleteCategory, uploadFileToStorage } from '../../../lib/firebase/admin-service';
+import { getCategories, createCategory, updateCategory, deleteCategory } from '../../../lib/firebase/admin-service';
+import ImageUpload from '../../../components/admin/ImageUpload';
 import type { Category } from '../../../types/admin';
 
 export default function AdminCategoriesPage() {
@@ -79,16 +80,6 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const url = await uploadFileToStorage(file, 'categories');
-      setImage(url);
-    } catch (err: any) {
-      alert('Upload failed: ' + err.message);
-    }
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -371,17 +362,15 @@ export default function AdminCategoriesPage() {
               </div>
 
               <div>
-                <label className="admin-label">Banner Image URL</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  placeholder="/wp-content/uploads/shop page/banner-01.jpg"
+                <ImageUpload
+                  label="Category Banner Photograph"
                   value={image}
-                  onChange={(e) => setImage(e.target.value)}
+                  onChange={setImage}
+                  folder="categories"
+                  helpText="Upload a high-resolution category hero banner from your computer."
+                  recommendedSize="1200 × 600px"
+                  aspectRatio="16 / 9"
                 />
-                <div style={{ marginTop: '8px' }}>
-                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '12px' }} />
-                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>

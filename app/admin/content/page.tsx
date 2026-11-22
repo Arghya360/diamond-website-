@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getWebsiteContent, updateWebsiteContent, uploadFileToStorage } from '../../../lib/firebase/admin-service';
+import { getWebsiteContent, updateWebsiteContent } from '../../../lib/firebase/admin-service';
+import ImageUpload from '../../../components/admin/ImageUpload';
 import type { WebsiteContent, WebsiteSlide, PromotionalBanner } from '../../../types/admin';
 
 export default function AdminContentPage() {
@@ -50,14 +51,6 @@ export default function AdminContentPage() {
     );
   };
 
-  const handleSlideImageUpload = async (index: number, file: File) => {
-    try {
-      const url = await uploadFileToStorage(file, 'slides');
-      handleSlideChange(index, 'image', url);
-    } catch (err: any) {
-      alert('Slide image upload failed: ' + err.message);
-    }
-  };
 
   const handleAddSlide = () => {
     const newSlide: WebsiteSlide = {
@@ -242,29 +235,15 @@ export default function AdminContentPage() {
                   </div>
 
                   <div>
-                    <label className="admin-label">Background Picture URL</label>
-                    <input
-                      type="text"
-                      className="admin-input"
+                    <ImageUpload
+                      label={`Slide #${idx + 1} Background Photograph`}
                       value={s.image || ''}
-                      onChange={(e) => handleSlideChange(idx, 'image', e.target.value)}
+                      onChange={(url) => handleSlideChange(idx, 'image', url)}
+                      folder="slides"
+                      helpText="Select a high-resolution hero image from your local computer."
+                      recommendedSize="1920 × 900px"
+                      aspectRatio="16 / 9"
                     />
-                    <div style={{ marginTop: '8px' }}>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) handleSlideImageUpload(idx, f);
-                        }}
-                        style={{ fontSize: '12px' }}
-                      />
-                    </div>
-                    {s.image && (
-                      <div style={{ marginTop: '10px', height: '110px', width: '220px', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-line)' }}>
-                        <img src={s.image} alt="Slide Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}

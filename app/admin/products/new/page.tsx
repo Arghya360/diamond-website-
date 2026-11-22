@@ -3,57 +3,64 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createProduct, getCategories, uploadFileToStorage } from '../../../../lib/firebase/admin-service';
+import { createProduct, getCategories } from '../../../../lib/firebase/admin-service';
+import MultiImageUpload from '../../../../components/admin/MultiImageUpload';
 import type { Product, Category, ProductImage, ProductSpecification } from '../../../../types/admin';
 
 export default function AddProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
-  const [uploadingImg, setUploadingImg] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Form State
+  // 1. Basic Information
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [category, setCategory] = useState('Rings');
   const [subcategory, setSubcategory] = useState('');
-  const [description, setDescription] = useState('');
   const [shortDescription, setShortDescription] = useState('');
+  const [description, setDescription] = useState('');
+
+  // 2. Pricing & Inventory
   const [price, setPrice] = useState<number | ''>('');
   const [salePrice, setSalePrice] = useState<number | ''>('');
   const [sku, setSku] = useState('');
   const [stock, setStock] = useState<number | ''>(10);
   const [availability, setAvailability] = useState<Product['availability']>('in_stock');
   const [weight, setWeight] = useState('');
+
+  // 3. Images
+  const [images, setImages] = useState<ProductImage[]>([
+    { url: '/wp-content/uploads/shop page/pro-21-300x300.png', isMain: true, alt: 'Main product photograph' },
+  ]);
+
+  // 4. Specifications
+  const [specs, setSpecs] = useState<ProductSpecification[]>([
+    { name: 'Metal', value: '18k White Gold' },
+    { name: 'Diamond Clarity', value: 'VS1' },
+    { name: 'Carat Weight', value: '1.50 ct' },
+  ]);
+
+  // 5. Merchandising
+  const [published, setPublished] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(true);
   const [isTrending, setIsTrending] = useState(false);
   const [badge, setBadge] = useState<Product['badge']>('NEW');
-  const [published, setPublished] = useState(true);
+
+  // 6. SEO
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
-
-  // Images state
-  const [images, setImages] = useState<ProductImage[]>([
-    { url: '/wp-content/uploads/shop page/pro-21-300x300.png', isMain: true, alt: 'Main product image' },
-  ]);
-  const [manualImgUrl, setManualImgUrl] = useState('');
-
-  // Specifications
-  const [specs, setSpecs] = useState<ProductSpecification[]>([
-    { name: 'Metal', value: '18k White Gold' },
-    { name: 'Diamond Clarity', value: 'VS1' },
-  ]);
 
   useEffect(() => {
     getCategories().then((cats) => {
       setCategories(cats);
-      if (cats.length > 0) setCategory(cats[0].name);
+      if (cats.length > 0 && !category) {
+        setCategory(cats[0].name);
+      }
     });
   }, []);
 
-  // Auto-generate slug from name
   const handleNameChange = (val: string) => {
     setName(val);
     const autoSlug = val
@@ -63,56 +70,6 @@ export default function AddProductPage() {
     setSlug(autoSlug);
   };
 
-  // Upload image to Firebase Storage
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    setUploadingImg(true);
-    setErrorMsg(null);
-
-    try {
-      const newImgs: ProductImage[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const downloadUrl = await uploadFileToStorage(file, 'products');
-        newImgs.push({
-          url: downloadUrl,
-          alt: file.name,
-          isMain: images.length === 0 && i === 0,
-        });
-      }
-      setImages((prev) => [...prev, ...newImgs]);
-    } catch (err: any) {
-      console.error('Upload failed:', err);
-      setErrorMsg('Image upload failed: ' + (err.message || 'Check storage permissions.'));
-    } finally {
-      setUploadingImg(false);
-    }
-  };
-
-  const handleAddManualUrl = () => {
-    if (!manualImgUrl.trim()) return;
-    setImages((prev) => [
-      ...prev,
-      { url: manualImgUrl.trim(), isMain: prev.length === 0, alt: name || 'Product image' },
-    ]);
-    setManualImgUrl('');
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSetMainImage = (index: number) => {
-    setImages((prev) =>
-      prev.map((img, i) => ({
-        ...img,
-        isMain: i === index,
-      }))
-    );
-  };
-
-  // Specs helpers
   const handleAddSpec = () => {
     setSpecs((prev) => [...prev, { name: '', value: '' }]);
   };
@@ -127,7 +84,11 @@ export default function AddProductPage() {
     );
   };
 
-  // Form submit
+  const discountPercent =
+    salePrice !== '' && price !== '' && Number(salePrice) > 0 && Number(price) < Number(salePrice)
+      ? Math.round(((Number(salePrice) - Number(price)) / Number(salePrice)) * 100)
+      : null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -136,6 +97,10 @@ export default function AddProductPage() {
     }
     if (price === '' || Number(price) <= 0) {
       setErrorMsg('A valid product price is required.');
+      return;
+    }
+    if (images.length === 0) {
+      setErrorMsg('Please upload at least one photograph for this piece.');
       return;
     }
 
@@ -178,8 +143,8 @@ export default function AddProductPage() {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      {/* Page Header */}
+    <div style={{ maxWidth: '1040px', margin: '0 auto' }}>
+      {/* Header */}
       <div className="admin-page-hero">
         <div>
           <span className="admin-hero-eyebrow">— ATELIER &amp; VAULT CATALOG</span>
@@ -199,29 +164,38 @@ export default function AddProductPage() {
       {errorMsg && (
         <div
           style={{
-            backgroundColor: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            color: '#f87171',
+            backgroundColor: 'rgba(192, 50, 58, 0.08)',
+            border: '1px solid rgba(192, 50, 58, 0.25)',
+            color: 'var(--crimson)',
             padding: '12px 16px',
-            borderRadius: '8px',
+            borderRadius: 'var(--radius-sm)',
             marginBottom: '20px',
             fontSize: '13px',
+            fontFamily: 'var(--font-title)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
           }}
         >
-          {errorMsg}
+          <span>⚠️</span>
+          <span>{errorMsg}</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit}>
-        {/* Basic Information Card */}
+        {/* 1. Basic Information */}
         <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            1. Basic Product Information
-          </h3>
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <span>1. Basic Piece Information</span>
+            </h2>
+          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+          <div className="admin-form-grid-2">
             <div>
-              <label className="admin-label">Product Name *</label>
+              <label className="admin-label">
+                Piece Title <span className="admin-field-required">*</span>
+              </label>
               <input
                 type="text"
                 required
@@ -233,7 +207,7 @@ export default function AddProductPage() {
             </div>
 
             <div>
-              <label className="admin-label">Product URL Slug</label>
+              <label className="admin-label">Storefront URL Slug</label>
               <input
                 type="text"
                 className="admin-input"
@@ -244,9 +218,11 @@ export default function AddProductPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+          <div className="admin-form-grid-2">
             <div>
-              <label className="admin-label">Primary Category *</label>
+              <label className="admin-label">
+                Primary Category <span className="admin-field-required">*</span>
+              </label>
               <select
                 className="admin-select"
                 value={category}
@@ -262,20 +238,20 @@ export default function AddProductPage() {
                   <>
                     <option value="Rings">Rings</option>
                     <option value="Earrings">Earrings</option>
+                    <option value="Diamonds">Diamonds</option>
                     <option value="Necklaces">Necklaces</option>
                     <option value="Bracelets">Bracelets</option>
-                    <option value="Diamonds">Diamonds</option>
                   </>
                 )}
               </select>
             </div>
 
             <div>
-              <label className="admin-label">Subcategory</label>
+              <label className="admin-label">Subcategory / Collection Tag</label>
               <input
                 type="text"
                 className="admin-input"
-                placeholder="e.g. Solitaire, Halo, Eternity Bands"
+                placeholder="e.g. Engagement Rings, Solitaire"
                 value={subcategory}
                 onChange={(e) => setSubcategory(e.target.value)}
               />
@@ -283,106 +259,116 @@ export default function AddProductPage() {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label className="admin-label">Short Description</label>
+            <label className="admin-label">Short Summary (Shown in Quick Views)</label>
             <input
               type="text"
               className="admin-input"
-              placeholder="Brief summary displayed on product cards..."
+              placeholder="e.g. Certified VS1 lab-grown diamond set in 18k white gold band."
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="admin-label">Full Product Description</label>
+            <label className="admin-label">Full Atelier Description</label>
             <textarea
               rows={4}
               className="admin-textarea"
-              placeholder="Detailed description of craftsmanship, materials, dimensions, and certification..."
+              placeholder="Provide a comprehensive narrative describing the diamond cut, master setting craftsmanship, provenance, and aesthetic character..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
         </div>
 
-        {/* Pricing & Inventory */}
+        {/* 2. Pricing & Inventory */}
         <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            2. Pricing & Inventory
-          </h3>
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <span>2. Pricing &amp; Vault Inventory</span>
+            </h2>
+          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+          <div className="admin-form-grid-3">
             <div>
-              <label className="admin-label">Regular Price ($ USD) *</label>
+              <label className="admin-label">
+                Selling Price ($ USD) <span className="admin-field-required">*</span>
+              </label>
               <input
                 type="number"
                 required
-                min="0"
-                step="0.01"
+                min={0}
+                step="any"
                 className="admin-input"
-                placeholder="4200"
+                placeholder="3600"
                 value={price}
                 onChange={(e) => setPrice(e.target.value === '' ? '' : Number(e.target.value))}
               />
             </div>
 
             <div>
-              <label className="admin-label">Sale / Original Price ($ USD)</label>
+              <label className="admin-label">
+                Original Price (for Sale Display)
+              </label>
               <input
                 type="number"
-                min="0"
-                step="0.01"
+                min={0}
+                step="any"
                 className="admin-input"
-                placeholder="5190 (optional)"
+                placeholder="4200 (optional)"
                 value={salePrice}
                 onChange={(e) => setSalePrice(e.target.value === '' ? '' : Number(e.target.value))}
               />
+              {discountPercent !== null && (
+                <div style={{ fontSize: '11px', color: 'var(--emerald)', fontWeight: 600, marginTop: '4px' }}>
+                  Calculated discount: -{discountPercent}%
+                </div>
+              )}
             </div>
 
             <div>
-              <label className="admin-label">Stock Quantity *</label>
-              <input
-                type="number"
-                min="0"
-                className="admin-input"
-                placeholder="10"
-                value={stock}
-                onChange={(e) => setStock(e.target.value === '' ? '' : Number(e.target.value))}
-              />
-            </div>
-
-            <div>
-              <label className="admin-label">Product SKU</label>
+              <label className="admin-label">SKU / Vault Reference</label>
               <input
                 type="text"
                 className="admin-input"
-                placeholder="e.g. RNG-HALO-001"
+                placeholder="CR-RNG-104"
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
               />
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+          <div className="admin-form-grid-3">
             <div>
-              <label className="admin-label">Availability Status</label>
+              <label className="admin-label">Units in Vault</label>
+              <input
+                type="number"
+                min={0}
+                className="admin-input"
+                value={stock}
+                onChange={(e) => setStock(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+            </div>
+
+            <div>
+              <label className="admin-label">Vault Availability</label>
               <select
                 className="admin-select"
                 value={availability}
                 onChange={(e) => setAvailability(e.target.value as any)}
               >
-                <option value="in_stock">In Stock</option>
+                <option value="in_stock">In Stock (Vault Ready)</option>
                 <option value="out_of_stock">Out of Stock</option>
-                <option value="preorder">Pre-Order / Made to Order</option>
+                <option value="preorder">Pre-Order / Bespoke Commission</option>
               </select>
             </div>
 
             <div>
-              <label className="admin-label">Estimated Metal Weight</label>
+              <label className="admin-label">Weight / Metal Grams</label>
               <input
                 type="text"
                 className="admin-input"
-                placeholder="e.g. 3.8 grams"
+                placeholder="e.g. 4.8g (18k)"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
               />
@@ -390,147 +376,77 @@ export default function AddProductPage() {
           </div>
         </div>
 
-        {/* Media & Images */}
+        {/* 3. Product Photographs */}
         <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            3. Product Images (Firebase Storage)
-          </h3>
-
-          {/* Upload input */}
-          <div style={{ marginBottom: '16px' }}>
-            <label
-              style={{
-                display: 'block',
-                padding: '24px',
-                border: '2px dashed var(--admin-border)',
-                borderRadius: '8px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                backgroundColor: 'rgba(255,255,255,0.01)',
-              }}
-            >
-              <div style={{ fontSize: '28px', marginBottom: '8px' }}>☁️</div>
-              <div style={{ color: 'var(--admin-gold)', fontWeight: 600, fontSize: '14px' }}>
-                {uploadingImg ? 'Uploading image to Firebase Storage...' : 'Click or Drag files here to upload to Firebase Storage'}
-              </div>
-              <div style={{ color: 'var(--admin-muted)', fontSize: '12px', marginTop: '4px' }}>
-                Supports PNG, JPG, WEBP (stored in Firebase Storage)
-              </div>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                style={{ display: 'none' }}
-                disabled={uploadingImg}
-                onChange={handleFileUpload}
-              />
-            </label>
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <span>3. Product Photographs &amp; Gallery</span>
+            </h2>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Direct local upload to Firebase Storage
+            </span>
           </div>
 
-          {/* Or Manual URL */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-            <input
-              type="text"
-              placeholder="Or add image URL manually (e.g. /wp-content/uploads/shop page/...)..."
-              className="admin-input"
-              value={manualImgUrl}
-              onChange={(e) => setManualImgUrl(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={handleAddManualUrl}
-              className="btn-secondary"
-              style={{ whiteSpace: 'nowrap' }}
-            >
-              Add URL
-            </button>
-          </div>
-
-          {/* Image Previews */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-            {images.map((img, idx) => (
-              <div
-                key={idx}
-                style={{
-                  width: '120px',
-                  borderRadius: '8px',
-                  border: img.isMain ? '2px solid var(--admin-gold)' : '1px solid var(--admin-border)',
-                  overflow: 'hidden',
-                  backgroundColor: '#0c1315',
-                  position: 'relative',
-                }}
-              >
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100px',
-                    backgroundImage: `url("${img.url}")`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                />
-                <div style={{ padding: '6px', textAlign: 'center', backgroundColor: '#141c1f' }}>
-                  {img.isMain ? (
-                    <span style={{ fontSize: '10px', color: 'var(--admin-gold)', fontWeight: 700 }}>
-                      ★ MAIN
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleSetMainImage(idx)}
-                      style={{ background: 'none', border: 'none', color: 'var(--admin-muted)', fontSize: '10px', cursor: 'pointer', padding: 0 }}
-                    >
-                      Set Main
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(idx)}
-                    style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '10px', cursor: 'pointer', marginLeft: '8px' }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <MultiImageUpload
+            images={images}
+            onChange={setImages}
+            folder="products"
+            maxImages={8}
+          />
         </div>
 
-        {/* Specifications & Attributes */}
+        {/* 4. Specifications */}
         <div className="admin-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--admin-text)' }}>
-              4. Product Specifications
-            </h3>
-            <button type="button" onClick={handleAddSpec} className="btn-secondary" style={{ fontSize: '12px' }}>
-              + Add Specification Row
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <span>4. Vault Specifications &amp; Gemstone Details</span>
+            </h2>
+            <button
+              type="button"
+              onClick={handleAddSpec}
+              className="btn-caritas-secondary"
+              style={{ padding: '6px 14px', fontSize: '11.5px' }}
+            >
+              + Add Specification
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {specs.map((spec, i) => (
-              <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  background: 'var(--surface-bg)',
+                  padding: '10px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-line)',
+                }}
+              >
                 <input
                   type="text"
-                  placeholder="Specification Name (e.g. Center Stone, Metal)"
+                  placeholder="Attribute (e.g. Diamond Cut, Metal, Carat)"
                   className="admin-input"
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, height: '38px', fontSize: '13px' }}
                   value={spec.name}
                   onChange={(e) => handleSpecChange(i, 'name', e.target.value)}
                 />
                 <input
                   type="text"
-                  placeholder="Value (e.g. 2.00ct Oval, Platinum)"
+                  placeholder="Specification Value (e.g. Round Brilliant, 18k Rose Gold)"
                   className="admin-input"
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, height: '38px', fontSize: '13px' }}
                   value={spec.value}
                   onChange={(e) => handleSpecChange(i, 'value', e.target.value)}
                 />
                 <button
                   type="button"
                   onClick={() => handleRemoveSpec(i)}
-                  className="btn-danger"
-                  style={{ padding: '8px 12px' }}
+                  className="btn-caritas-danger"
+                  style={{ padding: '8px 12px', height: '38px' }}
+                  title="Remove specification"
                 >
                   ✕
                 </button>
@@ -539,82 +455,111 @@ export default function AddProductPage() {
           </div>
         </div>
 
-        {/* Visibility, Badges & Highlights */}
+        {/* 5. Merchandising & Visibility */}
         <div className="admin-card">
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', color: 'var(--admin-text)' }}>
-            5. Website Visibility & Highlights
-          </h3>
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <span>5. Storefront Merchandising &amp; Badges</span>
+            </h2>
+          </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', marginBottom: '18px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '18px', marginBottom: '20px' }}>
+            <label className="admin-checkbox-label">
               <input
                 type="checkbox"
                 checked={published}
                 onChange={(e) => setPublished(e.target.checked)}
-                style={{ width: '18px', height: '18px', accentColor: 'var(--admin-gold)' }}
               />
-              <strong>Published (Visible on live website)</strong>
+              <span><strong>Published on Storefront</strong> (Publicly visible)</span>
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-              <input
-                type="checkbox"
-                checked={isNewArrival}
-                onChange={(e) => setIsNewArrival(e.target.checked)}
-                style={{ width: '18px', height: '18px', accentColor: 'var(--admin-gold)' }}
-              />
-              <span>Show in "New Arrivals" Grid</span>
-            </label>
-
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-              <input
-                type="checkbox"
-                checked={isTrending}
-                onChange={(e) => setIsTrending(e.target.checked)}
-                style={{ width: '18px', height: '18px', accentColor: 'var(--admin-gold)' }}
-              />
-              <span>Show in "Trending Products" Marquee</span>
-            </label>
-
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
+            <label className="admin-checkbox-label">
               <input
                 type="checkbox"
                 checked={isFeatured}
                 onChange={(e) => setIsFeatured(e.target.checked)}
-                style={{ width: '18px', height: '18px', accentColor: 'var(--admin-gold)' }}
               />
-              <span>Featured Product</span>
+              <span><strong>Featured Piece</strong> (Curator&#39;s highlight)</span>
+            </label>
+
+            <label className="admin-checkbox-label">
+              <input
+                type="checkbox"
+                checked={isNewArrival}
+                onChange={(e) => setIsNewArrival(e.target.checked)}
+              />
+              <span><strong>New Arrival</strong> (Shows in latest releases)</span>
+            </label>
+
+            <label className="admin-checkbox-label">
+              <input
+                type="checkbox"
+                checked={isTrending}
+                onChange={(e) => setIsTrending(e.target.checked)}
+              />
+              <span><strong>Trending Piece</strong> (High demand)</span>
             </label>
           </div>
 
-          <div style={{ width: '220px' }}>
-            <label className="admin-label">Promotional Badge Tag</label>
+          <div style={{ maxWidth: '280px' }}>
+            <label className="admin-label">Promotional Pill Badge</label>
             <select
               className="admin-select"
               value={badge || ''}
-              onChange={(e) => setBadge((e.target.value || null) as any)}
+              onChange={(e) => setBadge((e.target.value as any) || null)}
             >
-              <option value="">None</option>
-              <option value="NEW">NEW</option>
-              <option value="HOT">HOT</option>
+              <option value="">No Promotional Badge</option>
+              <option value="NEW">NEW ARRIVAL</option>
+              <option value="HOT">HOT PIECE</option>
               <option value="TRENDING">TRENDING</option>
               <option value="BESTSELLER">BESTSELLER</option>
             </select>
           </div>
         </div>
 
+        {/* 6. SEO */}
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h2 className="admin-card-title">
+              <span>6. Search Engine Optimization (SEO)</span>
+            </h2>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label className="admin-label">Custom Meta Title</label>
+            <input
+              type="text"
+              className="admin-input"
+              placeholder={`${name || 'Product'} | Caritas Luxury Diamonds`}
+              value={seoTitle}
+              onChange={(e) => setSeoTitle(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="admin-label">Custom Meta Description</label>
+            <textarea
+              rows={2}
+              className="admin-textarea"
+              placeholder="Discover our bespoke certified lab-grown diamond piece..."
+              value={seoDescription}
+              onChange={(e) => setSeoDescription(e.target.value)}
+            />
+          </div>
+        </div>
+
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '14px', justifyContent: 'flex-end', marginBottom: '40px' }}>
-          <Link href="/admin/products" className="btn-secondary" style={{ padding: '12px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '14px', marginTop: '24px', marginBottom: '40px' }}>
+          <Link href="/admin/products" className="btn-caritas-secondary" style={{ padding: '12px 24px' }}>
             Cancel
           </Link>
           <button
             type="submit"
             disabled={saving}
-            className="btn-gold"
-            style={{ padding: '12px 32px', fontSize: '15px', opacity: saving ? 0.7 : 1 }}
+            className="btn-caritas-gold"
+            style={{ padding: '12px 36px' }}
           >
-            {saving ? 'Saving to Firebase...' : 'Save & Publish Product'}
+            {saving ? 'Publishing Piece...' : 'Publish Piece to Catalog'}
           </button>
         </div>
       </form>

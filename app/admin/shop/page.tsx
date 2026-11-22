@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getShopSettings, updateShopSettings, uploadFileToStorage } from '../../../lib/firebase/admin-service';
+import { getShopSettings, updateShopSettings } from '../../../lib/firebase/admin-service';
+import ImageUpload from '../../../components/admin/ImageUpload';
 import type { ShopSettings } from '../../../types/admin';
 
 export default function AdminShopSettingsPage() {
@@ -50,16 +51,6 @@ export default function AdminShopSettingsPage() {
     load();
   }, []);
 
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const url = await uploadFileToStorage(file, 'banners');
-      setBannerImage(url);
-    } catch (err: any) {
-      alert('Upload failed: ' + err.message);
-    }
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,21 +195,15 @@ export default function AdminShopSettingsPage() {
             </div>
 
             <div>
-              <label className="admin-label">Banner Image URL</label>
-              <input
-                type="text"
-                className="admin-input"
+              <ImageUpload
+                label="Shop Header Hero Banner"
                 value={bannerImage}
-                onChange={(e) => setBannerImage(e.target.value)}
+                onChange={setBannerImage}
+                folder="banners"
+                helpText="Curate the primary showcase background banner displayed at the top of /shop."
+                recommendedSize="1920 × 600px"
+                aspectRatio="16 / 7"
               />
-              <div style={{ marginTop: '8px' }}>
-                <input type="file" accept="image/*" onChange={handleBannerUpload} style={{ fontSize: '12px' }} />
-              </div>
-              {bannerImage && (
-                <div style={{ marginTop: '12px', width: '100%', height: '140px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-line)' }}>
-                  <img src={bannerImage} alt="Banner Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-              )}
             </div>
           </div>
 
