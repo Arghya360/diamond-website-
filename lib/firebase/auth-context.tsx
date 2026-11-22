@@ -43,23 +43,26 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check local session storage for active admin
-    if (typeof window !== 'undefined') {
-      const stored =
-        sessionStorage.getItem('caritas_admin_session') ||
-        localStorage.getItem('caritas_admin_session');
-      if (stored === 'active') {
-        setIsAdmin(true);
-        setAdminProfile({
-          uid: 'caritas360-owner',
-          email: 'Caritas360',
-          displayName: 'Caritas360 (Super Admin)',
-          role: 'super_admin',
-        });
-      }
+    // Restore session from storage FIRST so layout doesn't flash redirect
+    const stored =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('caritas_admin_session') ||
+          localStorage.getItem('caritas_admin_session')
+        : null;
+
+    if (stored === 'active') {
+      // Restore the Caritas360 bypass session immediately
+      setIsAdmin(true);
+      setAdminProfile({
+        uid: 'caritas360-owner',
+        email: 'caritas360@caritasluxury.com',
+        displayName: 'Caritas360',
+        role: 'super_admin',
+      });
     }
 
     if (!isFirebaseConfigured || !auth) {
+      // No Firebase — session comes solely from storage
       setLoading(false);
       return;
     }

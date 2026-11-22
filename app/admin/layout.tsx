@@ -44,7 +44,9 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   }
 
   // Not authenticated or not admin: redirect to login
-  if (!user || !isAdmin) {
+  // NOTE: isAdmin can be true even when user (Firebase Auth) is null —
+  // this happens with the direct-credential bypass for Caritas360.
+  if (!isAdmin) {
     if (typeof window !== 'undefined') {
       router.push('/admin/login');
     }
@@ -182,7 +184,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                 }
               `}</style>
               <span style={{ fontSize: '14px', color: 'var(--admin-muted)' }}>
-                System: <strong style={{ color: '#10b981' }}>Firebase Active</strong>
+                System: <strong style={{ color: '#10b981' }}>● Online</strong>
               </span>
             </div>
 
