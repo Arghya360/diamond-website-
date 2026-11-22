@@ -10,6 +10,7 @@ ErrorDocument 404 /404.html
 
 # Fallback for header slide image variants (handles any apostrophe, quote or encoding)
 RewriteRule ^(.*)Gritty.*Jewelrysmith.*Workbench\.png$ "/wp-content/uploads/home page header picture/Gritty-Jewelrysmiths-Workbench.png" [L,NC]
+RewriteRule ^(.*)Golden.*Desert.*Oasis.*\.png$ "/wp-content/uploads/home page header picture/Golden-Desert-Oasis-at-Sunset.png" [L,NC]
 
 # 2. Redirects for Clean URLs and Legacy Paths
 RewriteRule ^about/?$ /about-us/ [R=301,L]

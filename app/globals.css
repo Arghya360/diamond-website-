@@ -86,6 +86,7 @@ img, video, iframe, embed, object {
 #rev_slider_1_1 rs-layer#slider-1-slide-1-layer-1,
 #rev_slider_1_1 rs-layer#slider-1-slide-20-layer-1,
 #rev_slider_1_1 rs-layer#slider-1-slide-21-layer-1,
+#rev_slider_1_1 rs-layer#slider-1-slide-22-layer-1,
 .elementor-element-de7f16b rs-layer[id*="layer-1"] {
   color: #ffffff !important;
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.9) !important;
@@ -95,6 +96,7 @@ img, video, iframe, embed, object {
 #rev_slider_1_1 rs-layer#slider-1-slide-1-layer-0,
 #rev_slider_1_1 rs-layer#slider-1-slide-20-layer-0,
 #rev_slider_1_1 rs-layer#slider-1-slide-21-layer-0,
+#rev_slider_1_1 rs-layer#slider-1-slide-22-layer-0,
 .elementor-element-de7f16b rs-layer[id*="layer-0"] {
   color: #d4b88f !important;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8) !important;
