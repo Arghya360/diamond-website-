@@ -17,7 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   // OPERATIONS
   { label: 'Overview', href: '/admin', icon: '📊', section: 'OPERATIONS' },
   { label: 'Orders', href: '/admin/orders', icon: '🧾', section: 'OPERATIONS' },
-  { label: 'Inventory & Stock', href: '/admin/products?view=stock', icon: '📦', section: 'OPERATIONS' },
+  { label: 'Inventory & Stock', href: '/admin/inventory', icon: '📦', section: 'OPERATIONS' },
 
   // RECORDS
   { label: 'Products', href: '/admin/products', icon: '◇', section: 'RECORDS' },
@@ -118,7 +118,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
           />
         )}
 
-        {/* ── LEFT SIDEBAR (White clean luxury matching screenshot) ── */}
+        {/* ── LEFT SIDEBAR ── */}
         <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
           {/* Brand header */}
           <div className="admin-sidebar-brand">
@@ -154,7 +154,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                   {secItems.map((item) => {
                     const isActive = item.href === '/admin'
                       ? pathname === '/admin'
-                      : pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href.split('?')[0]));
+                      : pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
 
                     return (
                       <Link
@@ -185,7 +185,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
               ← Back to Storefront
             </a>
 
-            {/* Profile Card matching the screenshot (Pale gold/cream box) */}
+            {/* Profile Card */}
             <div className="admin-profile-box">
               <div className="admin-profile-name">{displayName}</div>
               <div className="admin-profile-badge">
@@ -203,7 +203,6 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
         {/* ── STAGE / MAIN AREA ── */}
         <div className="admin-stage">
-          {/* Topbar matching the screenshot */}
           <header className="admin-topbar">
             <div className="admin-topbar-left">
               <button
@@ -239,7 +238,6 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          {/* Page Body */}
           <main className="admin-main-wrap">
             {children}
           </main>

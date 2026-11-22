@@ -1,12 +1,12 @@
 /* ==========================================================================
    CARITAS LUXURY — Master Administration Portal Stylesheet
-   Designed to match the executive Bullion & Diamond Trading Portal:
+   Executive Bullion & Diamond Trading Portal Design System:
    • Crisp White Sidebar with Dark Obsidian Active Nav
    • Clean Top Navigation with Real-Time Indicator & Dark Admin Pill
    • Editorial Serif Typography ("Playfair Display") for Headers
-   • Minimalist Stat Cards with Red Warning Flags
-   • Featured Dark Desk Card with Live Spot Benchmark Feeds
-   • Elegant Order Allocations Table with Soft Color Pill Badges
+   • Minimalist Stat Cards with Colored Values (Red, Amber, Green, Blue)
+   • Unified Filter Bars with Search Inputs, Status Pills & Select Dropdowns
+   • High-Density Professional Data Tables with Badges & Action Buttons
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;1,6..12,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Readex+Pro:wght@300;400;500;600;700&display=swap');
@@ -23,10 +23,13 @@
   --text-main: #111827;
   --text-secondary: #4B5563;
   --text-muted: #6B7280;
+
   --emerald: #15803D;
   --emerald-bg: #DCFCE7;
   --amber: #B45309;
   --amber-bg: #FEF3C7;
+  --blue: #2563EB;
+  --blue-bg: #DBEAFE;
   --crimson: #DC2626;
   --crimson-bg: #FEE2E2;
   --gray-pill: #475569;
@@ -39,10 +42,10 @@
   --font-title: 'Readex Pro', -apple-system, sans-serif;
   --font-body: 'Nunito Sans', -apple-system, sans-serif;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
   --radius-pill: 9999px;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 * {
@@ -89,7 +92,6 @@ body.admin-body,
   transition: transform 0.25s ease;
 }
 
-/* Brand at top of sidebar */
 .admin-sidebar-brand {
   padding: 20px 20px 14px;
   display: flex;
@@ -125,7 +127,6 @@ body.admin-body,
   font-family: var(--font-title);
 }
 
-/* Navigation Search input inside sidebar */
 .admin-sidebar-search-box {
   padding: 0 16px 12px;
 }
@@ -152,7 +153,6 @@ body.admin-body,
   color: #9CA3AF;
 }
 
-/* Navigation links */
 .admin-sidebar-nav {
   padding: 0 12px 20px;
   flex: 1;
@@ -196,7 +196,6 @@ body.admin-body,
   color: #111827;
 }
 
-/* Active navigation item: Solid dark black/obsidian background with white text */
 .admin-nav-item.active {
   background-color: #16191E;
   color: #FFFFFF;
@@ -219,7 +218,6 @@ body.admin-body,
   text-overflow: ellipsis;
 }
 
-/* Sidebar Footer & User Profile Card */
 .admin-sidebar-footer {
   padding: 14px 16px 18px;
   border-top: 1px solid var(--border-light);
@@ -244,7 +242,6 @@ body.admin-body,
   color: #111827;
 }
 
-/* Profile Card (Pale gold / cream box matching screenshot) */
 .admin-profile-box {
   background-color: #FFF8E7;
   border: 1px solid #EAD8B5;
@@ -371,7 +368,6 @@ body.admin-body,
   gap: 14px;
 }
 
-/* Circular Notification Bell */
 .admin-bell-button {
   width: 32px;
   height: 32px;
@@ -391,7 +387,6 @@ body.admin-body,
   transform: scale(1.05);
 }
 
-/* User pill */
 .admin-user-pill {
   display: flex;
   align-items: center;
@@ -420,119 +415,508 @@ body.admin-body,
 }
 
 /* ─────────────────────────────────────────────────────────────
-   MAIN CANVAS & OVERVIEW PAGE
+   MAIN CANVAS & COMMON HEADER STYLES
    ───────────────────────────────────────────────────────────── */
 .admin-main-wrap {
-  padding: 28px 32px 48px;
-  max-width: 1400px;
+  padding: 24px 28px 48px;
+  max-width: 1440px;
   width: 100%;
   margin: 0 auto;
   flex: 1;
 }
 
-.admin-overview-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/* Header */
+/* Editorial Top Header Section across pages */
+.admin-page-hero,
 .admin-overview-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
+  margin-bottom: 22px;
 }
 
-.admin-overview-title {
+.admin-page-hero-title,
+.admin-overview-title,
+.admin-hero-title {
   font-family: var(--font-serif);
-  font-size: 42px;
+  font-size: 38px;
   font-weight: 400;
   color: #111827;
   margin: 0 0 4px;
   letter-spacing: -0.5px;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
-.admin-overview-subtitle {
+.admin-page-hero-subtitle,
+.admin-overview-subtitle,
+.admin-hero-subtitle {
   color: #6B7280;
   font-size: 13px;
   margin: 0;
+  max-width: 700px;
 }
 
-.admin-btn-manage-products {
+.admin-page-hero-actions,
+.admin-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SYNC STATUS BAR (e.g. Products page)
+   ───────────────────────────────────────────────────────────── */
+.admin-sync-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 11.5px;
+  color: #6B7280;
+}
+
+.admin-sync-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-sync-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #16A34A;
+}
+
+.admin-sync-text-bold {
+  color: #111827;
+  font-weight: 600;
+}
+
+.admin-low-stock-alert {
+  background-color: #FFF8E7;
+  border: 1px solid #FDE68A;
+  color: #B45309;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background-color: #16191E;
-  color: #FFFFFF;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-title);
-  padding: 9px 18px;
-  border-radius: var(--radius-sm);
-  transition: all 0.15s ease;
-  white-space: nowrap;
+  gap: 5px;
 }
 
-.admin-btn-manage-products:hover {
-  background-color: #000000;
-  transform: translateY(-1px);
-}
-
-/* 4 Stats Cards Grid */
-.admin-overview-stats-grid {
+/* ─────────────────────────────────────────────────────────────
+   STANDARDIZED 4-STAT METRIC ROW (Dashboard, Customers, Messages)
+   ───────────────────────────────────────────────────────────── */
+.admin-overview-stats-grid,
+.admin-stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
 .admin-stat-card {
   background-color: #FFFFFF;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  padding: 18px 20px;
+  padding: 16px 18px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
 }
 
 .admin-stat-label {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: #6B7280;
   font-family: var(--font-title);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .admin-stat-value {
-  font-size: 27px;
+  font-size: 26px;
   font-weight: 700;
   color: #111827;
   font-family: var(--font-body);
   line-height: 1.1;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .admin-stat-value.red {
   color: var(--crimson);
 }
 
+.admin-stat-value.amber {
+  color: var(--amber);
+}
+
+.admin-stat-value.blue {
+  color: var(--blue);
+}
+
+.admin-stat-value.green {
+  color: var(--emerald);
+}
+
 .admin-stat-trend {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   color: #16A34A;
 }
 
 .admin-stat-sub {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #6B7280;
 }
 
-/* 2-Column Lower Layout */
+/* ─────────────────────────────────────────────────────────────
+   FILTER & SEARCH CARD (Used on Products, Orders, Customers, Messages)
+   ───────────────────────────────────────────────────────────── */
+.admin-filter-bar {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-filter-search-wrap {
+  flex: 1 1 280px;
+  min-width: 220px;
+}
+
+.admin-filter-input {
+  width: 100%;
+  height: 34px;
+  background-color: transparent;
+  border: none;
+  padding: 0 8px;
+  font-size: 12.5px;
+  font-family: var(--font-body);
+  color: #111827;
+  outline: none;
+}
+
+.admin-filter-input::placeholder {
+  color: #9CA3AF;
+}
+
+.admin-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-filter-label {
+  font-size: 11.5px;
+  color: #6B7280;
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+
+.admin-pill-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #F3F4F6;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.admin-pill-btn {
+  background: none;
+  border: none;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: #4B5563;
+  cursor: pointer;
+  font-family: var(--font-title);
+  transition: all 0.15s ease;
+}
+
+.admin-pill-btn.active {
+  background-color: #111827;
+  color: #FFFFFF;
+}
+
+.admin-filter-select {
+  height: 32px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 0 28px 0 10px;
+  font-size: 11.5px;
+  font-family: var(--font-body);
+  color: #111827;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   DATA TABLES (White Crisp Luxury Matching Reference)
+   ───────────────────────────────────────────────────────────── */
+.admin-card-table {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.admin-table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.admin-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.admin-data-table th {
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #6B7280;
+  border-bottom: 1px solid var(--border-light);
+  background-color: #FFFFFF;
+  font-family: var(--font-title);
+}
+
+.admin-data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-divider);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.admin-data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Product Cell with Thumbnail */
+.admin-table-prod-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-table-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+  object-fit: cover;
+  background-color: #F9FAFB;
+  flex-shrink: 0;
+}
+
+.admin-table-prod-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-table-prod-name {
+  font-weight: 600;
+  color: #111827;
+  font-size: 13px;
+}
+
+.admin-table-prod-meta {
+  font-size: 10.5px;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Gold small badge */
+.badge-gold-pill {
+  background-color: #FFF8E7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+  font-size: 8.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+/* Stock numbers */
+.stock-val-green {
+  color: #15803D;
+  font-weight: 600;
+}
+
+.stock-val-red {
+  color: #DC2626;
+  font-weight: 700;
+}
+
+/* Status Pill Badges */
+.admin-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-family: var(--font-title);
+  white-space: nowrap;
+}
+
+.status-green {
+  background-color: #DCFCE7;
+  color: #15803D;
+}
+
+.status-yellow {
+  background-color: #FEF3C7;
+  color: #B45309;
+}
+
+.status-gray {
+  background-color: #F1F5F9;
+  color: #475569;
+}
+
+.status-blue {
+  background-color: #DBEAFE;
+  color: #1D4ED8;
+}
+
+/* Actions in Tables */
+.admin-action-btn-black {
+  background-color: #111827;
+  color: #FFFFFF;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.15s ease;
+}
+
+.admin-action-btn-black:hover {
+  background-color: #000000;
+}
+
+.admin-action-btn-white {
+  background-color: #FFFFFF;
+  color: #374151;
+  border: 1px solid var(--border-light);
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.15s ease;
+}
+
+.admin-action-btn-white:hover {
+  border-color: #111827;
+  color: #111827;
+}
+
+.admin-action-btn-red {
+  background: none;
+  border: 1px solid #FEE2E2;
+  color: #DC2626;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-action-btn-red:hover {
+  background-color: #DC2626;
+  color: #FFFFFF;
+}
+
+/* Client Avatar Disc */
+.admin-client-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #111827;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  flex-shrink: 0;
+}
+
+/* Empty State Card */
+.admin-empty-state-card {
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-empty-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.admin-empty-title {
+  font-family: var(--font-title);
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px;
+}
+
+.admin-empty-sub {
+  color: #6B7280;
+  font-size: 12.5px;
+  max-width: 420px;
+  margin: 0 0 16px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   OVERVIEW PAGE 2-COL SECTION
+   ───────────────────────────────────────────────────────────── */
 .admin-overview-two-col {
   display: grid;
   grid-template-columns: 42% 58%;
@@ -540,7 +924,6 @@ body.admin-body,
   align-items: stretch;
 }
 
-/* Left: Dark Trading Desk Card */
 .admin-dark-desk-card {
   background-color: #16191E;
   border: 1px solid #232730;
@@ -633,7 +1016,6 @@ body.admin-body,
   transform: translateY(-1px);
 }
 
-/* Right: White Recent Allocation Orders Card */
 .admin-recent-orders-card {
   background-color: #FFFFFF;
   border: 1px solid var(--border-light);
@@ -672,160 +1054,41 @@ body.admin-body,
   text-decoration: underline;
 }
 
-.admin-table-responsive {
-  overflow-x: auto;
-}
-
-.admin-allocation-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-  text-align: left;
-}
-
-.admin-allocation-table th {
-  padding: 8px 12px 10px 0;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #6B7280;
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border-light);
-  font-family: var(--font-title);
-}
-
-.admin-allocation-table td {
-  padding: 13px 12px 13px 0;
-  border-bottom: 1px solid var(--border-divider);
-  color: var(--text-main);
-  vertical-align: middle;
-}
-
-.col-order-id {
-  font-family: var(--font-title);
-  font-weight: 600;
-  color: #111827;
-}
-
-.col-client {
-  color: #374151;
-}
-
-.col-total {
-  font-weight: 700;
-  color: #111827;
-}
-
-/* Status Pill Badges */
-.admin-pill-badge {
-  display: inline-block;
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  font-family: var(--font-title);
-  white-space: nowrap;
-}
-
-.badge-pill-green {
-  background-color: #DCFCE7;
-  color: #15803D;
-}
-
-.badge-pill-yellow {
-  background-color: #FEF3C7;
-  color: #B45309;
-}
-
-.badge-pill-gray {
-  background-color: #F1F5F9;
-  color: #475569;
-}
-
 /* ─────────────────────────────────────────────────────────────
-   SHARED FORM & MANAGEMENT PAGE ELEMENTS (Products, Categories, etc.)
+   FORM & EDITING CARDS (New / Edit Product, Shop Settings, etc.)
    ───────────────────────────────────────────────────────────── */
-.admin-page-hero {
-  background-color: #FFFFFF;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  padding: 24px 28px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.admin-hero-eyebrow {
-  display: block;
-  font-family: var(--font-title);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #B45309;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.admin-hero-title {
-  font-family: var(--font-serif);
-  font-size: 32px;
-  font-weight: 400;
-  color: #111827;
-  margin: 0 0 4px;
-  letter-spacing: -0.3px;
-}
-
-.admin-hero-subtitle {
-  color: #6B7280;
-  font-size: 13px;
-  margin: 0;
-  max-width: 650px;
-}
-
-.admin-hero-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
 .admin-card {
   background-color: #FFFFFF;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  padding: 22px 24px;
-  margin-bottom: 20px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
 }
 
 .admin-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border-light);
 }
 
 .admin-card-title {
   font-family: var(--font-serif);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 500;
   color: #111827;
   margin: 0;
 }
 
-/* Standardized Form Inputs */
 .admin-label {
   display: block;
   font-family: var(--font-title);
   font-size: 12px;
   font-weight: 600;
   color: #374151;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .admin-field-required {
@@ -835,30 +1098,29 @@ body.admin-body,
 
 .admin-input {
   width: 100%;
-  height: 42px;
+  height: 40px;
   background-color: #FFFFFF;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
-  padding: 0 14px;
+  padding: 0 12px;
   font-size: 13px;
   font-family: var(--font-body);
   color: #111827;
   outline: none;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .admin-input:focus {
   border-color: #111827;
-  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
 }
 
 .admin-select {
   width: 100%;
-  height: 42px;
+  height: 40px;
   background-color: #FFFFFF;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
-  padding: 0 34px 0 14px;
+  padding: 0 32px 0 12px;
   font-size: 13px;
   font-family: var(--font-body);
   color: #111827;
@@ -867,34 +1129,29 @@ body.admin-body,
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  transition: all 0.15s ease;
+  background-position: right 10px center;
 }
 
 .admin-select:focus {
   border-color: #111827;
-  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
 }
 
 .admin-textarea {
   width: 100%;
-  min-height: 96px;
+  min-height: 90px;
   background-color: #FFFFFF;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  padding: 10px 12px;
   font-size: 13px;
   font-family: var(--font-body);
   color: #111827;
   outline: none;
   resize: vertical;
-  line-height: 1.5;
-  transition: all 0.15s ease;
 }
 
 .admin-textarea:focus {
   border-color: #111827;
-  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
 }
 
 .admin-checkbox-label {
@@ -904,153 +1161,20 @@ body.admin-body,
   font-size: 12.5px;
   color: #374151;
   cursor: pointer;
-  user-select: none;
 }
 
-/* Grids */
 .admin-form-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .admin-form-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 16px;
-}
-
-/* Buttons */
-.btn-caritas-gold {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #BFA37C;
-  color: #111827;
-  font-weight: 700;
-  font-size: 12.5px;
-  font-family: var(--font-title);
-  padding: 9px 20px;
-  border-radius: var(--radius-sm);
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.15s ease;
-}
-
-.btn-caritas-gold:hover {
-  background-color: #AA8F67;
-  transform: translateY(-1px);
-}
-
-.btn-caritas-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #FFFFFF;
-  color: #374151;
-  border: 1px solid var(--border-light);
-  font-weight: 600;
-  font-size: 12.5px;
-  font-family: var(--font-title);
-  padding: 9px 18px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.15s ease;
-}
-
-.btn-caritas-secondary:hover {
-  border-color: #111827;
-  color: #111827;
-}
-
-.btn-caritas-danger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #FEE2E2;
-  color: #DC2626;
-  border: 1px solid rgba(220, 38, 38, 0.2);
-  font-weight: 600;
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-caritas-danger:hover {
-  background-color: #DC2626;
-  color: #FFFFFF;
-}
-
-/* Tables */
-.admin-table-container {
-  overflow-x: auto;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-sm);
-  background-color: #FFFFFF;
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 12.5px;
-  white-space: nowrap;
-}
-
-.admin-table th {
-  padding: 10px 16px;
-  background-color: #F9FAFB;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: #6B7280;
-  border-bottom: 1px solid var(--border-light);
-  font-family: var(--font-title);
-}
-
-.admin-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-divider);
-  color: #111827;
-  vertical-align: middle;
-}
-
-.admin-table tr:hover td {
-  background-color: #F9FAFB;
-}
-
-/* Badges */
-.badge-caritas,
-.badge-status {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  font-family: var(--font-title);
-}
-
-.badge-published {
-  background-color: #DCFCE7;
-  color: #15803D;
-}
-
-.badge-draft {
-  background-color: #F1F5F9;
-  color: #475569;
-}
-
-.badge-gold {
-  background-color: #FEF3C7;
-  color: #B45309;
+  margin-bottom: 14px;
 }
 
 /* Image Upload Dropzones */
@@ -1103,7 +1227,6 @@ body.admin-body,
   padding: 2px 5px;
   border-radius: 3px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .admin-gallery-delete-btn {
@@ -1123,11 +1246,75 @@ body.admin-body,
   font-size: 11px;
 }
 
+/* Buttons */
+.btn-caritas-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #BFA37C;
+  color: #111827;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: var(--font-title);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.btn-caritas-gold:hover {
+  background-color: #AA8F67;
+}
+
+.btn-caritas-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFFFFF;
+  color: #374151;
+  border: 1px solid var(--border-light);
+  font-weight: 600;
+  font-size: 12px;
+  font-family: var(--font-title);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.btn-caritas-secondary:hover {
+  border-color: #111827;
+  color: #111827;
+}
+
+.btn-caritas-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  font-weight: 600;
+  font-size: 11.5px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.btn-caritas-danger:hover {
+  background-color: #DC2626;
+  color: #FFFFFF;
+}
+
 /* ─────────────────────────────────────────────────────────────
    RESPONSIVENESS
    ───────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .admin-overview-stats-grid {
+  .admin-overview-stats-grid,
+  .admin-stats-row {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1157,7 +1344,8 @@ body.admin-body,
     padding: 16px;
   }
 
-  .admin-overview-stats-grid {
+  .admin-overview-stats-grid,
+  .admin-stats-row {
     grid-template-columns: 1fr;
   }
 

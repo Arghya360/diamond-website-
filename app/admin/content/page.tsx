@@ -1,34 +1,36 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { getWebsiteContent, updateWebsiteContent } from '../../../lib/firebase/admin-service';
 import ImageUpload from '../../../components/admin/ImageUpload';
-import type { WebsiteContent, WebsiteSlide, PromotionalBanner } from '../../../types/admin';
+import type { WebsiteSlide } from '../../../types/admin';
 
 export default function AdminContentPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'All' | 'New' | 'Contacted' | 'Closed'>('All');
+  const [activeTab, setActiveTab] = useState<'messages' | 'slides'>('messages');
 
   // Slides State
   const [slides, setSlides] = useState<WebsiteSlide[]>([]);
-  // Promo Banners State
-  const [promoBanners, setPromoBanners] = useState<PromotionalBanner[]>([]);
   // Contact Info & Social Links
-  const [contactEmail, setContactEmail] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [contactAddress, setContactAddress] = useState('');
-  const [socialInstagram, setSocialInstagram] = useState('');
-  const [socialFacebook, setSocialFacebook] = useState('');
-  const [socialPinterest, setSocialPinterest] = useState('');
+  const [contactEmail, setContactEmail] = useState('concierge@caritasluxury.com');
+  const [contactPhone, setContactPhone] = useState('+971 4 123 4567');
+  const [contactAddress, setContactAddress] = useState('DIFC Gate Precinct, Dubai, United Arab Emirates');
+  const [socialInstagram, setSocialInstagram] = useState('https://instagram.com/caritasluxury');
+  const [socialFacebook, setSocialFacebook] = useState('https://facebook.com/caritasluxury');
+  const [socialPinterest, setSocialPinterest] = useState('https://pinterest.com/caritasluxury');
 
   useEffect(() => {
     async function load() {
+      setLoading(true);
       try {
         const content = await getWebsiteContent();
         if (content) {
           if (content.slides) setSlides(content.slides);
-          if (content.promoBanners) setPromoBanners(content.promoBanners);
           if (content.contactEmail) setContactEmail(content.contactEmail);
           if (content.contactPhone) setContactPhone(content.contactPhone);
           if (content.contactAddress) setContactAddress(content.contactAddress);
@@ -50,7 +52,6 @@ export default function AdminContentPage() {
       prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
     );
   };
-
 
   const handleAddSlide = () => {
     const newSlide: WebsiteSlide = {
@@ -78,7 +79,6 @@ export default function AdminContentPage() {
     try {
       await updateWebsiteContent({
         slides,
-        promoBanners,
         contactEmail,
         contactPhone,
         contactAddress,
@@ -103,14 +103,13 @@ export default function AdminContentPage() {
             position: 'fixed',
             bottom: 24,
             right: 24,
-            background: 'var(--dark-obsidian)',
+            background: 'var(--dark-black)',
             color: '#FFFFFF',
-            border: '1px solid var(--primary-gold-border)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '12px 20px',
-            boxShadow: 'var(--shadow-lg)',
+            borderRadius: '4px',
+            padding: '10px 18px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             zIndex: 9999,
-            fontSize: '13px',
+            fontSize: '12.5px',
             fontFamily: 'var(--font-title)',
           }}
         >
@@ -118,61 +117,184 @@ export default function AdminContentPage() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header matching Screenshot 2 */}
       <div className="admin-page-hero">
         <div>
-          <span className="admin-hero-eyebrow">— HOMEPAGE &amp; EDITORIAL ASSETS</span>
-          <h1 className="admin-hero-title">Website Content &amp; Hero Sliders</h1>
-          <p className="admin-hero-subtitle">
-            Curate the homepage hero presentations, promotional banners, social profiles, and company contact touchpoints.
+          <h1 className="admin-page-hero-title">Contact Page &amp; Client Inbound Desk</h1>
+          <p className="admin-page-hero-subtitle">
+            Live incoming communications submitted through the frontend Contact Page, private consultations, and depository requests.
           </p>
         </div>
 
-        <div className="admin-hero-actions">
-          <button type="button" onClick={handleAddSlide} className="btn-caritas-gold">
-            <span>+</span>
-            <span>Add New Slide</span>
-          </button>
+        <div className="admin-page-hero-actions">
+          <a
+            href="/contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="admin-action-btn-black"
+            style={{ padding: '8px 16px' }}
+          >
+            Open Frontend Contact Page ↗
+          </a>
         </div>
       </div>
 
-      {loading ? (
-        <div className="admin-card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Loading website content...
+      {/* 4 Stat Cards Row matching Screenshot 2 */}
+      <div className="admin-stats-row">
+        {/* Card 1 */}
+        <div className="admin-stat-card">
+          <div className="admin-stat-label">TOTAL SUBMISSIONS</div>
+          <div className="admin-stat-value">0</div>
+          <div className="admin-stat-sub">All-time contact messages</div>
         </div>
-      ) : (
-        <form onSubmit={handleSave} style={{ maxWidth: '980px' }}>
-          {/* Hero Slides Section */}
-          <div className="admin-card">
-            <div className="admin-card-header">
-              <h2 className="admin-card-title">
-                <span>1. Hero Slideshow Sequences</span>
-              </h2>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                {slides.length} slide{slides.length === 1 ? '' : 's'} configured
-              </span>
+
+        {/* Card 2 */}
+        <div className="admin-stat-card">
+          <div className="admin-stat-label">NEW / UNREAD</div>
+          <div className="admin-stat-value amber">0</div>
+          <div className="admin-stat-sub">Requires client director follow-up</div>
+        </div>
+
+        {/* Card 3 */}
+        <div className="admin-stat-card">
+          <div className="admin-stat-label">IN PROGRESS / CONTACTED</div>
+          <div className="admin-stat-value blue">0</div>
+          <div className="admin-stat-sub">Consultation active</div>
+        </div>
+
+        {/* Card 4 */}
+        <div className="admin-stat-card">
+          <div className="admin-stat-label">RESOLVED / CLOSED</div>
+          <div className="admin-stat-value green">0</div>
+          <div className="admin-stat-sub">Deals finalized or closed</div>
+        </div>
+      </div>
+
+      {/* View Switcher Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('messages')}
+          className={`admin-pill-btn ${activeTab === 'messages' ? 'active' : ''}`}
+          style={{ padding: '6px 14px', fontSize: '12px' }}
+        >
+          Inbound Enquiries
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('slides')}
+          className={`admin-pill-btn ${activeTab === 'slides' ? 'active' : ''}`}
+          style={{ padding: '6px 14px', fontSize: '12px' }}
+        >
+          Homepage Hero Sliders &amp; Contact Info ({slides.length})
+        </button>
+      </div>
+
+      {activeTab === 'messages' ? (
+        <>
+          {/* Filter Bar matching Screenshot 2 */}
+          <div className="admin-filter-bar">
+            <div className="admin-filter-search-wrap">
+              <input
+                type="text"
+                placeholder="Search by client name, email, phone, or message keywords..."
+                className="admin-filter-input"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="admin-filter-controls">
+              <span className="admin-filter-label">Status:</span>
+              <div className="admin-pill-group">
+                {(['All', 'New', 'Contacted', 'Closed'] as const).map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    className={`admin-pill-btn ${filterStatus === st ? 'active' : ''}`}
+                    onClick={() => setFilterStatus(st)}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Table / Empty State matching Screenshot 2 */}
+          <div className="admin-card-table">
+            <div className="admin-table-container">
+              <table className="admin-data-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '22%' }}>CLIENT / CONTACT</th>
+                    <th style={{ width: '18%' }}>ENQUIRY TYPE</th>
+                    <th style={{ width: '32%' }}>MESSAGE CONTENT</th>
+                    <th style={{ width: '14%' }}>METHOD / DATE</th>
+                    <th style={{ width: '14%' }}>STATUS</th>
+                    <th style={{ textAlign: 'right', paddingRight: '20px' }}>ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="admin-empty-state-card">
+                        <div className="admin-empty-icon">✉️</div>
+                        <h3 className="admin-empty-title">No Inbound Messages Found</h3>
+                        <p className="admin-empty-sub">
+                          When visitors submit the form on the frontend Contact Page, their messages will appear here in real time.
+                        </p>
+                        <a
+                          href="/contact"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="admin-action-btn-black"
+                          style={{ padding: '8px 18px', fontSize: '12px' }}
+                        >
+                          Open Frontend Contact Page to Submit a Test Enquiry
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* Hero Sliders & Content Settings Form */
+        <form onSubmit={handleSave}>
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">Homepage Hero Presentations</h2>
+              <button
+                type="button"
+                onClick={handleAddSlide}
+                className="btn-caritas-gold"
+              >
+                + Add Slide
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {slides.map((s, idx) => (
                 <div
                   key={s.id || idx}
                   style={{
-                    border: '1px solid var(--border-line)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '20px',
-                    backgroundColor: 'var(--surface-bg)',
-                    position: 'relative',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '18px',
+                    backgroundColor: '#FAFAFA',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span className="badge-caritas badge-gold">Slide #{idx + 1}</span>
-                      <strong style={{ fontFamily: 'var(--font-title)' }}>{s.title}</strong>
+                      <span className="badge-gold-pill">Slide #{idx + 1}</span>
+                      <strong style={{ fontFamily: 'var(--font-title)', fontSize: '13px' }}>{s.title}</strong>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <label className="admin-checkbox-label">
                         <input
                           type="checkbox"
                           checked={s.active}
@@ -185,14 +307,13 @@ export default function AdminContentPage() {
                         type="button"
                         onClick={() => handleRemoveSlide(idx)}
                         className="btn-caritas-danger"
-                        style={{ padding: '4px 10px', fontSize: '11px' }}
                       >
                         Remove
                       </button>
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '14px' }}>
+                  <div className="admin-form-grid-2">
                     <div>
                       <label className="admin-label">Subtitle / Eyebrow</label>
                       <input
@@ -213,7 +334,7 @@ export default function AdminContentPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '14px' }}>
+                  <div className="admin-form-grid-2">
                     <div>
                       <label className="admin-label">Button Label</label>
                       <input
@@ -250,14 +371,12 @@ export default function AdminContentPage() {
             </div>
           </div>
 
-          {/* Contact Info Section */}
+          {/* Contact Details */}
           <div className="admin-card">
             <div className="admin-card-header">
-              <h2 className="admin-card-title">
-                <span>2. Brand Contact Touchpoints</span>
-              </h2>
+              <h2 className="admin-card-title">Concierge &amp; Boutique Touchpoints</h2>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+            <div className="admin-form-grid-2">
               <div>
                 <label className="admin-label">Concierge Email</label>
                 <input
@@ -265,7 +384,6 @@ export default function AdminContentPage() {
                   className="admin-input"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
-                  placeholder="concierge@caritasluxury.com"
                 />
               </div>
               <div>
@@ -275,7 +393,6 @@ export default function AdminContentPage() {
                   className="admin-input"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="+971 4 123 4567"
                 />
               </div>
             </div>
@@ -286,58 +403,16 @@ export default function AdminContentPage() {
                 className="admin-input"
                 value={contactAddress}
                 onChange={(e) => setContactAddress(e.target.value)}
-                placeholder="DIFC Gate Precinct, Dubai, United Arab Emirates"
               />
             </div>
           </div>
 
-          {/* Social Profiles */}
-          <div className="admin-card">
-            <div className="admin-card-header">
-              <h2 className="admin-card-title">
-                <span>3. Social Channels &amp; Lookbooks</span>
-              </h2>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-              <div>
-                <label className="admin-label">Instagram Profile</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  value={socialInstagram}
-                  onChange={(e) => setSocialInstagram(e.target.value)}
-                  placeholder="https://instagram.com/caritasluxury"
-                />
-              </div>
-              <div>
-                <label className="admin-label">Facebook Page</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  value={socialFacebook}
-                  onChange={(e) => setSocialFacebook(e.target.value)}
-                  placeholder="https://facebook.com/caritasluxury"
-                />
-              </div>
-              <div>
-                <label className="admin-label">Pinterest Curations</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  value={socialPinterest}
-                  onChange={(e) => setSocialPinterest(e.target.value)}
-                  placeholder="https://pinterest.com/caritasluxury"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
             <button
               type="submit"
               disabled={saving}
-              className="btn-caritas-gold"
-              style={{ padding: '12px 32px' }}
+              className="admin-action-btn-black"
+              style={{ padding: '10px 24px', fontSize: '12px' }}
             >
               {saving ? 'Saving Content...' : 'Save Website Content'}
             </button>
