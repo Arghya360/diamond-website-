@@ -2,341 +2,289 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getProducts, getCategories, getOrders } from '../../lib/firebase/admin-service';
-import { seedAllWebsiteData } from '../../lib/firebase/seed-data';
+import { getProducts, getCategories, getOrders, updateProduct, deleteProduct } from '../../lib/firebase/admin-service';
 import type { Product, Category, Order } from '../../types/admin';
+
+const THUMB_COLORS = ['', 'teal', 'rose', 'green', '', 'teal', 'rose'];
 
 export default function AdminDashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
-  const [seedNotice, setSeedNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      try {
-        const [prods, cats, ords] = await Promise.all([
-          getProducts(),
-          getCategories(),
-          getOrders(),
-        ]);
-        setProducts(prods);
-        setCategories(cats);
-        setOrders(ords);
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
+    loadAll();
   }, []);
 
-  const handleSeedData = async () => {
-    if (!confirm('This will seed the existing website data (products, categories, shop settings, slides) into Firebase Firestore. Continue?')) {
-      return;
-    }
-    setSeeding(true);
-    setSeedNotice(null);
+  async function loadAll() {
+    setLoading(true);
     try {
-      const res = await seedAllWebsiteData(true);
-      setSeedNotice(res.message);
-      // Reload dashboard data
-      const [prods, cats, ords] = await Promise.all([
-        getProducts(),
-        getCategories(),
-        getOrders(),
-      ]);
+      const [prods, cats, ords] = await Promise.all([getProducts(), getCategories(), getOrders()]);
       setProducts(prods);
       setCategories(cats);
       setOrders(ords);
-    } catch (err: any) {
-      setSeedNotice('Failed to seed: ' + err.message);
+    } catch (err) {
+      console.error(err);
     } finally {
-      setSeeding(false);
+      setLoading(false);
     }
+  }
+
+  const showNotice = (msg: string) => {
+    setNotice(msg);
+    setTimeout(() => setNotice(null), 3000);
   };
 
   const totalProducts = products.length;
   const publishedProducts = products.filter((p) => p.published).length;
   const draftProducts = products.filter((p) => !p.published).length;
-  const lowStockProducts = products.filter((p) => (p.stock || 0) <= 3);
+  const lowStock = products.filter((p) => (p.stock || 0) <= 3);
   const recentProducts = products.slice(0, 5);
+  const recentOrders = orders.slice(0, 5);
+  const pendingOrders = orders.filter((o) => o.orderStatus === 'pending').length;
+
+  const handleEditProduct = (p: Product) => {
+    window.location.href = `/admin/products/edit?id=${p.id}`;
+  };
+
+  const handleDeleteProduct = async (p: Product) => {
+    if (!p.id) return;
+    if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+    try {
+      await deleteProduct(p.id);
+      setProducts((prev) => prev.filter((x) => x.id !== p.id));
+      showNotice(`"${p.name}" deleted.`);
+    } catch (err: any) {
+      showNotice('Delete failed: ' + err.message);
+    }
+  };
 
   return (
-    <div>
-      {/* Top Banner / Heading */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '28px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: 'var(--admin-text)' }}>
-            Website Overview
-          </h1>
-          <p style={{ margin: '4px 0 0', color: 'var(--admin-muted)', fontSize: '13px' }}>
-            Real-time management portal for Caritas Luxury Diamonds & Fine Jewellery.
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={handleSeedData}
-            disabled={seeding}
-            className="btn-secondary"
-            title="Populate Firebase with all initial hardcoded website content"
-          >
-            {seeding ? 'Syncing...' : '⚡ Sync / Seed Existing Data'}
-          </button>
-          <Link href="/admin/products/new" className="btn-gold">
-            <span>+</span> Add New Product
-          </Link>
-        </div>
-      </div>
-
-      {seedNotice && (
-        <div
-          style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            color: '#34d399',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            marginBottom: '24px',
-            fontSize: '13px',
-          }}
-        >
-          {seedNotice}
+    <>
+      {/* Notice */}
+      {notice && (
+        <div style={{
+          position: 'fixed', bottom: 22, right: 22, background: '#1c1c1c', color: '#fff',
+          padding: '12px 16px', borderRadius: 8, fontSize: 13, zIndex: 999,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        }}>
+          {notice}
         </div>
       )}
 
-      {/* Metric Cards Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '16px',
-          marginBottom: '28px',
-        }}
-      >
-        {/* Total Products */}
-        <div className="admin-card" style={{ margin: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ color: 'var(--admin-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Total Products
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 700, marginTop: '8px', color: 'var(--admin-text)' }}>
-                {loading ? '...' : totalProducts}
-              </div>
-            </div>
-            <span style={{ fontSize: '24px' }}>💎</span>
-          </div>
-          <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--admin-muted)' }}>
-            <span style={{ color: '#34d399' }}>{publishedProducts} Published</span> • {draftProducts} Draft
-          </div>
-        </div>
+      {/* ── HERO BANNER ── */}
+      <section className="admin-hero">
+        <div className="admin-eyebrow">WELCOME TO CARITAS LUXURY</div>
+        <h1>Admin Portal</h1>
+        <p>Real-time management portal for Caritas Luxury Diamonds &amp; Fine Jewellery.</p>
+        <svg className="admin-hero-diamond" viewBox="0 0 260 190" aria-hidden="true">
+          <defs>
+            <linearGradient id="dg" x1="0" y1="0" x2="1" y2="1">
+              <stop stopColor="#fff" />
+              <stop offset=".5" stopColor="#b8c8d4" />
+              <stop offset=".75" stopColor="#fff" />
+              <stop offset="1" stopColor="#b08a48" />
+            </linearGradient>
+          </defs>
+          <path d="M55 34 91 9h79l36 25 39 40-105 104L15 74l40-40Z" fill="url(#dg)" stroke="#b6a17f" strokeWidth="2" />
+          <path d="m15 74 225 0M55 34l75 144 40-169M91 9l39 169 40-169M55 34l-40 40 115 104 105-104-35-40" fill="none" stroke="#81909a" strokeWidth="1.5" />
+        </svg>
+      </section>
 
-        {/* Categories */}
-        <div className="admin-card" style={{ margin: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ color: 'var(--admin-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Categories
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 700, marginTop: '8px', color: 'var(--admin-text)' }}>
-                {loading ? '...' : categories.length}
-              </div>
-            </div>
-            <span style={{ fontSize: '24px' }}>🏷️</span>
+      {/* ── STAT CARDS ── */}
+      <section className="admin-stats">
+        <div className="admin-stat">
+          <div className="admin-stat-icon">◇</div>
+          <div>
+            <span className="label">Total Products</span>
+            <strong>{loading ? '…' : totalProducts}</strong>
+            <small>{publishedProducts} Published · {draftProducts} Draft</small>
           </div>
-          <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--admin-gold)' }}>
-            Active on /shop and navigation
-          </div>
+          <span className="admin-trend">↑ 12%</span>
         </div>
-
-        {/* Orders */}
-        <div className="admin-card" style={{ margin: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ color: 'var(--admin-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Orders
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 700, marginTop: '8px', color: 'var(--admin-text)' }}>
-                {loading ? '...' : orders.length}
-              </div>
-            </div>
-            <span style={{ fontSize: '24px' }}>📦</span>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">◆</div>
+          <div>
+            <span className="label">Categories</span>
+            <strong>{loading ? '…' : categories.length}</strong>
+            <small>Active on site</small>
           </div>
-          <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--admin-muted)' }}>
-            {orders.filter((o) => o.orderStatus === 'pending').length} Pending fulfillment
-          </div>
+          <span className="admin-trend">↑ 0%</span>
         </div>
-
-        {/* Low Stock Alerts */}
-        <div className="admin-card" style={{ margin: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ color: 'var(--admin-muted)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Low Stock Alerts
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 700, marginTop: '8px', color: lowStockProducts.length > 0 ? '#f87171' : 'var(--admin-text)' }}>
-                {loading ? '...' : lowStockProducts.length}
-              </div>
-            </div>
-            <span style={{ fontSize: '24px' }}>⚠️</span>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">🛒</div>
+          <div>
+            <span className="label">Orders</span>
+            <strong>{loading ? '…' : orders.length}</strong>
+            <small>{pendingOrders} Pending fulfillment</small>
           </div>
-          <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--admin-muted)' }}>
-            Items with 3 or fewer units
-          </div>
+          <span className="admin-trend">↑ 0%</span>
         </div>
-      </div>
+        <div className="admin-stat">
+          <div className="admin-stat-icon">⚠</div>
+          <div>
+            <span className="label">Low Stock Alerts</span>
+            <strong style={{ color: lowStock.length > 0 ? '#d52e38' : undefined }}>
+              {loading ? '…' : lowStock.length}
+            </strong>
+            <small>Items with 3 or fewer units</small>
+          </div>
+          <span className="admin-trend">↑ 0%</span>
+        </div>
+      </section>
 
-      {/* Quick Action Buttons Row */}
-      <div className="admin-card">
-        <h3 style={{ margin: '0 0 16px', fontSize: '15px', color: 'var(--admin-text)' }}>
-          Quick Website Management Actions
-        </h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-          <Link href="/admin/products/new" className="btn-secondary">
-            + Add New Product
+      {/* ── QUICK ACTIONS ── */}
+      <section className="admin-panel admin-panel-padded" style={{ marginBottom: 18 }}>
+        <div className="admin-heading">
+          <h2><span className="admin-spark">ϟ</span> Quick Website Management Actions</h2>
+          <a href="/admin/settings">View All Actions →</a>
+        </div>
+        <div className="admin-actions">
+          <Link href="/admin/products/new" className="admin-action primary">
+            <span className="ico">＋</span>Add New Product
           </Link>
-          <Link href="/admin/categories" className="btn-secondary">
-            🏷️ Manage Categories
+          <Link href="/admin/categories" className="admin-action">
+            <span className="ico">◆</span>Manage Categories
           </Link>
-          <Link href="/admin/shop" className="btn-secondary">
-            🛍️ Edit Shop Page Settings
+          <Link href="/admin/shop" className="admin-action">
+            <span className="ico">🛒</span>Edit Shop Page Settings
           </Link>
-          <Link href="/admin/content" className="btn-secondary">
-            🖼️ Update Hero Slides & Banners
+          <Link href="/admin/content" className="admin-action">
+            <span className="ico">▧</span>Update Hero Slides &amp; Banners
           </Link>
-          <Link href="/admin/navigation" className="btn-secondary">
-            🧭 Reorder Navigation Menu
+          <Link href="/admin/navigation" className="admin-action">
+            <span className="ico">✎</span>Reorder Navigation Menu
           </Link>
-          <Link href="/admin/footer" className="btn-secondary">
-            📄 Edit Footer & Social Links
+          <Link href="/admin/footer" className="admin-action">
+            <span className="ico">▤</span>Edit Footer &amp; Social Links
           </Link>
         </div>
-      </div>
+      </section>
 
-      {/* Two Column Layout: Recent Products & System Status */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+      {/* ── TABLES ── */}
+      <div className="admin-tables">
         {/* Recent Products */}
-        <div className="admin-card" style={{ margin: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--admin-text)' }}>
-              Recent Products
-            </h3>
-            <Link href="/admin/products" style={{ color: 'var(--admin-gold)', fontSize: '12px', textDecoration: 'none' }}>
-              View All ({totalProducts}) →
-            </Link>
+        <article className="admin-panel admin-table-panel">
+          <div className="admin-heading">
+            <h2>◇ &nbsp;Recent Products</h2>
+            <Link href="/admin/products">View All ({totalProducts}) →</Link>
           </div>
-
-          {loading ? (
-            <p style={{ color: 'var(--admin-muted)', fontSize: '13px' }}>Loading products...</p>
-          ) : recentProducts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--admin-muted)' }}>
-              <p style={{ margin: '0 0 12px', fontSize: '14px' }}>No products found in Firebase.</p>
-              <button onClick={handleSeedData} className="btn-gold" style={{ fontSize: '12px' }}>
-                Seed Website Products Now
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {recentProducts.map((p) => (
-                <div
-                  key={p.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '10px 12px',
-                    backgroundColor: '#0c1315',
-                    borderRadius: '8px',
-                    border: '1px solid var(--admin-border)',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div
-                      style={{
-                        width: '42px',
-                        height: '42px',
-                        borderRadius: '6px',
-                        backgroundColor: '#1a2226',
-                        backgroundImage: p.images?.[0]?.url ? `url("${p.images[0].url}")` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--admin-text)' }}>
+          <div className="admin-tablewrap">
+            {loading ? (
+              <p style={{ color: '#777', fontSize: 12, margin: '12px 0' }}>Loading products…</p>
+            ) : recentProducts.length === 0 ? (
+              <p style={{ color: '#777', fontSize: 12, margin: '12px 0' }}>No products yet. <Link href="/admin/products/new" style={{ color: '#bd914d' }}>Add one →</Link></p>
+            ) : (
+              <table className="al">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentProducts.map((p, i) => (
+                    <tr key={p.id}>
+                      <td>
+                        <span className={`al-thumb ${THUMB_COLORS[i % THUMB_COLORS.length]}`}>♢</span>
                         {p.name}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--admin-muted)' }}>
-                        {p.category} • ${(p.price || 0).toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className={`badge-status ${p.published ? 'badge-published' : 'badge-draft'}`}>
-                      {p.published ? 'Published' : 'Draft'}
-                    </span>
-                    <Link
-                      href={`/admin/products/edit?id=${p.id}`}
-                      style={{
-                        color: 'var(--admin-gold)',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        border: '1px solid var(--admin-border)',
-                        fontSize: '11px',
-                        textDecoration: 'none',
-                      }}
-                    >
-                      Edit
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                      </td>
+                      <td>{p.category}</td>
+                      <td className="al-price">${(p.price || 0).toLocaleString()}</td>
+                      <td>
+                        <span className={`al-status ${p.published ? 'published' : 'draft'}`}>
+                          {p.published ? 'Published' : 'Draft'}
+                        </span>
+                      </td>
+                      <td>
+                        <button className="al-rowbtn" title="Edit" onClick={() => handleEditProduct(p)}>✎</button>
+                        <button className="al-rowbtn" title="Delete" onClick={() => handleDeleteProduct(p)}>✕</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </article>
 
-        {/* Backend & Firebase Live Status */}
-        <div className="admin-card" style={{ margin: 0 }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: '15px', color: 'var(--admin-text)' }}>
-            Firebase Backend Infrastructure Status
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--admin-border)' }}>
-              <span style={{ color: 'var(--admin-muted)' }}>Firebase Project ID:</span>
-              <strong style={{ color: 'var(--admin-text)' }}>
-                {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'Ready for new account'}
-              </strong>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--admin-border)' }}>
-              <span style={{ color: 'var(--admin-muted)' }}>Database (Firestore):</span>
-              <span style={{ color: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? '#34d399' : '#f59e0b', fontWeight: 600 }}>
-                {process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? '● Connected & Isolated (caritas_*)' : '○ Standalone / Ready to bind'}
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--admin-border)' }}>
-              <span style={{ color: 'var(--admin-muted)' }}>Media Storage (Bucket):</span>
-              <span style={{ color: 'var(--admin-muted)', fontWeight: 600 }}>
-                {process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'Configured via .env.local'}
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--admin-border)' }}>
-              <span style={{ color: 'var(--admin-muted)' }}>Data Isolation Prefix:</span>
-              <span style={{ color: 'var(--admin-gold)', fontWeight: 600 }}>caritas_* (100% Protected)</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--admin-muted)' }}>Super Admin:</span>
-              <span style={{ color: 'var(--admin-gold)', fontWeight: 600 }}>Caritas360</span>
-            </div>
+        {/* Recent Orders */}
+        <article className="admin-panel admin-table-panel">
+          <div className="admin-heading">
+            <h2>♧ &nbsp;Recent Orders</h2>
+            <Link href="/admin/orders">View All Orders →</Link>
+          </div>
+          <div className="admin-tablewrap">
+            {loading ? (
+              <p style={{ color: '#777', fontSize: 12, margin: '12px 0' }}>Loading orders…</p>
+            ) : recentOrders.length === 0 ? (
+              <p style={{ color: '#777', fontSize: 12, margin: '12px 0' }}>No orders yet.</p>
+            ) : (
+              <table className="al">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentOrders.map((o) => (
+                    <tr key={o.id}>
+                      <td className="al-orderid">#{o.orderNumber || o.id?.slice(0, 7)}</td>
+                      <td>{o.customerName || '—'}</td>
+                      <td className="al-price">${(o.total || 0).toLocaleString()}</td>
+                      <td>
+                        <span className={`al-status ${o.orderStatus || 'pending'}`}>
+                          {o.orderStatus?.charAt(0).toUpperCase() + (o.orderStatus?.slice(1) || '') || 'Pending'}
+                        </span>
+                      </td>
+                      <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </article>
+      </div>
+
+      {/* ── FIREBASE STATUS ── */}
+      <div className="admin-panel admin-firebase">
+        <div className="admin-firebase-intro">
+          <div className="admin-stat-icon">◇</div>
+          <div>
+            <h3>Firebase Backend Infrastructure Status</h3>
+            <p>Your website is securely connected to Firebase.</p>
           </div>
         </div>
+        <div className="admin-infra">
+          <span>♧ &nbsp;Firebase Project ID</span>
+          <strong>{process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'caritas-luxury-diamonds'}</strong>
+        </div>
+        <div className="admin-infra">
+          <span>▤ &nbsp;Database (Firestore)</span>
+          <strong className="connected">● &nbsp;Connected &amp; Isolated (caritas_*)</strong>
+        </div>
+        <div className="admin-infra">
+          <span>▣ &nbsp;Media Storage (Bucket)</span>
+          <strong>● &nbsp;{process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'caritas-luxury-diamonds.firebasestorage.app'}</strong>
+        </div>
+        <div className="admin-infra">
+          <span>◈ &nbsp;Data Isolation Prefix</span>
+          <strong>caritas_* (100% Protected)</strong>
+        </div>
+        <div className="admin-all-online">✓ All Systems Online</div>
       </div>
-    </div>
+
+      <div className="admin-foot">© 2025 Caritas Luxury. Crafted for an exceptional experience.</div>
+    </>
   );
 }

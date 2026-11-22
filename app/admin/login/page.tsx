@@ -7,133 +7,68 @@ import '../admin.css';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { user, isAdmin, login, resetPassword, error: authError } = useAdminAuth();
-  const [username, setUsername] = useState('Caritas360');
+  const { isAdmin, login, error: authError } = useAdminAuth();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isAdmin) {
-      router.push('/admin');
-    }
+    if (isAdmin) router.push('/admin');
   }, [isAdmin, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
-    setSuccessMessage(null);
     setLoading(true);
-
     try {
-      const success = await login(username.trim(), password);
-      if (success) {
-        setSuccessMessage('Authenticated successfully! Redirecting...');
-        setTimeout(() => {
-          router.push('/admin');
-        }, 300);
+      const ok = await login(username.trim(), password);
+      if (ok) {
+        router.push('/admin');
       } else {
-        setLocalError('Invalid username or password. Please verify your credentials.');
+        setLocalError('Invalid username or password. Please try again.');
       }
     } catch (err: any) {
-      console.error('Login error:', err);
-      setLocalError(err.message || 'Error occurred during authentication.');
+      setLocalError(err.message || 'Authentication error.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!username) {
-      setLocalError('Please enter your username or email address first.');
-      return;
-    }
-    try {
-      await resetPassword(username);
-      setSuccessMessage('Password reset instructions sent.');
-    } catch (err: any) {
-      setLocalError('Failed to send reset email. ' + (err.message || ''));
-    }
-  };
-
   return (
-    <div
-      style={{
-        display: 'flex',
-        minHeight: '100vh',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        background: 'radial-gradient(circle at center, #141c1f 0%, #0c1315 100%)',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '420px',
-          backgroundColor: 'var(--admin-card)',
-          border: '1px solid var(--admin-border)',
-          borderRadius: '12px',
-          padding: '36px',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-        }}
-      >
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div
-            style={{
-              color: 'var(--admin-gold)',
-              fontWeight: 700,
-              fontSize: '20px',
-              letterSpacing: '1.5px',
-              marginBottom: '6px',
-            }}
-          >
+    <div className="admin-login-wrap">
+      <div className="admin-login-box">
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <svg width="44" height="34" viewBox="0 0 64 48" fill="none" stroke="#bd914d" strokeWidth="2" style={{ marginBottom: 8 }}>
+            <path d="M12 5h40l9 13-29 25L3 18 12 5Z" />
+            <path d="m3 18 58 0M12 5l9 13 11 25 11-25 9-13M21 18l11-13 11 13" />
+          </svg>
+          <div style={{ font: '600 20px Playfair Display, Georgia, serif', letterSpacing: '1px', color: '#191817' }}>
             CARITAS LUXURY
           </div>
-          <p style={{ margin: 0, color: 'var(--admin-muted)', fontSize: '13px' }}>
-            Administrative Control Panel
-          </p>
+          <p style={{ margin: '4px 0 0', color: '#777b82', fontSize: 12 }}>Administrative Control Panel</p>
         </div>
 
-        {/* Alerts */}
+        {/* Error */}
         {(localError || authError) && (
-          <div
-            style={{
-              backgroundColor: 'rgba(239, 68, 68, 0.12)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#f87171',
-              padding: '12px 14px',
-              borderRadius: '6px',
-              fontSize: '13px',
-              marginBottom: '20px',
-            }}
-          >
+          <div style={{
+            background: 'rgba(213,46,56,0.08)',
+            border: '1px solid rgba(213,46,56,0.25)',
+            color: '#c0323a',
+            padding: '10px 14px',
+            borderRadius: 8,
+            fontSize: 13,
+            marginBottom: 18,
+          }}>
             {localError || authError}
           </div>
         )}
 
-        {successMessage && (
-          <div
-            style={{
-              backgroundColor: 'rgba(16, 185, 129, 0.12)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              color: '#34d399',
-              padding: '12px 14px',
-              borderRadius: '6px',
-              fontSize: '13px',
-              marginBottom: '20px',
-            }}
-          >
-            {successMessage}
-          </div>
-        )}
-
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label className="admin-label">Username or Email</label>
+            <label className="admin-label">Username</label>
             <input
               type="text"
               required
@@ -142,36 +77,11 @@ export default function AdminLoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
+              autoFocus
             />
           </div>
-
           <div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '6px',
-              }}
-            >
-              <label className="admin-label" style={{ margin: 0 }}>
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--admin-gold)',
-                  fontSize: '11px',
-                  cursor: 'pointer',
-                  padding: 0,
-                }}
-              >
-                Forgot password?
-              </button>
-            </div>
+            <label className="admin-label">Password</label>
             <input
               type="password"
               required
@@ -182,30 +92,18 @@ export default function AdminLoginPage() {
               autoComplete="current-password"
             />
           </div>
-
           <button
             type="submit"
             disabled={loading}
             className="btn-gold"
-            style={{
-              width: '100%',
-              justifyContent: 'center',
-              padding: '11px',
-              marginTop: '8px',
-              opacity: loading ? 0.7 : 1,
-            }}
+            style={{ width: '100%', justifyContent: 'center', marginTop: 4, opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? 'Authenticating...' : 'Sign In to Dashboard'}
+            {loading ? 'Authenticating…' : 'Sign In to Dashboard'}
           </button>
         </form>
 
-        <div style={{ marginTop: '24px', textAlign: 'center' }}>
-          <a
-            href="/"
-            style={{ color: '#6b7280', fontSize: '12px', textDecoration: 'none' }}
-          >
-            ← Back to Public Website
-          </a>
+        <div style={{ marginTop: 20, textAlign: 'center' }}>
+          <a href="/" style={{ color: '#aaa', fontSize: 12, textDecoration: 'none' }}>← Back to Website</a>
         </div>
       </div>
     </div>
