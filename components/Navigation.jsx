@@ -81,7 +81,7 @@ function SubMenu({ items, parentId, currentPath }) {
 // ─────────────────────────────────────────────────────────────────
 // Desktop / full navigation (ul#mega-menu-primary)
 // ─────────────────────────────────────────────────────────────────
-function DesktopMenu({ currentPath }) {
+function DesktopMenu({ currentPath, menu = MENU }) {
   return (
     <ul
       id="mega-menu-primary"
@@ -98,7 +98,7 @@ function DesktopMenu({ currentPath }) {
       data-breakpoint="1024"
       data-unbind="true"
     >
-      {MENU.map((item) => {
+      {menu.map((item) => {
         const active = isActive(item, currentPath);
 
         let liClass = 'mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom';
@@ -191,7 +191,7 @@ function MobileSubList({ items, open, currentPath, onNavigate }) {
 // ─────────────────────────────────────────────────────────────────
 // Mobile off-canvas drawer (portaled to document.body)
 // ─────────────────────────────────────────────────────────────────
-function MobileMenu({ open, onClose, currentPath }) {
+function MobileMenu({ open, onClose, currentPath, menu = MENU }) {
   const [mounted, setMounted] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
 
@@ -282,7 +282,7 @@ function MobileMenu({ open, onClose, currentPath }) {
 
       {/* Menu items list */}
       <ul style={{ listStyle: 'none', padding: '16px 0', margin: 0, flex: '1 0 auto' }}>
-        {MENU.map((item) => {
+        {menu.map((item) => {
           const active = isActive(item, currentPath);
           const isOpen = openDropdown === item.id;
 
@@ -392,6 +392,19 @@ function MobileMenu({ open, onClose, currentPath }) {
 // ─────────────────────────────────────────────────────────────────
 export default function Navigation({ currentPath = '/' }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuItems, setMenuItems] = useState(MENU);
+
+  useEffect(() => {
+    import('../lib/firebase/admin-service')
+      .then(({ getNavigation }) => {
+        getNavigation().then((items) => {
+          if (items && items.length > 0) {
+            setMenuItems(items.filter((i) => i.active !== false));
+          }
+        }).catch(() => {});
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
@@ -641,10 +654,10 @@ export default function Navigation({ currentPath = '/' }) {
       </div>
 
       {/* Desktop horizontal menu */}
-      <DesktopMenu currentPath={currentPath} />
+      <DesktopMenu currentPath={currentPath} menu={menuItems} />
 
       {/* Mobile drawer portaled to body */}
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} currentPath={currentPath} />
+      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} currentPath={currentPath} menu={menuItems} />
     </div>
   );
 }

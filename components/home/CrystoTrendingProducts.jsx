@@ -1,8 +1,10 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getProducts } from '../../lib/firebase/admin-service';
 
-const TRENDING_PRODUCTS = [
+const DEFAULT_TRENDING = [
   {
     id: 1,
     img: '/wp-content/uploads/shop page/pro-21-300x300.png',
@@ -78,10 +80,37 @@ const TRENDING_PRODUCTS = [
 ];
 
 export default function CrystoTrendingProducts() {
+  const [trendingList, setTrendingList] = useState(DEFAULT_TRENDING);
   const gold = '#BFA37C';
 
+  useEffect(() => {
+    async function loadTrending() {
+      try {
+        const firestoreProducts = await getProducts({ publishedOnly: true });
+        if (firestoreProducts && firestoreProducts.length > 0) {
+          const trending = firestoreProducts.filter((p) => p.isTrending || p.isFeatured);
+          const sourceList = trending.length > 0 ? trending : firestoreProducts;
+          const formatted = sourceList.map((p) => ({
+            id: p.id,
+            img: p.images?.[0]?.url || '/wp-content/uploads/shop page/pro-21-300x300.png',
+            title: p.name,
+            price: `From $${(p.price || 0).toLocaleString()}`,
+            badge: p.badge || (p.isNewArrival ? 'NEW' : null),
+            rating: p.rating || 5.0,
+          }));
+          if (formatted.length > 0) {
+            setTrendingList(formatted);
+          }
+        }
+      } catch (err) {
+        console.error('Trending products fallback to default:', err);
+      }
+    }
+    loadTrending();
+  }, []);
+
   // Duplicate items for seamless continuous infinite marquee
-  const items = [...TRENDING_PRODUCTS, ...TRENDING_PRODUCTS];
+  const items = [...trendingList, ...trendingList];
 
   return (
     <section

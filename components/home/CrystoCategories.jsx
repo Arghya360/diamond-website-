@@ -1,8 +1,10 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getCategories } from '../../lib/firebase/admin-service';
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   {
     img: '/wp-content/uploads/shop page/banner-01.jpg',
     title: 'Diamond ring',
@@ -34,6 +36,31 @@ const CATEGORIES = [
 ];
 
 export default function CrystoCategories() {
+  const [categoriesList, setCategoriesList] = useState(DEFAULT_CATEGORIES);
+
+  useEffect(() => {
+    async function loadCats() {
+      try {
+        const firestoreCats = await getCategories();
+        if (firestoreCats && firestoreCats.length > 0) {
+          const published = firestoreCats.filter((c) => c.published !== false);
+          if (published.length > 0) {
+            const formatted = published.map((c) => ({
+              img: c.image || '/wp-content/uploads/shop page/banner-01.jpg',
+              title: c.name,
+              items: c.itemsCountText || '5 Items',
+              href: `/diamonds`,
+              textDark: !!c.textDark,
+            }));
+            setCategoriesList(formatted);
+          }
+        }
+      } catch (err) {
+        console.error('Categories fallback to default:', err);
+      }
+    }
+    loadCats();
+  }, []);
   return (
     <section
       style={{
@@ -98,7 +125,7 @@ export default function CrystoCategories() {
       `}</style>
 
       <div className="cat-grid">
-        {CATEGORIES.map((cat) => {
+        {categoriesList.map((cat) => {
           const fg = cat.textDark ? '#111111' : '#ffffff';
           // For light-bg cards: subtle top overlay; for dark-bg: stronger shade
           const overlay = cat.textDark

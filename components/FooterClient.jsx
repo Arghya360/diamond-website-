@@ -41,10 +41,24 @@ export function CrystoSubscribeForm() {
   const [email, setEmail] = useState('');
   const [agreed, setAgreed] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!email) return;
-    alert('Thank you for subscribing!');
+    try {
+      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
+      const { db } = await import('../lib/firebase/client');
+      await addDoc(collection(db, 'customers'), {
+        email: email.trim(),
+        name: email.split('@')[0],
+        type: 'subscriber',
+        totalOrders: 0,
+        totalSpent: 0,
+        createdAt: serverTimestamp(),
+      });
+    } catch (err) {
+      // safe fallback if offline
+    }
+    alert('Thank you for subscribing to Caritas Luxury!');
     setEmail('');
   }
 

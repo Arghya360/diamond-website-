@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getProducts } from '../../lib/firebase/admin-service';
 
 const TABS = ['All', 'Rings', 'Earrings', 'Diamonds', 'Necklaces', 'Bracelets'];
 
-const PRODUCTS = [
+const DEFAULT_PRODUCTS = [
   {
     id: 1,
     img: '/wp-content/uploads/shop page/pro-21-300x300.png',
@@ -80,9 +81,45 @@ function StarRating({ rating }) {
 
 export default function CrystoNewArrivals() {
   const [activeTab, setActiveTab] = useState('All');
+  const [productsList, setProductsList] = useState(DEFAULT_PRODUCTS);
   const gold = '#BFA37C';
 
-  const visible = activeTab === 'All' ? PRODUCTS : PRODUCTS.filter((p) => p.tab === activeTab);
+  useEffect(() => {
+    async function loadFromFirebase() {
+      try {
+        const firestoreProducts = await getProducts({ publishedOnly: true });
+        if (firestoreProducts && firestoreProducts.length > 0) {
+          // Format Firestore products to match component shape
+          const formatted = firestoreProducts
+            .filter((p) => p.isNewArrival !== false)
+            .map((p) => {
+              const orig = p.salePrice ? `$${p.salePrice.toLocaleString()}` : null;
+              const disc = p.salePrice && p.price < p.salePrice
+                ? `-${Math.round(((p.salePrice - p.price) / p.salePrice) * 100)}%`
+                : null;
+              return {
+                id: p.id,
+                img: p.images?.[0]?.url || '/wp-content/uploads/shop page/pro-21-300x300.png',
+                title: p.name,
+                price: `$${(p.price || 0).toLocaleString()}`,
+                originalPrice: orig,
+                discount: disc,
+                rating: p.rating || 5.0,
+                tab: p.category || 'Rings',
+              };
+            });
+          if (formatted.length > 0) {
+            setProductsList(formatted);
+          }
+        }
+      } catch (err) {
+        console.error('Using default products fallback:', err);
+      }
+    }
+    loadFromFirebase();
+  }, []);
+
+  const visible = activeTab === 'All' ? productsList : productsList.filter((p) => p.tab === activeTab);
 
   return (
     <section style={{ background: '#f5f1ec', padding: '70px 0 80px', boxSizing: 'border-box' }}>
