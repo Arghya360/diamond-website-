@@ -31,6 +31,10 @@ export default function RootLayout({ children }) {
       <head>
         {/* Polyfill URL.canParse for older browsers / Next.js 16 Turbopack HMR */}
         <script dangerouslySetInnerHTML={{ __html: `if(typeof URL.canParse!=='function'){URL.canParse=function(u,b){try{new URL(u,b);return true;}catch(e){return false;}}}` }} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
         <LegacyStyles resources={site.stylesheets} />
       </head>
       <body className={site.bodyClass} suppressHydrationWarning>{children}</body>

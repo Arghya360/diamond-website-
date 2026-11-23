@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AdminAuthProvider, useAdminAuth } from '../../lib/firebase/auth-context';
 import './admin.css';
 
@@ -26,26 +26,57 @@ const NAV_ITEMS: NavItem[] = [
   // STORE MANAGEMENT
   { label: 'Shop Page CMS', href: '/admin/shop', icon: 'storefront', section: 'STORE MANAGEMENT' },
   { label: 'Homepage Content', href: '/admin/content', icon: 'web', section: 'STORE MANAGEMENT' },
+  { label: 'Promotional Banners', href: '/admin/content?tab=slides', icon: 'ad_units', section: 'STORE MANAGEMENT' },
   { label: 'Navigation Menu', href: '/admin/navigation', icon: 'menu_open', section: 'STORE MANAGEMENT' },
   { label: 'Footer Settings', href: '/admin/footer', icon: 'view_day', section: 'STORE MANAGEMENT' },
 
   // BUSINESS
-  { label: 'Orders & Commissions', href: '/admin/orders', icon: 'shopping_bag', section: 'BUSINESS' },
-  { label: 'VIP Private Clients', href: '/admin/customers', icon: 'contacts', section: 'BUSINESS' },
-  { label: 'Salon Appointments', href: '/admin/appointments', icon: 'calendar_month', section: 'BUSINESS' },
+  { label: 'Orders', href: '/admin/orders', icon: 'shopping_bag', section: 'BUSINESS' },
+  { label: 'Customers', href: '/admin/customers', icon: 'contacts', section: 'BUSINESS' },
+  { label: 'Analytics', href: '/admin/orders?tab=analytics', icon: 'analytics', section: 'BUSINESS' },
 
   // SYSTEM
-  { label: 'Administrators', href: '/admin/settings', icon: 'shield_person', section: 'SYSTEM' },
-  { label: 'Website Settings', href: '/admin/settings', icon: 'tune', section: 'SYSTEM' },
+  { label: 'Administrators', href: '/admin/settings?tab=admins', icon: 'shield_person', section: 'SYSTEM' },
+  { label: 'Website Settings', href: '/admin/settings?tab=general', icon: 'tune', section: 'SYSTEM' },
+  { label: 'Firebase Connection', href: '/admin/settings?tab=db', icon: 'cloud_sync', section: 'SYSTEM' },
 ];
 
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { adminProfile, isAdmin, loading, logout } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [navSearch, setNavSearch] = useState('');
   const [omniSearch, setOmniSearch] = useState('');
+
+  const currentTab = searchParams?.get('tab');
+
+  const isItemActive = (item: NavItem) => {
+    const itemPath = item.href.split('?')[0];
+    const itemQuery = item.href.includes('?') ? item.href.split('?')[1] : null;
+
+    if (itemPath === '/admin') {
+      return pathname === '/admin';
+    }
+
+    const pathMatches = pathname === itemPath || (pathname.startsWith(itemPath + '/') && !itemPath.includes('?'));
+    if (!pathMatches) return false;
+
+    if (itemQuery) {
+      const targetTab = new URLSearchParams(itemQuery).get('tab');
+      return currentTab === targetTab;
+    }
+
+    if (currentTab) {
+      const siblingHasTab = NAV_ITEMS.some(
+        (i) => i.href.startsWith(itemPath + '?tab=' + currentTab)
+      );
+      if (siblingHasTab) return false;
+    }
+
+    return true;
+  };
 
   // Clean layout for login screen
   if (pathname === '/admin/login') {
@@ -223,9 +254,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
                     <nav style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4 }}>
                       {secItems.map((item) => {
-                        const isActive = item.href === '/admin'
-                          ? pathname === '/admin'
-                          : pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+                        const isActive = isItemActive(item);
 
                         return (
                           <Link
@@ -563,6 +592,9 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminAuthProvider>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
       <script src="https://cdn.tailwindcss.com"></script>
       <script
         id="tailwind-config"
@@ -570,7 +602,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           __html: `tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-surface":"#131b2e","surface-container-highest":"#dae2fd","surface":"#faf8ff","surface-variant":"#dae2fd","on-primary":"#ffffff","tertiary-fixed":"#ffddb4","on-tertiary":"#ffffff","surface-tint":"#376757","on-background":"#131b2e","surface-container-lowest":"#ffffff","inverse-surface":"#283044","secondary-fixed-dim":"#e0c298","inverse-on-surface":"#eef0ff","on-surface-variant":"#404945","tertiary-container":"#5b3f15","on-tertiary-fixed-variant":"#5e4117","surface-container-low":"#f2f3ff","on-error":"#ffffff","on-primary-fixed":"#002117","primary":"#003629","outline-variant":"#c0c9c3","surface-dim":"#d2d9f4","surface-container-high":"#e2e7ff","on-secondary":"#ffffff","on-secondary-container":"#78603e","on-tertiary-fixed":"#291800","tertiary":"#422902","surface-bright":"#faf8ff","on-error-container":"#93000a","on-tertiary-container":"#d3ab78","tertiary-fixed-dim":"#e9c08a","error-container":"#ffdad6","inverse-primary":"#9ed1bd","on-secondary-fixed":"#281800","primary-fixed-dim":"#9ed1bd","surface-container":"#eaedff","on-primary-fixed-variant":"#1d4f40","secondary":"#725b38","error":"#ba1a1a","on-secondary-fixed-variant":"#584323","secondary-container":"#fedeb2","on-primary-container":"#8abda9","primary-fixed":"#baeed9","outline":"#707974","background":"#faf8ff","secondary-fixed":"#fedeb2","primary-container":"#1b4d3e"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{gutter:"1.5rem","space-xl":"2.5rem","space-sm":"0.5rem","space-xs":"0.25rem","space-md":"1rem","space-lg":"1.5rem",margin:"2rem"},fontFamily:{"headline-lg-mobile":["EB Garamond"],"title-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"display-mobile":["EB Garamond"],"title-md":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"headline-md":["EB Garamond"],display":["EB Garamond"],"headline-sm":["Plus Jakarta Sans"],"headline-lg":["EB Garamond"],"body-md":["Plus Jakarta Sans"]}}}}`,
         }}
       />
-      <AdminLayoutInner>{children}</AdminLayoutInner>
+      <Suspense fallback={
+        <div className="admin-body" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAF8FF' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: 44, height: 44, border: '3px solid #E2E7FF', borderTopColor: '#003629', borderRadius: '50%', animation: 'caritasSpin 0.9s linear infinite', margin: '0 auto 16px' }} />
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: 18, letterSpacing: '2px', color: '#003629', fontWeight: 600 }}>CARITAS LUXURY</div>
+          </div>
+        </div>
+      }>
+        <AdminLayoutInner>{children}</AdminLayoutInner>
+      </Suspense>
     </AdminAuthProvider>
   );
 }

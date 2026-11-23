@@ -1,16 +1,25 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAdminAuth } from '../../../lib/firebase/auth-context';
 import { getAdminUsers, addAdminUser } from '../../../lib/firebase/admin-service';
 import { seedAllWebsiteData } from '../../../lib/firebase/seed-data';
 import type { AdminUser } from '../../../types/admin';
 
-export default function AdminSettingsPage() {
+function SettingsContent() {
   const { user, adminProfile } = useAdminAuth();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams?.get('tab');
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'general' | 'currencies' | 'security' | 'seo' | 'notifications' | 'api'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'currencies' | 'security' | 'seo' | 'notifications' | 'api' | 'admins' | 'db'>('general');
+
+  useEffect(() => {
+    if (tabParam === 'admins' || tabParam === 'db' || tabParam === 'general' || tabParam === 'currencies' || tabParam === 'security' || tabParam === 'seo' || tabParam === 'notifications' || tabParam === 'api') {
+      setActiveTab(tabParam as any);
+    }
+  }, [tabParam]);
 
   // Brand Settings State
   const [atelierName, setAtelierName] = useState('Caritas Haute Joaillerie Genève');
@@ -210,7 +219,29 @@ export default function AdminSettingsPage() {
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">lock_reset</span>
-            <span>API &amp; Atelier Vault Integrations</span>
+            <span>API &amp; Integrations</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('admins')}
+            className={`px-4 py-2.5 rounded-lg font-title-md text-title-md flex items-center gap-2 transition-all ${
+              activeTab === 'admins'
+                ? 'bg-primary text-on-primary font-semibold shadow-xs'
+                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[18px]">shield_person</span>
+            <span>Administrators &amp; Access</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('db')}
+            className={`px-4 py-2.5 rounded-lg font-title-md text-title-md flex items-center gap-2 transition-all ${
+              activeTab === 'db'
+                ? 'bg-primary text-on-primary font-semibold shadow-xs'
+                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[18px]">cloud_sync</span>
+            <span>Firebase &amp; Baseline Sync</span>
           </button>
         </div>
       </div>
@@ -581,5 +612,17 @@ export default function AdminSettingsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminSettingsPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ padding: 40, textAlign: 'center', color: '#707974', fontFamily: 'var(--font-title)' }}>
+        Loading website configuration &amp; security settings...
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
   );
 }

@@ -270,7 +270,7 @@ export default function AdminDiamondsPage() {
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 600, color: C.onSurface, display: 'flex', alignItems: 'center', gap: 4 }}>
                             {stone.name}
-                            <span className="material-symbols-outlined" style={{ fontSize: 14, color: stone.origin === 'Natural' ? C.secondary : C.outline }}>{stone.origin === 'Natural' ? 'verified' : 'psychology'}</span>
+                            <span className="material-symbols-outlined" style={{ fontSize: 14, color: stone.origin === 'Natural' ? C.secondary : C.outline }}>{stone.origin === 'Natural' ? 'verified' : 'science'}</span>
                           </div>
                           <div style={{ fontSize: 11, color: C.outline }}>{stone.lab} · {stone.id}</div>
                         </div>

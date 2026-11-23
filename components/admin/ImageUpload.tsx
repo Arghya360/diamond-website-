@@ -185,7 +185,7 @@ export default function ImageUpload({
             gap: '6px',
           }}
         >
-          <span>⚠️</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>warning</span>
           <span>{error}</span>
         </div>
       )}
@@ -212,18 +212,20 @@ export default function ImageUpload({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
                 className="btn-caritas-secondary"
-                style={{ padding: '6px 12px', fontSize: '11.5px', height: '32px' }}
+                style={{ padding: '6px 12px', fontSize: '11.5px', height: '32px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span>🔄</span> Replace from Computer
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>refresh</span>
+                <span>Replace from Computer</span>
               </button>
               <button
                 type="button"
                 onClick={handleRemove}
                 disabled={uploading}
                 className="btn-caritas-danger"
-                style={{ padding: '6px 12px', fontSize: '11.5px', height: '32px' }}
+                style={{ padding: '6px 12px', fontSize: '11.5px', height: '32px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                <span>✕</span> Remove
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+                <span>Remove</span>
               </button>
             </div>
           </div>
@@ -262,7 +264,9 @@ export default function ImageUpload({
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '24px 16px' }}>
-              <div className="admin-dropzone-icon">📷</div>
+              <div className="admin-dropzone-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 36, color: 'var(--primary)' }}>cloud_upload</span>
+              </div>
               <div style={{ fontFamily: 'var(--font-title)', fontWeight: 600, fontSize: '13.5px', color: 'var(--dark-obsidian)', marginBottom: '4px' }}>
                 <span style={{ color: 'var(--primary-gold)', textDecoration: 'underline' }}>Click to browse</span> or drag &amp; drop an image here
               </div>

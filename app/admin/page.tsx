@@ -441,7 +441,7 @@ export default function AdminDashboardPage() {
           <div style={{ marginTop: 10 }}>
             <div style={{ fontSize: 20, fontWeight: 700, color: '#131B2E', fontFamily: 'var(--font-title)' }}>99.8% GIA/IGI</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
-              <span style={{ fontSize: 11, color: '#707974' }}>Dual-Lab Sealed Custody</span>
+              <span style={{ fontSize: 11, color: '#707974' }}>Dual-Lab Verified Custody</span>
               <span style={{ fontSize: 10, fontWeight: 700, color: '#78603E', backgroundColor: '#FEDEB2', padding: '1px 6px', borderRadius: 999 }}>5.0 Star</span>
             </div>
           </div>
@@ -659,7 +659,7 @@ export default function AdminDashboardPage() {
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#003629' }}>312,420</div>
               <span style={{ fontSize: 9.5, color: '#707974', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#003629' }} /> Vault Inquiries
+                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#003629' }} /> Vault Checkouts
               </span>
             </div>
           </div>
