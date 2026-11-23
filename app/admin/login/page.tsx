@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     if (isAdmin) {
-      router.push('/admin');
+      router.push('/admin/');
     }
   }, [isAdmin, router]);
 
@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
     try {
       const ok = await login(identifier.trim(), password);
       if (ok) {
-        router.push('/admin');
+        router.push('/admin/');
       } else {
         setLocalError('Invalid administrative credentials. Please verify your username and password.');
       }
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
     setLoading(true);
     setTimeout(async () => {
       const ok = await login('curator.geneve@caritasluxury.com', 'Caritas1234!@#');
-      if (ok) router.push('/admin');
+      if (ok) router.push('/admin/');
       setLoading(false);
       setTimeout(() => setPasskeyNotice(false), 2000);
     }, 1200);

@@ -53,14 +53,15 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const currentTab = searchParams?.get('tab');
 
   const isItemActive = (item: NavItem) => {
-    const itemPath = item.href.split('?')[0];
+    const normPath = (pathname || '').replace(/\/index\.html$/, '').replace(/\/$/, '') || '/';
+    const itemPath = item.href.split('?')[0].replace(/\/$/, '');
     const itemQuery = item.href.includes('?') ? item.href.split('?')[1] : null;
 
     if (itemPath === '/admin') {
-      return pathname === '/admin';
+      return normPath === '/admin';
     }
 
-    const pathMatches = pathname === itemPath || (pathname.startsWith(itemPath + '/') && !itemPath.includes('?'));
+    const pathMatches = normPath === itemPath || (normPath.startsWith(itemPath + '/') && !itemPath.includes('?'));
     if (!pathMatches) return false;
 
     if (itemQuery) {
@@ -78,8 +79,11 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     return true;
   };
 
-  // Clean layout for login screen
-  if (pathname === '/admin/login') {
+  // Clean layout for login screen (robust against trailing slashes e.g. /admin/login/ on cPanel)
+  const normalizedPath = (pathname || '').replace(/\/index\.html$/, '').replace(/\/$/, '') || '/';
+  const isLoginRoute = normalizedPath === '/admin/login' || (pathname || '').startsWith('/admin/login');
+
+  if (isLoginRoute) {
     return <div className="admin-body">{children}</div>;
   }
 
@@ -109,7 +113,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   // Auth Guard
   if (!isAdmin) {
-    if (typeof window !== 'undefined') router.push('/admin/login');
+    if (typeof window !== 'undefined') router.push('/admin/login/');
     return (
       <div className="admin-body" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAF8FF' }}>
         <p style={{ color: '#707974', fontFamily: 'var(--font-title)' }}>Redirecting to administrator authentication...</p>
@@ -119,7 +123,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/admin/login');
+    router.push('/admin/login/');
   };
 
   const displayName = adminProfile?.displayName || 'Caritas360 Super Admin';
