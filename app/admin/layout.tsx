@@ -4,6 +4,7 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AdminAuthProvider, useAdminAuth } from '../../lib/firebase/auth-context';
+import AdminLoginForm from '../../components/admin/AdminLoginForm';
 import './admin.css';
 
 interface NavItem {
@@ -111,12 +112,11 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Auth Guard
+  // Auth Guard: Direct in-place login form rendering (never gets stuck in redirect loops)
   if (!isAdmin) {
-    if (typeof window !== 'undefined') router.push('/admin/login/');
     return (
-      <div className="admin-body" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAF8FF' }}>
-        <p style={{ color: '#707974', fontFamily: 'var(--font-title)' }}>Redirecting to administrator authentication...</p>
+      <div className="admin-body">
+        <AdminLoginForm />
       </div>
     );
   }
