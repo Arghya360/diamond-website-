@@ -1,6 +1,6 @@
 /* ==========================================================================
    CARITAS LUXURY — Master Administration Portal Stylesheet
-   Executive Bullion & Diamond Trading Portal Design System:
+   Haute Joaillerie & Diamond Trading Portal Design System:
    • Crisp White Sidebar with Dark Obsidian Active Nav
    • Clean Top Navigation with Real-Time Indicator & Dark Admin Pill
    • Editorial Serif Typography ("Playfair Display") for Headers
@@ -50,6 +50,93 @@
 
 * {
   box-sizing: border-box;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 20px 0 40px;
+}
+
+.admin-checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 16px;
+  font-size: 12.5px;
+}
+
+.admin-checkbox-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-toast,
+.admin-error-alert {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+  max-width: 420px;
+  padding: 12px 18px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  box-shadow: 0 8px 24px rgba(17,24,39,.14);
+}
+
+.admin-toast {
+  background: var(--dark-obsidian);
+  color: #fff;
+  border: 1px solid var(--primary-gold-border, #BFA37C);
+}
+
+.admin-error-alert {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  background: #FEF2F2;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+  margin: 0 0 16px;
+  box-shadow: none;
+}
+
+.admin-status-toggle,
+.admin-table-action {
+  border: 1px solid var(--border-light);
+  background: #fff;
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  margin-left: 6px;
+}
+
+.admin-status-toggle.published {
+  background: var(--emerald-bg);
+  color: var(--emerald);
+  border-color: #BBF7D0;
+}
+
+.admin-table-action.danger {
+  color: var(--crimson);
+}
+
+@media (max-width: 760px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 body.admin-body,

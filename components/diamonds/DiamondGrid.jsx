@@ -1,5 +1,6 @@
 'use client';
 import { useState, useMemo, useEffect } from 'react';
+import { getDiamonds } from '../../lib/firebase/admin-service';
 
 // ── Complete Diamonds Catalog ─────────────────────────────────────
 const DIAMONDS_CATALOG = [
@@ -341,6 +342,38 @@ const COLOR_STEPS = ['M', 'L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D'];
 const CLARITY_STEPS = ['SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'];
 
 export default function DiamondGrid({ prefilterColour }) {
+  const [diamondCatalog, setDiamondCatalog] = useState(DIAMONDS_CATALOG);
+
+  useEffect(() => {
+    async function loadManagedDiamonds() {
+      try {
+        const managed = await getDiamonds({ publishedOnly: true });
+        if (managed.length > 0) {
+          const formatted = managed.map((diamond, index) => ({
+            id: diamond.id || `managed-${index}`,
+            shape: diamond.shape,
+            carat: diamond.carat,
+            cut: diamond.cut,
+            color: diamond.category === 'pink' ? 'Pink' : diamond.color,
+            clarity: diamond.clarity,
+            price: diamond.price,
+            origin: diamond.origin,
+            colour: diamond.category,
+            quickShip: diamond.quickShip,
+            bestValue: diamond.bestValue,
+            goingFast: false,
+            popularRank: diamond.popularRank || (index + 100),
+            img: diamond.image || '/wp-content/uploads/diamond/download.jpg',
+          }));
+          setDiamondCatalog([...formatted, ...DIAMONDS_CATALOG]);
+        }
+      } catch (error) {
+        console.error('Using the preserved diamond catalogue fallback:', error);
+      }
+    }
+    loadManagedDiamonds();
+  }, []);
+
   // ── Filter State ──
   const [origin, setOrigin] = useState('Natural'); // Default active 'Natural Diamonds' like in the screenshot
   const [selectedShape, setSelectedShape] = useState('All');
@@ -408,7 +441,7 @@ export default function DiamondGrid({ prefilterColour }) {
 
   // ── Filter & Sort Logic ──
   const filtered = useMemo(() => {
-    let list = DIAMONDS_CATALOG.filter((d) => {
+    let list = diamondCatalog.filter((d) => {
       // prefilterColour check
       if (prefilterColour && d.colour !== prefilterColour) return false;
 
@@ -466,6 +499,7 @@ export default function DiamondGrid({ prefilterColour }) {
 
     return list;
   }, [
+    diamondCatalog,
     prefilterColour,
     origin,
     selectedShape,
@@ -1358,7 +1392,7 @@ export default function DiamondGrid({ prefilterColour }) {
                   transition: 'all 0.2s',
                 }}
               >
-                All Diamonds ({filtered.length > 0 ? (131433 - (DIAMONDS_CATALOG.length - filtered.length) * 1100).toLocaleString() : 0})
+                All Diamonds ({filtered.length > 0 ? (131433 - (diamondCatalog.length - filtered.length) * 1100).toLocaleString() : 0})
               </button>
               <button
                 type="button"

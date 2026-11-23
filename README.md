@@ -6,14 +6,15 @@
 
 ## 📑 Table of Contents
 1. [Website Architecture & Technology Stack](#-website-architecture--technology-stack)
-2. [Complete Website URL Directory & Sitemap](#-complete-website-url-directory--sitemap)
+2. [Frontend Structure & Admin Panel Design Guide](#frontend-structure--admin-panel-design-guide)
+3. [Complete Website URL Directory & Sitemap](#-complete-website-url-directory--sitemap)
    - [Public Storefront Routes](#1-public-storefront-routes)
    - [Admin Control Panel Routes](#2-admin-control-panel-routes-admin)
-3. [Admin Portal Access & Credentials](#-admin-portal-access--credentials)
-4. [Multi-Website Database Isolation Protection](#-multi-website-database-isolation-protection)
-5. [Connecting Your Firebase Account](#-connecting-your-firebase-account)
-6. [Local Development & Testing](#-local-development--testing)
-7. [Production Build & Hosting Deployment](#-production-build--hosting-deployment)
+4. [Admin Portal Access & Credentials](#-admin-portal-access--credentials)
+5. [Multi-Website Database Isolation Protection](#-multi-website-database-isolation-protection)
+6. [Connecting Your Firebase Account](#-connecting-your-firebase-account)
+7. [Local Development & Testing](#-local-development--testing)
+8. [Production Build & Hosting Deployment](#-production-build--hosting-deployment)
    - [cPanel / Apache Shared Hosting](#a-cpanel--apache-shared-hosting)
    - [Firebase Hosting](#b-firebase-hosting)
    - [Vercel / Node.js Server](#c-vercel--nodejs-server)
@@ -30,6 +31,338 @@
   - **File & Media Storage**: Firebase Cloud Storage
   - **Authentication**: Firebase Auth with Role-Based Access Control (RBAC)
 - **Deployment Targets**: Static Export HTML5 (`out/`) or Node.js Serverless SSR
+
+---
+
+## Frontend Structure & Admin Panel Design Guide
+
+This section describes the public website from an administrator's perspective. Use it as the specification for building or expanding the admin panel.
+
+### 1. Global Layout Used by Every Page
+
+The storefront is not a collection of independent pages. Every public page shares the same website shell:
+
+| Global area | Frontend component | What an admin should control |
+| :--- | :--- | :--- |
+| Top header | `components/Header.jsx` | Store logo, utility links, primary navigation, active menu state, CTA button |
+| Primary navigation | `components/Navigation.jsx` | Menu labels, URLs, order, visibility, dropdown labels and dropdown URLs |
+| Page breadcrumb/banner | `components/SitePage.jsx` | Page title, banner image, breadcrumb label and route |
+| Main content | Individual route and section components | Page headings, text, images, cards, links, section visibility and display order |
+| Footer | `components/Footer.jsx` | Newsletter copy, social links, link groups, contact details and copyright text |
+| Loading/preloader | `components/SitePage.jsx` and homepage source renderer | Logo and preloader image |
+| Mobile navigation | `components/Navigation.jsx` | Menu visibility and responsive dropdown behavior |
+
+The global shell comes from the saved original homepage HTML, while React components replace selected areas. Do not redesign or replace the shell when creating an admin page.
+
+### 2. Public Route Map
+
+| Route | Page purpose | Main frontend components | Administrator module |
+| :--- | :--- | :--- | :--- |
+| `/` | Main brand homepage | `components/sections/HomeSections.jsx` | Website Content and Homepage Sections |
+| `/shop` | Fine-jewellery shopping page | `components/home/CrystoHomePage.jsx` and its child components | Shop Management |
+| `/diamonds` | Complete diamond catalogue | `components/diamonds/DiamondGrid.jsx` | Diamond Management |
+| `/diamonds/white` | White diamond catalogue with a white prefilter | `DiamondGrid` with `prefilterColour="white"` | Diamond Management, White collection filter |
+| `/diamonds/pink` | Pink diamond catalogue with a pink prefilter | `DiamondGrid` with `prefilterColour="pink"` | Diamond Management, Pink collection filter |
+| `/create-your-own` | Bespoke ring introduction and consultation CTA | `app/create-your-own/page.js` | Website Content / Bespoke Services |
+| `/why-lab-grown` | Lab-grown diamond benefits and interactive timeline | `components/whylabgrown/WhyLabGrownContent.jsx` | Website Content |
+| `/diamond-guide` | Educational guide to diamond 4Cs and shapes | `app/diamond-guide/page.js` | Website Content / Knowledge Pages |
+| `/sourcing` | Ethical sourcing and sustainability information | `app/sourcing/page.js` | Website Content / Sourcing |
+| `/about-us` | Brand story and company information | `components/about/*.jsx` | Website Content / About Page |
+| `/contact` | Enquiries, consultation requests and bespoke design requests | `ContactInquiryCards` and `ContactFormTabs` | Customers, Messages and Inquiries |
+| `/delivery` | Shipping and delivery policy | `app/delivery/page.js` | Footer / Policy Content |
+| `/returns` | Returns, exchanges and warranty policy | `app/returns/page.js` | Footer / Policy Content |
+| `/privacy` | Privacy and personal-data policy | `app/privacy/page.js` | Footer / Policy Content |
+| `/terms` | Sales and bespoke-order terms | `app/terms/page.js` | Footer / Policy Content |
+
+### 3. Homepage Structure
+
+The homepage is rendered by `components/sections/HomeSections.jsx`, which preserves the original Elementor section structure. Its major managed areas should be represented as separate records or sections in the admin panel.
+
+| Homepage area | Frontend behavior | Recommended admin fields |
+| :--- | :--- | :--- |
+| Revolution hero slider | Displays multiple full-width slides with text and calls to action | Slide title, subtitle, image, button text, button URL, order, active status |
+| Intro/About section | Describes the Caritas brand | Eyebrow, heading, body, image, button and link |
+| Services section | Presents core service or brand pillars | Repeatable title, description, icon/image and link |
+| Diamond process | Explains lab-grown diamond creation | Section heading, process steps, step images and text |
+| Mission/Vision | Shows brand mission and vision messaging | Heading, body copy, image and optional CTA |
+| Diamond shapes | Highlights popular diamond shapes | Shape name, shape image, destination URL and order |
+| Video section | Shows brand or production video | Video URL, poster image, heading and text |
+| Testimonials | Displays client quotes | Quote, customer name, role/location, image and order |
+| Global map | Shows brand reach or sourcing footprint | Map image, heading, locations and supporting text |
+| Export/closing section | Closing brand or commerce message | Heading, body, image and CTA |
+
+The homepage UI should remain visually unchanged. An admin update should change content or data only, not replace or restyle these components.
+
+### 4. Shop Page Structure
+
+The `/shop` route replaces the original main content with `components/home/CrystoHomePage.jsx`. Its section order must remain stable:
+
+| Order | Shop section | Frontend behavior | Recommended admin controls |
+| :---: | :--- | :--- | :--- |
+| 1 | Hero | Dark full-width luxury banner with “SHINE BRIGHT / DAY AND NIGHT” and product messaging | Badge, left heading, right heading, subtitle, CTA label/link, hero image |
+| 2 | Diamond category cards | Four visual category cards | Title, item count, image, destination URL, text theme, order, published |
+| 3 | New Arrivals | Tabbed jewellery product grid | Product selection, category tabs, publish state and display order |
+| 4 | Brand logos | Partner or press logo strip | Logo image, alternate image for hover, alt text, order |
+| 5 | Shop by Shape and Carat | Four circular diamond-shape/category cards | Title, image, destination URL, order and visibility |
+| 6 | Trending products | Continuous horizontal marquee | Product featured/trending status, badge, order and published state |
+| 7 | Promotional banners | Three wide promotional cards | Title, subtitle, badge, image, button text/link, order and active state |
+| 8 | Journal/Blog | Three editorial cards | Image, title, date, categories, destination and published state |
+
+When a shop product is published or unpublished, the change must affect every published storefront block that uses that product.
+
+### 5. Diamond Catalogue Structure
+
+The diamond catalogue is managed through `components/diamonds/DiamondGrid.jsx`.
+
+| Diamond field | UI/function | Required behavior |
+| :--- | :--- | :--- |
+| Name/title | Product identification | Required for a clear admin and catalogue label |
+| Shape | Shape filter and card | Round, Oval, Emerald, Asscher, Marquise, Cushion, Pear, Radiant, Princess, Heart, Old Mine and Elongated Cushion |
+| Carat | Carat range filter and card | Numeric value with two-decimal support |
+| Cut | Cut filter and card | Fair, Good, Very Good, Ideal, Super Ideal |
+| Color | Colour-grade filter and card | D–M white grades or “Pink” for fancy pink diamonds |
+| Clarity | Clarity filter and card | SI2 through FL, including VVS grades |
+| Price | Price sorting/filter and card | Stored in AED; display formatting must remain consistent |
+| Origin | Origin filter | Natural or Lab Grown |
+| Collection | `/diamonds/white` or `/diamonds/pink` | `white` or `pink` |
+| Image | Visual or list view | Firebase Storage URL or existing local asset |
+| Availability | Stock/sale state | Available, Reserved or Sold |
+| QuickShip | Special filter/toggle | Boolean |
+| BestValue | Promotional badge | Boolean |
+| Published | Public visibility | Drafts are excluded from every public catalogue |
+| Popular rank | Default sort | Lower or configured rank appears earlier |
+
+Catalogue functionality the admin must preserve:
+
+- Shape selection
+- Origin filtering
+- Carat range
+- Price range
+- Cut, colour and clarity grade sliders
+- “Looking for” presets
+- QuickShip-only filter
+- Popular, price and carat sorting
+- Visual and list views
+- Compare mode
+- Wishlist state
+- `/diamonds/white` white collection prefilter
+- `/diamonds/pink` pink collection prefilter
+
+### 6. Jewellery Product Structure
+
+The reusable jewellery product data belongs in the `caritas_products` collection. A product can appear in:
+
+- `/shop` New Arrivals
+- `/shop` Trending Products
+- The general storefront catalogue
+- Future jewellery or diamond category pages
+
+| Product field | Purpose | Admin control |
+| :--- | :--- | :--- |
+| Name | Card title and product title | Required text |
+| Slug | Route and document identity | Auto-generated, editable and unique |
+| Category | Primary collection | Rings, Earrings, Necklaces, Bracelets or custom category |
+| Subcategory | Secondary grouping | Engagement rings, hoops, pendants, bands, etc. |
+| Description | Full product copy | Rich or plain text |
+| Short description | Compact card copy | Text |
+| Price | Selling price | Numeric AED value |
+| Sale price | Comparison/discount price | Numeric optional value |
+| SKU | Inventory reference | Text |
+| Stock | Available units | Numeric |
+| Availability | Purchase state | In stock, out of stock or preorder |
+| Weight | Jewellery specification | Text or grams |
+| Images | Main image and gallery | Multiple Firebase Storage uploads |
+| Specifications | Material/spec rows | Repeatable name/value pairs |
+| Featured | Featured collection state | Boolean |
+| New arrival | New Arrivals state | Boolean |
+| Trending | Trending marquee state | Boolean |
+| Badge | Promotional label | NEW, HOT, TRENDING or BESTSELLER |
+| Rating/review count | Visual product rating | Numeric optional values |
+| Published | Frontend visibility | Boolean |
+| SEO title/description | Search metadata | Text fields |
+
+### 7. Category and Collection Structure
+
+Categories use the `caritas_categories` collection and can control shop category cards.
+
+| Category field | Purpose |
+| :--- | :--- |
+| Name | Card title |
+| Slug | Stable identity |
+| Description | Optional category copy |
+| Image | Category card/banner |
+| Item count text | Public label such as “7 Items” |
+| Text theme | Dark or light text for the selected image |
+| Display order | Card sorting |
+| Published | Hide/show the category |
+| Subcategories | Repeatable category tags |
+
+Categories must be separate from individual diamond records. Category names should not be used as a replacement for diamond collection values.
+
+### 8. Shared Header and Footer
+
+The header is loaded by `Header.jsx` and receives the current route. It dynamically loads navigation from `caritas_settings/navigation`.
+
+Recommended navigation record fields:
+
+- Menu item ID
+- Label
+- Destination URL
+- Display order
+- Active/published state
+- Has dropdown
+- Repeatable child label
+- Repeatable child URL
+- Repeatable child active state
+
+The footer should be treated as a separate settings module. Manageable areas include:
+
+- Newsletter heading and subtitle
+- Contact email and phone
+- Social URLs
+- Customer-service/legal links
+- Collection links
+- Footer description
+- Copyright text
+
+### 9. Supporting Public Pages
+
+#### Create Your Own
+
+The page explains the bespoke ring process and links to Contact. Admin controls should cover:
+
+- Page breadcrumb/title
+- Eyebrow and heading
+- Introductory copy
+- Repeatable process bullets
+- Consultation CTA label and URL
+- Supporting image
+
+#### Contact
+
+The contact page contains:
+
+- Enquiry cards
+- Diamond enquiry form
+- Consultation-request form
+- Bespoke-design form
+
+At minimum, an admin module should store contact details, service cards and form success/error messages. Submitted inquiry records should be stored in `caritas_customers` or a dedicated inquiry collection.
+
+#### Why Lab-Grown
+
+This page includes an educational introduction, benefits, statistics, production steps and an interactive timeline. Manage as repeatable section records:
+
+- Timeline year/order
+- Timeline title
+- Timeline description
+- Timeline image
+- Benefits
+- Stats
+- Optional active/default year
+
+#### Diamond Guide
+
+Manage:
+
+- Page introduction
+- Repeatable guide sections
+- Heading
+- Paragraph
+- CTA label
+- CTA URL
+
+#### Sourcing
+
+Manage:
+
+- Page introduction
+- Repeatable sourcing pillars
+- Pillar title
+- Pillar description
+- CTA label
+- CTA URL
+
+#### About Us
+
+Manage each of the existing sections:
+
+- Breadcrumb
+- Brand story
+- Process
+- Services
+- Banner
+- Testimonials
+- Partner/client logos
+
+#### Delivery and Returns
+
+Manage:
+
+- Page title
+- Eyebrow
+- Introduction
+- Repeatable policy headings and paragraphs
+- Optional CTA
+
+#### Privacy and Terms
+
+Manage:
+
+- Page title
+- Introduction
+- Repeatable legal sections
+- Contact/privacy email
+- Effective date
+
+### 10. Recommended Admin Module Map
+
+| Admin module | Frontend responsibility |
+| :--- | :--- |
+| Overview | Overall status and operational counts |
+| Diamonds | Diamond catalogue, 4Cs, collection, publication and visibility |
+| Products / Jewellery | `/shop` jewellery products and merchandising flags |
+| Categories | Shop category cards and subcategories |
+| Shop Page Settings | Shop hero and global shop settings |
+| Homepage Content | Homepage slides and brand sections |
+| Navigation | Header menu and dropdown links |
+| Footer | Footer, social links and legal/customer links |
+| Orders | Customer orders and fulfillment |
+| Customers | Customers and contact/consultation inquiries |
+| Settings | Admin roles, Firebase status and baseline synchronization |
+
+### 11. Firestore Collection Reference
+
+| Collection/document | Intended records |
+| :--- | :--- |
+| `caritas_diamonds` | Managed loose diamonds |
+| `caritas_products` | Jewellery products |
+| `caritas_categories` | Jewellery and shop categories |
+| `caritas_orders` | Customer orders |
+| `caritas_customers` | Registered customer and inquiry records |
+| `caritas_adminUsers` | Authorized administrator records |
+| `caritas_media` | Media-library references |
+| `caritas_settings/shop` | Shop hero and shop display settings |
+| `caritas_settings/websiteContent` | Homepage and website content |
+| `caritas_settings/navigation` | Header navigation items |
+| `caritas_settings/footer` | Footer configuration |
+
+The collection prefix is configured through `NEXT_PUBLIC_COLLECTION_PREFIX`. Keep `caritas_` unless the database isolation requirement is intentionally changed.
+
+### 12. Publishing and Synchronization Rules
+
+Every public-facing record should follow these rules:
+
+1. Store a clear `published` or `active` boolean.
+2. Filter unpublished records before rendering public pages.
+3. Preserve existing static content as fallback data when Firestore is unavailable.
+4. Do not overwrite the existing frontend layout or component structure.
+5. Upload images to Firebase Storage, save the download URL in Firestore, and reference that URL in the frontend.
+6. Use stable IDs and slugs for routes, links and comparisons.
+7. Use display order values for menus, cards and repeatable sections.
+8. Validate required fields before publishing.
+9. Keep product and diamond management separate.
+10. Update image, content and publication changes without requiring a frontend code deployment.
 
 ---
 

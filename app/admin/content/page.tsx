@@ -122,7 +122,7 @@ export default function AdminContentPage() {
         <div>
           <h1 className="admin-page-hero-title">Contact Page &amp; Client Inbound Desk</h1>
           <p className="admin-page-hero-subtitle">
-            Live incoming communications submitted through the frontend Contact Page, private consultations, and depository requests.
+            Live incoming communications submitted through the frontend Contact Page, private consultations, and bespoke commissions.
           </p>
         </div>
 

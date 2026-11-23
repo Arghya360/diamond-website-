@@ -39,36 +39,44 @@ export default function AdminDashboardPage() {
   const totalOrdersCount = orders.length > 0 ? orders.length : 4;
 
   // Recent allocation orders
-  const displayOrders = [
-    {
-      id: '#MC-782190',
-      client: 'Rashid Al-Nuaimi',
-      total: 'AED 54,291',
-      status: 'PAYMENT RECEIVED',
-      badgeClass: 'badge-pill-green',
-    },
-    {
-      id: '#MC-782191',
-      client: 'Hamad Bin Sultan',
-      total: 'AED 27,500',
-      status: 'CONFIRMED',
-      badgeClass: 'badge-pill-yellow',
-    },
-    {
-      id: '#MC-725398',
-      client: 'Code With Arghya',
-      total: 'AED 2,500',
-      status: 'PENDING',
-      badgeClass: 'badge-pill-gray',
-    },
-    {
-      id: '#MC-849017',
-      client: 'Code With Arghya',
-      total: 'AED 5,542.91',
-      status: 'PENDING',
-      badgeClass: 'badge-pill-gray',
-    },
-  ];
+  const displayOrders = orders.length > 0
+    ? orders.slice(0, 5).map((o) => ({
+        id: o.id.startsWith('#') ? o.id : `#CL-${o.id.slice(0, 6).toUpperCase()}`,
+        client: o.customerName || 'Private Client',
+        total: `$${(o.total || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
+        status: o.orderStatus === 'delivered' ? 'PAYMENT RECEIVED' : o.orderStatus.toUpperCase(),
+        badgeClass: o.orderStatus === 'delivered' || o.orderStatus === 'shipped' ? 'badge-pill-green' : o.orderStatus === 'processing' ? 'badge-pill-yellow' : 'badge-pill-gray',
+      }))
+    : [
+        {
+          id: '#CL-782190',
+          client: 'Eleanor Vance',
+          total: '$54,291',
+          status: 'PAYMENT RECEIVED',
+          badgeClass: 'badge-pill-green',
+        },
+        {
+          id: '#CL-782191',
+          client: 'Arthur Pendelton',
+          total: '$27,500',
+          status: 'CONFIRMED',
+          badgeClass: 'badge-pill-yellow',
+        },
+        {
+          id: '#CL-725398',
+          client: 'Julian Montgomery',
+          total: '$2,500',
+          status: 'PENDING',
+          badgeClass: 'badge-pill-gray',
+        },
+        {
+          id: '#CL-849017',
+          client: 'Claire Dubois',
+          total: '$5,542.91',
+          status: 'PENDING',
+          badgeClass: 'badge-pill-gray',
+        },
+      ];
 
   return (
     <div className="admin-overview-container">
@@ -77,7 +85,7 @@ export default function AdminDashboardPage() {
         <div>
           <h1 className="admin-overview-title">Overview</h1>
           <p className="admin-overview-subtitle">
-            Live operational status, commercial volume, and precious metal spot benchmarks.
+            Live operational status, commercial volume, and haute joaillerie benchmarks.
           </p>
         </div>
 
@@ -93,7 +101,7 @@ export default function AdminDashboardPage() {
         {/* Metric 1 */}
         <div className="admin-stat-card">
           <div className="admin-stat-label">PAID REVENUE • 30 DAYS</div>
-          <div className="admin-stat-value">AED 54,291.00</div>
+          <div className="admin-stat-value">$54,291.00</div>
           <div className="admin-stat-trend">
             <span>↑ 12.4% vs prior month</span>
           </div>
@@ -127,30 +135,30 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* ── 3. LOWER SECTION (Left: Dark Bullion Trading Desk, Right: Recent Allocation Orders) ── */}
+      {/* ── 3. LOWER SECTION (Left: Dark Haute Joaillerie Desk, Right: Recent Allocation Orders) ── */}
       <div className="admin-overview-two-col">
         {/* Left: Dark Trading Desk Card */}
         <div className="admin-dark-desk-card">
           <div className="admin-desk-eyebrow">
-            <span>✦ LIVE METAL SPOT BENCHMARK</span>
+            <span>✦ LIVE DIAMOND &amp; PRECIOUS METAL BENCHMARK</span>
           </div>
 
-          <h2 className="admin-desk-title">Dubai Bullion Trading Desk</h2>
+          <h2 className="admin-desk-title">Caritas Haute Joaillerie Desk</h2>
 
           <div className="admin-desk-prices">
             <div className="admin-desk-row">
-              <span className="admin-desk-metal">Gold (Au 999.9):</span>
-              <span className="admin-desk-rate">$3524.90 <span className="admin-desk-unit">/ oz</span></span>
+              <span className="admin-desk-metal">Gold (18k / Au 750):</span>
+              <span className="admin-desk-rate">$82.40 <span className="admin-desk-unit">/ g</span></span>
             </div>
 
             <div className="admin-desk-row">
-              <span className="admin-desk-metal">Silver (Ag 999.0):</span>
-              <span className="admin-desk-rate">$41.29 <span className="admin-desk-unit">/ oz</span></span>
+              <span className="admin-desk-metal">Diamond (1.0ct G/VS1):</span>
+              <span className="admin-desk-rate">$4,850.00 <span className="admin-desk-unit">/ stone</span></span>
             </div>
           </div>
 
           <p className="admin-desk-note">
-            All catalogue prices recalculate in real-time server-side against these spot feeds and configured product premiums.
+            All catalogue prices and bespoke allocations recalculate in real-time server-side against these spot feeds and configured atelier premiums.
           </p>
 
           <Link href="/admin/products" className="admin-desk-btn">

@@ -1,7 +1,7 @@
 import { collection, doc, writeBatch, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './client';
 import { COLLECTIONS } from './admin-service';
-import type { Product, Category, ShopSettings, WebsiteContent, NavigationItem } from '../../types/admin';
+import type { Product, Category, ShopSettings, WebsiteContent, NavigationItem, Diamond } from '../../types/admin';
 
 export const INITIAL_CATEGORIES: Category[] = [
   {
@@ -270,6 +270,14 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
 ];
 
+export const INITIAL_DIAMONDS: Diamond[] = [
+  { name: 'Round Brilliant 1.02ct', slug: 'round-brilliant-1-02ct', shape: 'Round', carat: 1.02, cut: 'Super Ideal', color: 'D', clarity: 'VVS2', price: 5040, origin: 'Natural', category: 'white', image: '/wp-content/uploads/diamond/download.jpg', availability: 'available', quickShip: true, bestValue: false, published: true, popularRank: 1 },
+  { name: 'Oval Diamond 1.50ct', slug: 'oval-diamond-1-50ct', shape: 'Oval', carat: 1.50, cut: 'Super Ideal', color: 'G', clarity: 'VS1', price: 8130, origin: 'Natural', category: 'white', image: '/wp-content/uploads/diamond/download%20(2).jpg', availability: 'available', quickShip: true, bestValue: true, published: true, popularRank: 2 },
+  { name: 'Emerald Diamond 1.50ct', slug: 'emerald-diamond-1-50ct', shape: 'Emerald', carat: 1.50, cut: 'Super Ideal', color: 'H', clarity: 'VS2', price: 5340, origin: 'Natural', category: 'white', image: '/wp-content/uploads/diamond/download%20(8).jpg', availability: 'available', quickShip: true, bestValue: true, published: true, popularRank: 3 },
+  { name: 'Pink Round Diamond 1.05ct', slug: 'pink-round-diamond-1-05ct', shape: 'Round', carat: 1.05, cut: 'Super Ideal', color: 'Pink', clarity: 'VVS2', price: 5800, origin: 'Lab Grown', category: 'pink', image: '/wp-content/uploads/diamond/download%20(1).jpg', availability: 'available', quickShip: true, bestValue: true, published: true, popularRank: 4 },
+  { name: 'Pink Oval Diamond 1.45ct', slug: 'pink-oval-diamond-1-45ct', shape: 'Oval', carat: 1.45, cut: 'Ideal', color: 'Pink', clarity: 'VS1', price: 7200, origin: 'Lab Grown', category: 'pink', image: '/wp-content/uploads/diamond/download%20(6).jpg', availability: 'available', quickShip: true, bestValue: false, published: true, popularRank: 5 },
+];
+
 export const INITIAL_SHOP_SETTINGS: ShopSettings = {
   heroBadge: '— THE FINE JEWELLERY COLLECTION —',
   heroTitle: 'Luxury Diamond Collection',
@@ -447,6 +455,12 @@ export async function seedAllWebsiteData(overwrite: boolean = false): Promise<{ 
     for (const prod of INITIAL_PRODUCTS) {
       const prodRef = doc(collection(db, COLLECTIONS.products));
       batch.set(prodRef, { ...prod, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    }
+
+    // Seed Diamonds in isolated collection
+    for (const diamond of INITIAL_DIAMONDS) {
+      const diamondRef = doc(collection(db, COLLECTIONS.diamonds));
+      batch.set(diamondRef, { ...diamond, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
     }
 
     // Seed Shop Settings in isolated document

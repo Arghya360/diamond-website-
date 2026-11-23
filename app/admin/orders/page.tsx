@@ -40,52 +40,52 @@ export default function AdminOrdersPage() {
     }
   };
 
-  // Provide initial baseline orders matching Screenshot 5 if empty
+  // Provide initial baseline orders matching Caritas Luxury styling if empty
   const baselineOrders: any[] = [
     {
-      id: '#MC-782190',
+      id: '#CL-782190',
       isDemo: true,
       createdAt: '10/23/2026',
-      customerName: 'Rashid Al-Nuaimi',
-      customerEmail: 'rashid.alnuaimi@example.ae',
+      customerName: 'Eleanor Vance',
+      customerEmail: 'eleanor.vance@caritasluxury.com',
       itemsCount: 2,
-      totalFormatted: 'AED 54,291',
+      totalFormatted: '$54,291',
       orderStatus: 'payment_received',
       statusLabel: 'PAYMENT RECEIVED',
       statusClass: 'status-green',
     },
     {
-      id: '#MC-782191',
+      id: '#CL-782191',
       isDemo: true,
       createdAt: '10/23/2026',
-      customerName: 'Hamad Bin Sultan',
-      customerEmail: 'hamad.sultan@example.ae',
+      customerName: 'Arthur Pendelton',
+      customerEmail: 'arthur.p@example.com',
       itemsCount: 1,
-      totalFormatted: 'AED 27,500',
+      totalFormatted: '$27,500',
       orderStatus: 'confirmed',
       statusLabel: 'CONFIRMED',
       statusClass: 'status-yellow',
     },
     {
-      id: '#MC-725398',
+      id: '#CL-725398',
       isDemo: false,
       createdAt: '10/19/2026',
-      customerName: 'Code With Arghya',
-      customerEmail: 'codehub0792@gmail.com',
+      customerName: 'Julian Montgomery',
+      customerEmail: 'j.montgomery@example.com',
       itemsCount: 1,
-      totalFormatted: 'AED 2,500',
+      totalFormatted: '$2,500',
       orderStatus: 'pending',
       statusLabel: 'PENDING',
       statusClass: 'status-gray',
     },
     {
-      id: '#MC-849017',
+      id: '#CL-849017',
       isDemo: false,
       createdAt: '10/19/2026',
-      customerName: 'Code With Arghya',
-      customerEmail: 'codehub0792@gmail.com',
+      customerName: 'Claire Dubois',
+      customerEmail: 'claire.dubois@example.com',
       itemsCount: 2,
-      totalFormatted: 'AED 5,542.91',
+      totalFormatted: '$5,542.91',
       orderStatus: 'pending',
       statusLabel: 'PENDING',
       statusClass: 'status-gray',
@@ -94,13 +94,13 @@ export default function AdminOrdersPage() {
 
   const allDisplayOrders = orders.length > 0
     ? orders.map((o) => ({
-        id: o.id.startsWith('#') ? o.id : `#MC-${o.id.slice(0, 6)}`,
+        id: o.id.startsWith('#') ? o.id : `#CL-${o.id.slice(0, 6).toUpperCase()}`,
         isDemo: false,
         createdAt: new Date().toLocaleDateString('en-US'),
         customerName: o.customerName || 'Private Client',
         customerEmail: o.customerEmail || 'client@caritasluxury.com',
         itemsCount: o.items?.length || 1,
-        totalFormatted: `AED ${((o.total || 0) * 3.67).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
+        totalFormatted: `$${(o.total || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,
         orderStatus: o.orderStatus,
         statusLabel: o.orderStatus === 'delivered' ? 'PAYMENT RECEIVED' : o.orderStatus.toUpperCase(),
         statusClass: o.orderStatus === 'delivered' || o.orderStatus === 'shipped' ? 'status-green' : o.orderStatus === 'processing' ? 'status-yellow' : 'status-gray',
@@ -141,12 +141,12 @@ export default function AdminOrdersPage() {
         </div>
       )}
 
-      {/* Header matching Screenshot 5 */}
+      {/* Header matching Reference */}
       <div className="admin-page-hero">
         <div>
-          <h1 className="admin-page-hero-title">Allocation Orders</h1>
+          <h1 className="admin-page-hero-title">Client Allocation Orders</h1>
           <p className="admin-page-hero-subtitle">
-            Manage physical precious metal allocation orders, payment settlements, and vault custody handoffs.
+            Manage client fine jewellery allocation orders, payment settlements, and vault custody handoffs.
           </p>
         </div>
       </div>

@@ -55,6 +55,29 @@ export interface Category {
   updatedAt?: any;
 }
 
+export interface Diamond {
+  id?: string;
+  name: string;
+  slug: string;
+  shape: string;
+  carat: number;
+  cut: string;
+  color: string;
+  clarity: string;
+  price: number;
+  origin: 'Natural' | 'Lab Grown';
+  category: 'white' | 'pink';
+  image: string;
+  availability: 'available' | 'sold' | 'reserved';
+  quickShip: boolean;
+  bestValue: boolean;
+  description?: string;
+  published: boolean;
+  popularRank?: number;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
 export interface ShopSettings {
   id?: string;
   heroBadge?: string;

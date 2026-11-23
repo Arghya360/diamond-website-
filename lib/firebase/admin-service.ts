@@ -30,6 +30,7 @@ import type {
   Order,
   Customer,
   AdminUser,
+  Diamond,
 } from '../../types/admin';
 
 // ─── Collection Isolation / Namespacing ───────────────────────────
@@ -46,6 +47,7 @@ export const COLLECTIONS = {
   customers: `${PREFIX}customers`,
   adminUsers: `${PREFIX}adminUsers`,
   media: `${PREFIX}media`,
+  diamonds: `${PREFIX}diamonds`,
 };
 
 // ─── Normalizers ──────────────────────────────────────────────────
@@ -204,6 +206,83 @@ export async function deleteProduct(id: string): Promise<void> {
   if (!db) return;
   const docRef = doc(db, COLLECTIONS.products, id);
   await deleteDoc(docRef);
+}
+
+function normalizeDiamond(id: string, raw: any): Diamond {
+  return {
+    id,
+    name: raw.name || `${raw.shape || 'Diamond'} ${raw.carat || ''}ct`,
+    slug: raw.slug || id,
+    shape: raw.shape || 'Round',
+    carat: Number(raw.carat || 0),
+    cut: raw.cut || 'Ideal',
+    color: raw.color || 'F',
+    clarity: raw.clarity || 'VS1',
+    price: Number(raw.price || 0),
+    origin: raw.origin === 'Natural' ? 'Natural' : 'Lab Grown',
+    category: raw.category === 'pink' ? 'pink' : 'white',
+    image: raw.image || raw.img || '',
+    availability: raw.availability || 'available',
+    quickShip: Boolean(raw.quickShip),
+    bestValue: Boolean(raw.bestValue),
+    description: raw.description || '',
+    published: raw.published !== false,
+    popularRank: Number(raw.popularRank || 999),
+    createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
+  };
+}
+
+export async function getDiamonds(options?: {
+  publishedOnly?: boolean;
+  category?: 'white' | 'pink';
+}): Promise<Diamond[]> {
+  if (!isFirebaseConfigured || !db) return [];
+  try {
+    const snapshot = await getDocs(collection(db, COLLECTIONS.diamonds));
+    let diamonds: Diamond[] = [];
+    snapshot.forEach((docSnap) => diamonds.push(normalizeDiamond(docSnap.id, docSnap.data())));
+    if (options?.publishedOnly) diamonds = diamonds.filter((diamond) => diamond.published);
+    if (options?.category) diamonds = diamonds.filter((diamond) => diamond.category === options.category);
+    return diamonds.sort((a, b) => (a.popularRank || 999) - (b.popularRank || 999));
+  } catch (error) {
+    console.warn('Unable to load managed diamonds:', error);
+    return [];
+  }
+}
+
+export async function getDiamondById(id: string): Promise<Diamond | null> {
+  if (!isFirebaseConfigured || !db) return null;
+  try {
+    const docSnap = await getDoc(doc(db, COLLECTIONS.diamonds, id));
+    return docSnap.exists() ? normalizeDiamond(docSnap.id, docSnap.data()) : null;
+  } catch (error) {
+    console.error('Error fetching diamond by ID:', error);
+    return null;
+  }
+}
+
+export async function createDiamond(data: Omit<Diamond, 'id'>): Promise<string> {
+  if (!db) return `local-diamond-${Date.now()}`;
+  const docRef = await addDoc(collection(db, COLLECTIONS.diamonds), {
+    ...data,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+export async function updateDiamond(id: string, data: Partial<Diamond>): Promise<void> {
+  if (!db) return;
+  await updateDoc(doc(db, COLLECTIONS.diamonds, id), {
+    ...data,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function deleteDiamond(id: string): Promise<void> {
+  if (!db) return;
+  await deleteDoc(doc(db, COLLECTIONS.diamonds, id));
 }
 
 // ─── Categories Service ───────────────────────────────────────────

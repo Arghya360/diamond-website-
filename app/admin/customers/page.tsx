@@ -26,80 +26,80 @@ export default function AdminCustomersPage() {
     load();
   }, []);
 
-  // Baseline accounts matching Screenshot 3
+  // Baseline accounts matching Caritas Luxury styling
   const baselineUsers = [
     {
       id: 'usr-1',
       uid: '4ucbmxp01...',
-      initials: 'ZA',
-      name: 'Zain Abdullah',
-      email: 'abdull.z@outlook.com',
-      phone: '00447392803132',
-      address: 'Dubai, United Arab Emirates',
+      initials: 'EV',
+      name: 'Eleanor Vance',
+      email: 'eleanor.vance@caritasluxury.com',
+      phone: '+41 22 819 3000',
+      address: 'Geneva, Switzerland',
       role: 'CUSTOMER',
       ordersCount: 0,
-      totalTransacted: 'AED 0.00',
+      totalTransacted: '$0.00',
     },
     {
       id: 'usr-2',
       uid: '5VQjSaKp1j...',
-      initials: 'CW',
-      name: 'Code With Arghya',
-      email: 'codehub0792@gmail.com',
-      phone: '+971 7587569870',
-      address: 'Dubai, United Arab Emirates',
+      initials: 'SL',
+      name: 'Sophia Laurent',
+      email: 'sophia.laurent@example.com',
+      phone: '+33 1 42 68 55 00',
+      address: 'Paris, France',
       role: 'CUSTOMER',
       ordersCount: 4,
-      totalTransacted: 'AED 16,085.82',
+      totalTransacted: '$16,085.82',
       isGreen: true,
     },
     {
       id: 'usr-3',
       uid: 'R11sPerYPETB1...',
-      initials: 'JB',
-      name: 'Joyanto Biswas',
-      email: 'support@cofood.com',
-      phone: '+880156643321',
-      address: 'Dubai, United Arab Emirates',
+      initials: 'AP',
+      name: 'Arthur Pendelton',
+      email: 'arthur.p@example.com',
+      phone: '+44 20 7946 0921',
+      address: 'London, United Kingdom',
       role: 'CUSTOMER',
       ordersCount: 0,
-      totalTransacted: 'AED 0.00',
+      totalTransacted: '$0.00',
     },
     {
       id: 'usr-4',
-      uid: 'pdein_montague...',
-      initials: 'MC',
-      name: 'Montague Cole Master Owner',
-      email: 'montague0972@montaguecole.com',
-      phone: 'No phone recorded',
-      address: 'Dubai, United Arab Emirates',
+      uid: 'c360_admin_01...',
+      initials: 'C3',
+      name: 'Caritas360 Super Admin',
+      email: 'admin@caritasluxury.com',
+      phone: '+41 22 819 3001',
+      address: 'Geneva, Switzerland',
       role: 'OWNER',
       ordersCount: 0,
-      totalTransacted: 'AED 0.00',
+      totalTransacted: '$0.00',
     },
     {
       id: 'usr-5',
       uid: 'QzvDK0xiT1xLAG...',
-      initials: 'AB',
-      name: 'arghya biswas',
-      email: 'arghyabiswas0792@gmail.com',
-      phone: 'No phone recorded',
-      address: 'Dubai, United Arab Emirates',
-      role: 'OWNER',
+      initials: 'JM',
+      name: 'Julian Montgomery',
+      email: 'j.montgomery@example.com',
+      phone: '+1 212 555 0198',
+      address: 'New York, United States',
+      role: 'CUSTOMER',
       ordersCount: 0,
-      totalTransacted: 'AED 0.00',
+      totalTransacted: '$0.00',
     },
     {
       id: 'usr-6',
       uid: 'anthony_thorp...',
-      initials: 'EM',
-      name: 'Executive Master Administrator',
-      email: 'anthony.thorpe@augustusadamsfineart.com',
-      phone: 'No phone recorded',
+      initials: 'CD',
+      name: 'Claire Dubois',
+      email: 'claire.dubois@example.com',
+      phone: '+971 4 362 7000',
       address: 'Dubai, United Arab Emirates',
       role: 'CUSTOMER',
       ordersCount: 0,
-      totalTransacted: 'AED 0.00',
+      totalTransacted: '$0.00',
     },
   ];
 
@@ -111,10 +111,10 @@ export default function AdminCustomersPage() {
         name: c.name,
         email: c.email,
         phone: c.phone || 'No phone recorded',
-        address: 'Dubai, United Arab Emirates',
+        address: 'Geneva, Switzerland',
         role: c.type === 'inquiry' ? 'INQUIRY' : 'CUSTOMER',
         ordersCount: c.totalOrders || 0,
-        totalTransacted: `AED ${((c.totalSpent || 0) * 3.67).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        totalTransacted: `$${(c.totalSpent || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         isGreen: (c.totalSpent || 0) > 0,
       }))
     : baselineUsers;
@@ -138,17 +138,17 @@ export default function AdminCustomersPage() {
 
   return (
     <>
-      {/* Header matching Screenshot 3 */}
+      {/* Header matching Reference */}
       <div className="admin-page-hero">
         <div>
-          <h1 className="admin-page-hero-title">Registered Users &amp; Customer Accounts</h1>
+          <h1 className="admin-page-hero-title">Registered Clients &amp; VIP Accounts</h1>
           <p className="admin-page-hero-subtitle">
-            All authenticated client accounts, registration profiles, contact credentials, addresses, and lifetime bullion allocation totals.
+            All authenticated client accounts, registration profiles, contact credentials, addresses, and lifetime fine jewellery acquisition totals.
           </p>
         </div>
       </div>
 
-      {/* 4 Stat Cards Row matching Screenshot 3 */}
+      {/* 4 Stat Cards Row matching Reference */}
       <div className="admin-stats-row">
         {/* Card 1 */}
         <div className="admin-stat-card">
@@ -174,8 +174,8 @@ export default function AdminCustomersPage() {
         {/* Card 4 */}
         <div className="admin-stat-card">
           <div className="admin-stat-label">TOTAL TRANSACTED VOLUME</div>
-          <div className="admin-stat-value green">AED 16,085.82</div>
-          <div className="admin-stat-sub">Lifetime physical bullion purchases</div>
+          <div className="admin-stat-value green">$16,085.82</div>
+          <div className="admin-stat-sub">Lifetime fine jewellery acquisitions</div>
         </div>
       </div>
 

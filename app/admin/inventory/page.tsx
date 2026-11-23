@@ -49,23 +49,22 @@ export default function AdminInventoryPage() {
     }
   };
 
-  // If no products in database yet, provide standard inventory items matching screenshot
+  // If no products in database yet, provide standard Caritas Luxury inventory items
   const displayItems = products.length > 0
     ? products
     : [
-        { id: 'inv-1', name: '1 g Gold Bar', category: 'Gold', weight: '1 g', stock: 500, availability: 'in_stock' },
-        { id: 'inv-2', name: '5 g Gold Bar', category: 'Gold', weight: '5 g', stock: 350, availability: 'in_stock' },
-        { id: 'inv-3', name: '10 g Gold Bar', category: 'Gold', weight: '10 g', stock: 300, availability: 'in_stock' },
-        { id: 'inv-4', name: '20 g Gold Bar', category: 'Gold', weight: '20 g', stock: 280, availability: 'in_stock' },
-        { id: 'inv-5', name: '50 g Gold Bar', category: 'Gold', weight: '50 g', stock: 8, availability: 'in_stock' },
-        { id: 'inv-6', name: '100 g Gold Bar', category: 'Gold', weight: '100 g', stock: 400, availability: 'in_stock' },
-        { id: 'inv-7', name: '1 kg Gold Bar', category: 'Gold', weight: '1000 g', stock: 250, availability: 'in_stock' },
-        { id: 'inv-8', name: '100 g Silver Bar', category: 'Silver', weight: '100 g', stock: 800, availability: 'in_stock' },
-        { id: 'inv-9', name: '250 g Silver Bar', category: 'Silver', weight: '250 g', stock: 600, availability: 'in_stock' },
-        { id: 'inv-10', name: '500 g Silver Bar', category: 'Silver', weight: '500 g', stock: 875, availability: 'in_stock' },
-        { id: 'inv-11', name: '1 kg Silver Bar', category: 'Silver', weight: '1000 g', stock: 950, availability: 'in_stock' },
-        { id: 'inv-12', name: '1 oz Dubai Gold Coin', category: 'Gold', weight: '31.1035 g', stock: 70, availability: 'in_stock' },
-        { id: 'inv-13', name: '1 oz Dubai Silver Coin', category: 'Silver', weight: '31.1035 g', stock: 150, availability: 'in_stock' },
+        { id: 'inv-1', name: 'Pink Cluster Diamond Necklace', category: 'Necklaces', weight: '4.20 ct', stock: 500, availability: 'in_stock' },
+        { id: 'inv-2', name: 'Teal Drop Ring & Earring Set', category: 'Rings & Sets', weight: '3.15 ct', stock: 350, availability: 'in_stock' },
+        { id: 'inv-3', name: 'Fancy Pink Drop Earrings', category: 'Earrings', weight: '2.80 ct', stock: 300, availability: 'in_stock' },
+        { id: 'inv-4', name: 'Pink Morganite Butterfly Ring', category: 'Rings', weight: '5.50 ct', stock: 280, availability: 'in_stock' },
+        { id: 'inv-5', name: 'Emerald Eternity Band', category: 'Rings', weight: '1.95 ct', stock: 8, availability: 'in_stock' },
+        { id: 'inv-6', name: 'Classic Solitaire Diamond Ring (1.50ct)', category: 'Rings', weight: '1.50 ct', stock: 70, availability: 'in_stock' },
+        { id: 'inv-7', name: 'Round Brilliant Loose Diamond (D/VVS1)', category: 'Loose Diamonds', weight: '1.02 ct', stock: 150, availability: 'in_stock' },
+        { id: 'inv-8', name: 'Princess Cut Loose Diamond (E/VVS2)', category: 'Loose Diamonds', weight: '1.55 ct', stock: 85, availability: 'in_stock' },
+        { id: 'inv-9', name: 'Cushion Cut Pink Fancy Diamond', category: 'Loose Diamonds', weight: '2.10 ct', stock: 40, availability: 'in_stock' },
+        { id: 'inv-10', name: 'Diamond Tennis Bracelet (18k Gold)', category: 'Bracelets', weight: '7.00 ct', stock: 120, availability: 'in_stock' },
+        { id: 'inv-11', name: 'Oval Brilliant Cut Diamond (1.80ct)', category: 'Loose Diamonds', weight: '1.80 ct', stock: 25, availability: 'in_stock' },
+        { id: 'inv-12', name: 'Pear Shape Fancy Intense Yellow Diamond', category: 'Loose Diamonds', weight: '2.50 ct', stock: 15, availability: 'in_stock' },
       ];
 
   return (
@@ -93,9 +92,9 @@ export default function AdminInventoryPage() {
       {/* Header */}
       <div className="admin-page-hero">
         <div>
-          <h1 className="admin-page-hero-title">Inventory &amp; Stock</h1>
+          <h1 className="admin-page-hero-title">Vault Inventory &amp; Stock Allocation</h1>
           <p className="admin-page-hero-subtitle">
-            Live inventory physical vault holdings, bullion reserve units, and stock allocation controls.
+            Live inventory physical vault holdings, haute jewellery reserve units, and stock allocation controls.
           </p>
         </div>
 
@@ -106,15 +105,15 @@ export default function AdminInventoryPage() {
         </div>
       </div>
 
-      {/* Table Card matching Screenshot 1 */}
+      {/* Table Card matching Reference */}
       <div className="admin-card-table">
         <div className="admin-table-container">
           <table className="admin-data-table">
             <thead>
               <tr>
                 <th style={{ width: '30%' }}>PRODUCT</th>
-                <th>METAL</th>
-                <th>WEIGHT</th>
+                <th>CATEGORY</th>
+                <th>CARAT / WEIGHT</th>
                 <th>CURRENT STOCK</th>
                 <th>STATUS</th>
                 <th style={{ textAlign: 'right', paddingRight: '20px' }}>ACTIONS</th>
@@ -131,10 +130,10 @@ export default function AdminInventoryPage() {
                       <strong style={{ color: '#111827', fontWeight: 600 }}>{item.name}</strong>
                     </td>
                     <td style={{ color: '#6B7280' }}>
-                      {item.category?.includes('Gold') || item.name.includes('Gold') ? 'Gold' : item.name.includes('Silver') ? 'Silver' : item.category || 'Gold'}
+                      {item.category || 'Fine Jewellery'}
                     </td>
                     <td style={{ color: '#6B7280' }}>
-                      {item.weight || (item.name.match(/\d+\s*(g|kg|oz)/i)?.[0] || '1 oz')}
+                      {item.weight || (item.name.match(/\d+(\.\d+)?\s*(ct|g)/i)?.[0] || '1.50 ct')}
                     </td>
                     <td>
                       <span className={isLow ? 'stock-val-red' : 'stock-val-green'}>

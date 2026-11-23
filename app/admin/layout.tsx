@@ -21,12 +21,14 @@ const NAV_ITEMS: NavItem[] = [
 
   // RECORDS
   { label: 'Products', href: '/admin/products', icon: '◇', section: 'RECORDS' },
+  { label: 'Diamonds', href: '/admin/diamonds', icon: '💎', section: 'RECORDS' },
   { label: 'Categories', href: '/admin/categories', icon: '◆', section: 'RECORDS' },
   { label: 'Live Metal Prices & Ticker', href: '/admin/shop', icon: '📈', section: 'RECORDS' },
   { label: 'Users & Customers', href: '/admin/customers', icon: '👥', section: 'RECORDS' },
 
   // CLIENT SERVICES
   { label: 'Contact Page & Messages', href: '/admin/content', icon: '✉️', section: 'CLIENT SERVICES' },
+  { label: 'Appointments', href: '/admin/appointments', icon: '🏛️', section: 'CLIENT SERVICES' },
   { label: 'Navigation Menu', href: '/admin/navigation', icon: '🧭', section: 'CLIENT SERVICES' },
   { label: 'Footer & Policies', href: '/admin/footer', icon: '📄', section: 'CLIENT SERVICES' },
 
@@ -85,8 +87,8 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     router.push('/admin/login');
   };
 
-  const displayName = adminProfile?.displayName || 'Caritas360 Master Owner';
-  const initial = displayName.charAt(0).toUpperCase() || 'M';
+  const displayName = adminProfile?.displayName || 'Caritas360 Super Admin';
+  const initial = 'C';
 
   // Filter navigation by search input
   const filteredNav = NAV_ITEMS.filter((item) =>
@@ -126,7 +128,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
               <span className="admin-brand-star">✦</span>
               <div className="admin-brand-text">
                 <div className="admin-brand-name">CARITAS LUXURY</div>
-                <div className="admin-brand-sub">BULLION • DIAMONDS • DUBAI</div>
+                <div className="admin-brand-sub">FINE JEWELLERY &amp; DIAMONDS • GENEVA</div>
               </div>
             </Link>
           </div>
@@ -189,7 +191,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             <div className="admin-profile-box">
               <div className="admin-profile-name">{displayName}</div>
               <div className="admin-profile-badge">
-                <span>👑</span> MAIN OWNER
+                <span>👑</span> SUPER ADMIN
               </div>
               <button
                 onClick={handleLogout}
@@ -215,7 +217,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
               <div className="admin-topbar-brand-indicator">
                 <span className="admin-live-dot" />
-                <span className="admin-live-brand-name">Caritas Luxury Fine Jewellery</span>
+                <span className="admin-live-brand-name">Caritas Luxury Admin</span>
                 <span className="admin-badge-admin-pill">ADMIN</span>
               </div>
             </div>

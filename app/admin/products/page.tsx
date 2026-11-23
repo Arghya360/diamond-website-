@@ -110,10 +110,10 @@ function ProductsTableInner() {
         </div>
       )}
 
-      {/* Header matching Screenshot 4 */}
+      {/* Header matching Reference */}
       <div className="admin-page-hero">
         <div>
-          <h1 className="admin-page-hero-title">Bullion Inventory &amp; Catalogue Products</h1>
+          <h1 className="admin-page-hero-title">Haute Jewellery &amp; Diamond Catalogue</h1>
           <p className="admin-page-hero-subtitle">
             Create, edit with picture uploads, update prices, and manage stock. Any changes sync instantly to the Storefront Catalogue.
           </p>
@@ -134,12 +134,12 @@ function ProductsTableInner() {
             className="admin-action-btn-black"
             style={{ padding: '8px 16px' }}
           >
-            + Add Bullion Product
+            + Add New Product
           </Link>
         </div>
       </div>
 
-      {/* Realtime Sync Status Bar matching Screenshot 4 */}
+      {/* Realtime Sync Status Bar matching Reference */}
       <div className="admin-sync-bar">
         <div className="admin-sync-indicator">
           <span className="admin-sync-dot" />
@@ -158,12 +158,12 @@ function ProductsTableInner() {
         </div>
       </div>
 
-      {/* Filter and Search Bar matching Screenshot 4 */}
+      {/* Filter and Search Bar matching Reference */}
       <div className="admin-filter-bar">
         <div className="admin-filter-search-wrap">
           <input
             type="text"
-            placeholder="Search products by title, metal, or assay..."
+            placeholder="Search products by title, category, or metal..."
             className="admin-filter-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -203,10 +203,10 @@ function ProductsTableInner() {
             <thead>
               <tr>
                 <th style={{ width: '28%' }}>PRODUCT</th>
-                <th>METAL &amp; ASSAY</th>
-                <th>CATEGORY</th>
-                <th>WEIGHT</th>
-                <th>PRICE (AED)</th>
+                <th>CATEGORY &amp; METAL</th>
+                <th>COLLECTION</th>
+                <th>CARAT / SPECS</th>
+                <th>PRICE ($)</th>
                 <th>STOCK</th>
                 <th>STATUS</th>
                 <th style={{ textAlign: 'right', paddingRight: '20px' }}>ACTIONS</th>
@@ -231,7 +231,7 @@ function ProductsTableInner() {
                   const photoCount = p.images?.length || 1;
                   const isFeatured = p.isFeatured;
                   const isLow = (p.stock || 0) <= 8;
-                  const formattedPrice = `AED ${(p.price * 3.67).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  const formattedPrice = `$${(p.price || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 
                   return (
                     <tr key={p.id}>
@@ -253,29 +253,29 @@ function ProductsTableInner() {
                         </div>
                       </td>
 
-                      {/* Metal & Assay */}
+                      {/* Category & Collection */}
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <span className="badge-gold-pill" style={{ width: 'fit-content' }}>Gold</span>
-                          <span style={{ fontSize: '10.5px', color: '#9CA3AF' }}>Placeholder</span>
+                          <span className="badge-gold-pill" style={{ width: 'fit-content' }}>{p.category || 'Fine Jewellery'}</span>
+                          <span style={{ fontSize: '10.5px', color: '#9CA3AF' }}>{p.sku || 'Curated'}</span>
                         </div>
                       </td>
 
                       {/* Category */}
                       <td style={{ color: '#4B5563' }}>
-                        {p.category || 'Gold Bars'}
+                        {p.category || 'Fine Jewellery'}
                       </td>
 
-                      {/* Weight */}
+                      {/* Carat / Weight */}
                       <td style={{ color: '#4B5563' }}>
-                        {p.weight || '1 g'}
+                        {p.weight || '1.50 ct'}
                       </td>
 
                       {/* Price */}
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <strong style={{ color: '#111827', fontWeight: 600 }}>{formattedPrice}</strong>
-                          <span style={{ fontSize: '10.5px', color: '#9CA3AF' }}>+2.5% premium</span>
+                          <span style={{ fontSize: '10.5px', color: '#9CA3AF' }}>Verified GIA/IGI</span>
                         </div>
                       </td>
 
