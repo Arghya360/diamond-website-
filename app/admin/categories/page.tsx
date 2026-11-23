@@ -80,42 +80,45 @@ export default function AdminCategoriesPage() {
     }
   };
 
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
-    setSaving(true);
+    if (!name.trim()) {
+      alert('Please provide a category title.');
+      return;
+    }
 
-    const subcats = subcategoriesStr
+    setSaving(true);
+    const subcategories = subcategoriesStr
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const catData: Omit<Category, 'id'> = {
+    const payload: Partial<Category> = {
       name: name.trim(),
       slug: slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      description: description.trim() || undefined,
-      image: image.trim() || undefined,
-      itemsCountText: itemsCountText.trim() || undefined,
+      description: description.trim(),
+      image,
+      itemsCountText: itemsCountText.trim(),
       displayOrder: Number(displayOrder) || 1,
       published,
       textDark,
-      subcategories: subcats,
+      subcategories,
     };
 
     try {
-      if (editingCat?.id) {
-        await updateCategory(editingCat.id, catData);
+      if (editingCat && editingCat.id) {
+        await updateCategory(editingCat.id, payload);
         setNotice(`Category "${name}" updated successfully.`);
       } else {
-        await createCategory(catData);
+        await createCategory(payload as Omit<Category, 'id'>);
         setNotice(`Category "${name}" created successfully.`);
       }
+
       setShowModal(false);
       await loadCategories();
       setTimeout(() => setNotice(null), 3500);
     } catch (err: any) {
-      alert('Error saving category: ' + err.message);
+      alert('Failed to save category: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -123,158 +126,149 @@ export default function AdminCategoriesPage() {
 
   const handleDelete = async (cat: Category) => {
     if (!cat.id) return;
-    if (!confirm(`Delete category "${cat.name}"? Products in this category will not be deleted.`)) return;
+    if (!confirm(`Are you sure you want to remove the category "${cat.name}"?`)) return;
+
     try {
       await deleteCategory(cat.id);
-      setCategories((prev) => prev.filter((c) => c.id !== cat.id));
-      setNotice(`Category "${cat.name}" deleted.`);
+      setNotice(`Category "${cat.name}" removed.`);
+      await loadCategories();
       setTimeout(() => setNotice(null), 3500);
     } catch (err: any) {
-      alert('Error deleting category: ' + err.message);
+      alert('Failed to delete category: ' + err.message);
     }
   };
 
   return (
-    <>
+    <div className="flex flex-col w-full">
       {notice && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            background: 'var(--dark-obsidian)',
-            color: '#FFFFFF',
-            border: '1px solid var(--primary-gold-border)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '12px 20px',
-            boxShadow: 'var(--shadow-lg)',
-            zIndex: 9999,
-            fontSize: '13px',
-            fontFamily: 'var(--font-title)',
-          }}
-        >
-          {notice}
+        <div className="fixed bottom-6 right-6 z-50 bg-[#003629] text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-[#baeed9]/20 font-body-md animate-fade-in">
+          <span className="material-symbols-outlined text-[20px] text-[#baeed9]">verified</span>
+          <span>{notice}</span>
         </div>
       )}
 
-      {/* Page Header */}
-      <div className="admin-page-hero">
-        <div>
-          <span className="admin-hero-eyebrow">— MERCHANDISE ARCHITECTURE</span>
-          <h1 className="admin-hero-title">Diamond Jewelry Categories</h1>
-          <p className="admin-hero-subtitle">
-            Configure diamond categories, banner cards, subcategory filters, and storefront navigation hierarchy.
-          </p>
+      {/* Header */}
+      <div className="flex flex-col gap-space-sm mb-space-lg">
+        <div className="flex items-center gap-2 font-label-sm text-label-sm uppercase tracking-widest text-outline">
+          <span>Catalogue</span>
+          <span className="text-xs">/</span>
+          <span className="text-secondary font-semibold">Categories</span>
         </div>
-
-        <div className="admin-hero-actions">
-          <button onClick={openAddModal} className="btn-caritas-gold">
-            <span>+</span>
-            <span>Add New Category</span>
-          </button>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
+          <div className="flex flex-col max-w-3xl">
+            <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
+              Diamond &amp; Fine Jewellery Categories
+            </h1>
+            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+              Configure diamond categories, hero showcase cards, subcategory filters, and storefront navigation hierarchy.
+            </p>
+          </div>
+          <div className="flex items-center gap-space-sm shrink-0">
+            <button
+              onClick={openAddModal}
+              className="flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-all shadow-md font-title-md text-title-md"
+            >
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span>+ Add New Category</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Categories Table Card */}
-      <div className="admin-card" style={{ padding: 0 }}>
-        <div className="admin-table-container">
-          <table className="admin-table">
+      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-space-xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr>
-                <th style={{ width: '56px' }}>Banner</th>
-                <th>Category Name</th>
-                <th>Slug</th>
-                <th>Subcategories</th>
-                <th>Item Count Text</th>
-                <th>Display Order</th>
-                <th>Storefront Status</th>
-                <th style={{ textAlign: 'right', paddingRight: '20px' }}>Actions</th>
+              <tr className="bg-surface-container-low text-outline font-label-sm text-label-sm uppercase tracking-wider">
+                <th className="py-3.5 px-6" style={{ width: '80px' }}>Banner</th>
+                <th className="py-3.5 px-6">Category Name</th>
+                <th className="py-3.5 px-6">Slug</th>
+                <th className="py-3.5 px-6">Subcategories</th>
+                <th className="py-3.5 px-6">Item Count</th>
+                <th className="py-3.5 px-6">Order</th>
+                <th className="py-3.5 px-6">Status</th>
+                <th className="py-3.5 px-6 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
               {loading ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                  <td colSpan={8} className="py-12 text-center text-on-surface-variant">
                     Loading categories...
                   </td>
                 </tr>
               ) : categories.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
-                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏷️</div>
-                    <p style={{ margin: '0 0 4px', fontWeight: 600, color: 'var(--text-main)' }}>No categories configured</p>
-                    <button onClick={openAddModal} className="btn-caritas-gold" style={{ marginTop: '12px', fontSize: '12px' }}>
-                      Add Your First Category
-                    </button>
+                  <td colSpan={8} className="py-12 text-center text-on-surface-variant">
+                    <span className="material-symbols-outlined text-[36px] text-outline mb-2 block">category</span>
+                    No categories configured yet.
                   </td>
                 </tr>
               ) : (
                 categories.map((c) => (
-                  <tr key={c.id || c.name}>
-                    <td>
+                  <tr key={c.id || c.name} className="hover:bg-surface-container-low/70 transition-colors">
+                    <td className="py-4 px-6">
                       <div
-                        className="admin-prod-thumb"
+                        className="w-14 h-14 rounded-lg bg-cover bg-center border border-surface-container shadow-xs"
                         style={{
                           backgroundImage: c.image ? `url("${c.image}")` : 'none',
+                          backgroundColor: '#f2f3ff',
                         }}
                       />
                     </td>
-                    <td>
-                      <div className="admin-prod-name">{c.name}</div>
+                    <td className="py-4 px-6">
+                      <div className="font-title-md text-title-md text-on-surface font-semibold">{c.name}</div>
                       {c.description && (
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', maxWidth: '240px', whiteSpace: 'normal' }}>
+                        <div className="font-body-sm text-body-sm text-outline max-w-xs truncate">
                           {c.description}
                         </div>
                       )}
                     </td>
-                    <td>
-                      <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                        /{c.slug}
-                      </span>
+                    <td className="py-4 px-6 font-mono text-outline font-body-sm text-body-sm">
+                      /{c.slug}
                     </td>
-                    <td>
+                    <td className="py-4 px-6">
                       {c.subcategories && c.subcategories.length > 0 ? (
-                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', maxWidth: '220px' }}>
+                        <div className="flex flex-wrap gap-1 max-w-xs">
                           {c.subcategories.map((sub, i) => (
-                            <span key={i} className="badge-caritas badge-gold" style={{ fontSize: '10px' }}>
+                            <span key={i} className="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface">
                               {sub}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>—</span>
+                        <span className="text-outline text-body-sm">—</span>
                       )}
                     </td>
-                    <td>
-                      <span style={{ fontSize: '12.5px', fontWeight: 600 }}>
-                        {c.itemsCountText || '—'}
+                    <td className="py-4 px-6 font-semibold text-on-surface font-title-md text-title-md">
+                      {c.itemsCountText || '—'}
+                    </td>
+                    <td className="py-4 px-6 font-mono text-outline font-body-sm text-body-sm">
+                      {c.displayOrder || 1}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
+                        c.published !== false ? 'bg-primary-fixed text-on-primary-fixed' : 'bg-surface-container text-outline'
+                      }`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                        {c.published !== false ? 'Published' : 'Draft'}
                       </span>
                     </td>
-                    <td>
-                      <span style={{ fontFamily: 'var(--font-title)', fontWeight: 700 }}>
-                        #{c.displayOrder || 1}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge-caritas ${c.published !== false ? 'badge-published' : 'badge-draft'}`}>
-                        {c.published !== false ? '● Live on Store' : '○ Draft'}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right', paddingRight: '20px' }}>
-                      <div style={{ display: 'inline-flex', gap: '8px' }}>
+                    <td className="py-4 px-6 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => openEditModal(c)}
-                          className="btn-caritas-secondary"
-                          style={{ padding: '6px 14px', fontSize: '12px' }}
+                          className="px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-title-md text-title-md transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(c)}
-                          className="btn-caritas-danger"
-                          title="Delete category"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:text-red-700 hover:bg-red-50 transition-colors"
+                          title="Delete Category"
                         >
-                          Delete
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
                         </button>
                       </div>
                     </td>
@@ -286,167 +280,138 @@ export default function AdminCategoriesPage() {
         </div>
       </div>
 
-      {/* ── MODAL: CREATE / EDIT CATEGORY ── */}
+      {/* Modal for Add / Edit Category */}
       {showModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(12, 19, 21, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '24px',
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--border-line)',
-              width: '100%',
-              maxWidth: '560px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: 'var(--shadow-lg)',
-              padding: '28px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0, fontFamily: 'var(--font-title)', fontSize: '18px', color: 'var(--dark-obsidian)' }}>
-                {editingCat ? `Edit Category: ${editingCat.name}` : 'Create New Category'}
-              </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface-container-lowest rounded-2xl max-w-xl w-full p-space-xl shadow-2xl border border-surface-container flex flex-col max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between pb-space-md border-b border-surface-container-low">
+              <div>
+                <span className="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">
+                  Catalogue Configuration
+                </span>
+                <h2 className="font-headline-md text-headline-md text-primary mt-1">
+                  {editingCat ? `Edit Category: ${editingCat.name}` : 'Create New Category'}
+                </h2>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
-                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: 'var(--text-muted)' }}
+                className="w-9 h-9 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-outline transition-colors"
               >
-                ✕
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label className="admin-label">Category Name *</label>
-                <input
-                  type="text"
-                  required
-                  className="admin-input"
-                  placeholder="e.g. Diamond ring"
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="admin-label">Slug</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  placeholder="diamond-ring"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="admin-label">Description</label>
-                <textarea
-                  rows={2}
-                  className="admin-textarea"
-                  placeholder="Bespoke diamond engagement rings..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <ImageUpload
-                  label="Category Banner Photograph"
-                  value={image}
-                  onChange={setImage}
-                  folder="categories"
-                  helpText="Upload a high-resolution category hero banner from your computer."
-                  recommendedSize="1200 × 600px"
-                  aspectRatio="16 / 9"
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label className="admin-label">Items Count Text</label>
+            <form onSubmit={handleSave} className="py-space-md space-y-space-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+                <div className="space-y-1">
+                  <label className="font-label-md text-label-md text-on-surface font-semibold">Category Name</label>
                   <input
                     type="text"
-                    className="admin-input"
-                    placeholder="e.g. 7 Items"
-                    value={itemsCountText}
-                    onChange={(e) => setItemsCountText(e.target.value)}
+                    required
+                    value={name}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
+                    placeholder="e.g. Loose Diamonds"
                   />
                 </div>
-                <div>
-                  <label className="admin-label">Display Order</label>
+                <div className="space-y-1">
+                  <label className="font-label-md text-label-md text-on-surface font-semibold">Slug (URL Path)</label>
                   <input
-                    type="number"
-                    min={1}
-                    className="admin-input"
-                    value={displayOrder}
-                    onChange={(e) => setDisplayOrder(Number(e.target.value))}
+                    type="text"
+                    required
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none font-mono text-sm"
+                    placeholder="e.g. loose-diamonds"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="admin-label">Subcategories (comma separated)</label>
-                <input
-                  type="text"
-                  className="admin-input"
-                  placeholder="Engagement Rings, Eternity Bands, Solitaire Rings"
-                  value={subcategoriesStr}
-                  onChange={(e) => setSubcategoriesStr(e.target.value)}
+              <div className="space-y-1">
+                <label className="font-label-md text-label-md text-on-surface font-semibold">Description</label>
+                <textarea
+                  rows={2}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full p-3 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
+                  placeholder="Curated selection of certified loose diamonds..."
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+              <div className="space-y-2">
+                <label className="font-label-md text-label-md text-on-surface font-semibold">Banner Image (Local Upload or URL)</label>
+                <ImageUpload
+                  value={image}
+                  onChange={(url) => setImage(url)}
+                  folder="categories"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+                <div className="space-y-1">
+                  <label className="font-label-md text-label-md text-on-surface font-semibold">Items Count Text</label>
+                  <input
+                    type="text"
+                    value={itemsCountText}
+                    onChange={(e) => setItemsCountText(e.target.value)}
+                    className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
+                    placeholder="e.g. 12 Items"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-label-md text-label-md text-on-surface font-semibold">Display Order Priority</label>
+                  <input
+                    type="number"
+                    value={displayOrder}
+                    onChange={(e) => setDisplayOrder(Number(e.target.value))}
+                    className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-label-md text-label-md text-on-surface font-semibold">Subcategories (Comma-separated)</label>
+                <input
+                  type="text"
+                  value={subcategoriesStr}
+                  onChange={(e) => setSubcategoriesStr(e.target.value)}
+                  className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
+                  placeholder="e.g. Solitaires, Halo Rings, Eternity Bands"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={published}
                     onChange={(e) => setPublished(e.target.checked)}
+                    className="w-4 h-4 rounded text-primary accent-[#003629]"
                   />
-                  <span>Published on Storefront</span>
-                </label>
-
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={textDark}
-                    onChange={(e) => setTextDark(e.target.checked)}
-                  />
-                  <span>Dark Text on Banner (for light images)</span>
+                  <span className="font-title-md text-title-md text-on-surface">Publish Immediately on Storefront</span>
                 </label>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px', paddingTop: '16px', borderTop: '1px solid var(--border-line)' }}>
+              <div className="pt-space-md border-t border-surface-container-low flex items-center justify-end gap-space-sm">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="btn-caritas-secondary"
+                  className="px-space-md py-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-title-md text-title-md transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn-caritas-gold"
+                  className="px-space-lg py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-title-md text-title-md shadow-md transition-all disabled:opacity-50"
                 >
-                  {saving ? 'Saving Category...' : 'Save Category'}
+                  {saving ? 'Saving...' : editingCat ? 'Update Category' : 'Create Category'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
