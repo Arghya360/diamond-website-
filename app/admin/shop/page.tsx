@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getShopSettings, updateShopSettings, getProducts } from '../../../lib/firebase/admin-service';
 import ImageUpload from '../../../components/admin/ImageUpload';
-import type { ShopSettings, Product } from '../../../types/admin';
 
 interface CuratedItem {
   id: string;
@@ -31,8 +30,8 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
     price: '$64,500',
     statusBadge: 'Direct Atelier',
     tags: [
-      { label: 'Homepage Hero', bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
-      { label: 'Spot #1', bg: 'bg-primary-fixed', text: 'text-primary' },
+      { label: 'Homepage Hero', bg: '#fedeb2', text: '#78603e' },
+      { label: 'Spot #1', bg: '#baeed9', text: '#003629' },
     ],
     visible: true,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDg_0A6olI5NR8AvgSKpdz4Jeq_mWsnAZBiU-E0Hjef26MhVbxS733h2qMvD6sqk0XnTYFRmCDvoC2DY1SfnQmA0aG_Oo3MVIPjmkuad4d7PoK6jVc82OLsaYM8SPsxfXv15B2VjZO-y83YoGxZ-rRde3uDsbUIvpUp_iIzkkSEDYHEQF5l-MF9Vs3cLml7lM_nVrvOmG7lGxO8iF2Ayds__eRBDw1m9LGfbuvTlZ1M',
@@ -47,7 +46,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
     price: '$42,000',
     statusBadge: 'Certified GIA',
     tags: [
-      { label: 'Trending Spotlight', bg: 'bg-surface-container', text: 'text-on-surface-variant' },
+      { label: 'Trending Spotlight', bg: '#eaedff', text: '#404945' },
     ],
     visible: true,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDi0YvrRdmLCmY23in9Xf48uE730OqWjPonq2Pvje1b3-WI2c6UHwR3H2tlgN5K1zHpc8vLv0bHud8vM49y2pAgTJu2yhFe2q0d826I6NamdrfPHZRJr7___lsluW9vzf6JCZhrXIprv93xtIE0hNd7x7lK7c0JvhX1BckLWLvFMCr1ZieGID_6Bt7er8__RnUHrZOVG6JY-fCbKeJGTZdmfi3emQVgNo_DQFyAeo-V',
@@ -62,8 +61,8 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
     price: '$18,800',
     statusBadge: 'In Stock (2)',
     tags: [
-      { label: 'New Arrival', bg: 'bg-primary-fixed', text: 'text-primary' },
-      { label: 'Grid #3', bg: 'bg-surface-container', text: 'text-on-surface-variant' },
+      { label: 'New Arrival', bg: '#baeed9', text: '#003629' },
+      { label: 'Grid #3', bg: '#eaedff', text: '#404945' },
     ],
     visible: true,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFXtAP78hDoyEkiBIzc1c3nudwp6OOKdC_z3WfClfM7Wvj-CFSyPmd1hZGkbkZ7Kba03N4mcvq_r2kr58Jgevf1nQrel16EApUXSTf8LWHBxscJEN3fEOY0L1k4w22ZXmw_S1JoLDGwM7-1RjEngt5kWrFSbZIktHYV7s-VLKJUPCVuw479_7yzuEDC2yNOk4ov8sPcee9BQvSXP8nrdlAJ6wSBuCBgmuVzdgcQuB1',
@@ -78,7 +77,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
     price: '$89,000',
     statusBadge: 'Private Viewing',
     tags: [
-      { label: 'VIP Reserved', bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
+      { label: 'VIP Reserved', bg: '#fedeb2', text: '#78603e' },
     ],
     visible: true,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCEDt_xjwiJ3hY4rM1rqUYuEtZ-G7VDSdocHo2N_UM7TMOqzc_TmvirczgPMiQM-1_WJifWO8zPZsjEpLvY284i0kjh-oX3gJWax5QOhPtfbSm8tfqvQ707q8UT9KsB1j7GEEabpWhaCGQWuo4I2KgSPH5ldWS4GTF67q14u6h5gMTom5JvLZs0Y7KlWMTb6aIA6SkARTFL0IcWvDxq21ii8AWAVr_yrSX55Ehgv1uL',
@@ -93,7 +92,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
     price: '$54,000',
     statusBadge: 'SSEF Certified',
     tags: [
-      { label: 'Salon Exclusive', bg: 'bg-surface-container-highest', text: 'text-on-surface' },
+      { label: 'Salon Exclusive', bg: '#dae2fd', text: '#131b2e' },
     ],
     visible: true,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAEuVGT0gIrhf-vUlPaCgc4nM7Ry95j6qFcQSYeBEZ9s5bdGNSPgQXKLozKV8BUUvZO0COqIayzlsH0gULqCBVKeYnaepR5yyfoj4s-KEn9vp4Kim1eQBBDSSJ5cJu8hrbNibLI_QKQ7wYOk89p915WYWVxb_LVlBiCvhtAreVSFPXDa-2C7vjsCQueX9jKR_Kp4tgWxWVCCPB6UhLOx4cI-dxn78ski-J7L5N5LhFK',
@@ -108,7 +107,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
     price: '$31,500',
     statusBadge: 'High Demand',
     tags: [
-      { label: 'Best Seller', bg: 'bg-secondary-fixed-dim', text: 'text-on-secondary-fixed' },
+      { label: 'Best Seller', bg: '#e0c298', text: '#281800' },
     ],
     visible: true,
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVxf8Ssr2XsH9gn6Vujk19OcAfzQ6KGNKhK16Od3nH2VWKgV1GUrFgydPxxMYjZPZK8uLj46bgiKiFCbXYDyTBJi5CyA-CKVCsNH8GhMx_sJLAgVEr7vWrDdGDaMQY-_YDIGSAAiaZWoDaDMR4n5WFD8wT7CTFYEDTgQ6uhgfNzsadeWJVWXE1Il3Xe_1k8UPy2HDRsu4KOFBpcTp8XU_cwTcw-MJ30N8DffHGCXh1',
@@ -131,7 +130,7 @@ export default function AdminShopSettingsPage() {
   const [heroButtonText, setHeroButtonText] = useState('Explore Solitaires');
   const [heroButtonLink, setHeroButtonLink] = useState('/shop/solitaires');
   const [bannerImage, setBannerImage] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuBgLqSodf-JzLBjCzzqrV9TVJgJEzAk_wSfp3Dg_M3TQISbT7OEkrOWeaE_vdcNzJy3UV2Ch8Tn-_P0L7a_TPaV8cOLvfuT6DdLwuM2cuhspWUwRdOOcP7tLfj9EyMba2SZxphn-YHVVkbjLv0NNypVI1x7mORJ0e9_af3ueeX3sQ3YaeNT5GK39nskAVq3pN2lsuDWLSgxt_36_SWw3Cc5xE8ayVRPGUspCgDWJ_07');
-  
+
   // Modals for Hero Editing
   const [editCopyModalOpen, setEditCopyModalOpen] = useState(false);
   const [replaceAssetModalOpen, setReplaceAssetModalOpen] = useState(false);
@@ -182,7 +181,7 @@ export default function AdminShopSettingsPage() {
             price: p.price ? `$${Number(p.price).toLocaleString()}` : '$28,000',
             statusBadge: p.stock && p.stock > 0 ? `In Stock (${p.stock})` : 'Direct Atelier',
             tags: [
-              { label: idx === 0 ? 'Homepage Hero' : 'Featured Selection', bg: idx === 0 ? 'bg-secondary-container' : 'bg-primary-fixed', text: idx === 0 ? 'text-on-secondary-container' : 'text-primary' },
+              { label: idx === 0 ? 'Homepage Hero' : 'Featured Selection', bg: idx === 0 ? '#fedeb2' : '#baeed9', text: idx === 0 ? '#78603e' : '#003629' },
             ],
             visible: p.published !== false,
             image: p.images?.[0]?.url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDg_0A6olI5NR8AvgSKpdz4Jeq_mWsnAZBiU-E0Hjef26MhVbxS733h2qMvD6sqk0XnTYFRmCDvoC2DY1SfnQmA0aG_Oo3MVIPjmkuad4d7PoK6jVc82OLsaYM8SPsxfXv15B2VjZO-y83YoGxZ-rRde3uDsbUIvpUp_iIzkkSEDYHEQF5l-MF9Vs3cLml7lM_nVrvOmG7lGxO8iF2Ayds__eRBDw1m9LGfbuvTlZ1M',
@@ -276,73 +275,74 @@ export default function AdminShopSettingsPage() {
   ];
 
   return (
-    <div className="flex flex-col w-full font-body-md text-on-surface antialiased">
+    <div className="flex flex-col w-full font-body-md text-on-surface antialiased" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {notice && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#003629] text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-[#baeed9]/20 font-body-md animate-fade-in">
-          <span className="material-symbols-outlined text-[20px] text-[#baeed9]">verified</span>
+        <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9999, backgroundColor: '#003629', color: '#ffffff', padding: '12px 20px', borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: 8, border: '1px solid rgba(186, 238, 217, 0.3)', fontSize: 13, fontWeight: 600 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#baeed9' }}>verified</span>
           <span>{notice}</span>
         </div>
       )}
 
       {/* Top Command & Action Bar */}
-      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-space-md mb-space-lg">
-        <div className="space-y-space-xs">
-          <div className="flex items-center gap-2 font-label-sm text-label-sm text-secondary uppercase tracking-[0.2em]">
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-space-md mb-space-lg" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
+        <div className="space-y-space-xs" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div className="flex items-center gap-2 font-label-sm text-label-sm text-secondary uppercase tracking-[0.2em]" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 10, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#725b38' }}>
             <span>Store Management</span>
-            <span className="text-outline-variant text-[10px]">/</span>
-            <span className="text-primary font-semibold">Frontend CMS</span>
-            <span className="text-outline-variant text-[10px]">/</span>
-            <span className="inline-flex items-center gap-1 text-primary-container px-2 py-0.5 rounded-full bg-primary-fixed/60 font-semibold tracking-normal text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            <span style={{ color: '#c0c9c3', fontSize: 10 }}>/</span>
+            <span style={{ color: '#003629', fontWeight: 700 }}>Frontend CMS</span>
+            <span style={{ color: '#c0c9c3', fontSize: 10 }}>/</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#1b4d3e', padding: '2px 8px', borderRadius: 999, backgroundColor: 'rgba(186, 238, 217, 0.6)', fontWeight: 700, letterSpacing: 'normal', fontSize: 11 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#003629', display: 'inline-block' }}></span>
               CDN Live • Synced 14s ago
             </span>
           </div>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+          <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 32, fontWeight: 500, color: '#131b2e', margin: 0, letterSpacing: '-0.02em', lineHeight: '40px' }}>
             Shop Page CMS &amp; Merchandising
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+          <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl" style={{ fontSize: 14, color: '#404945', margin: 0, maxWidth: 760, lineHeight: '22px' }}>
             Curate live storefront collections, featured fine jewellery showcases, hero visual merchandising, and granular drag-and-drop order for the Caritas global client experience.
           </p>
         </div>
 
         {/* Global CTA Group */}
-        <div className="flex flex-wrap items-center gap-space-sm shrink-0">
+        <div className="flex flex-wrap items-center gap-space-sm shrink-0" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <Link
             href="/shop"
             target="_blank"
             className="inline-flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-title-md shadow-sm hover:bg-surface-container-low transition-all"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 8, backgroundColor: '#ffffff', color: '#131b2e', border: '1px solid #eaedff', fontSize: 13, fontWeight: 600, textDecoration: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
           >
-            <span className="material-symbols-outlined text-[18px] text-secondary">visibility</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#725b38' }}>visibility</span>
             <span>Preview Live Shop</span>
           </Link>
           <button
             onClick={() => alert('CMS Revisions History: Active v4.8 (Nov 23, 2026). All previous states mirrored to Zurich Cold Vault.')}
             className="inline-flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-title-md shadow-sm hover:bg-surface-container-low transition-all"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 8, backgroundColor: '#ffffff', color: '#131b2e', border: '1px solid #eaedff', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
           >
-            <span className="material-symbols-outlined text-[18px] text-outline">history</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#707974' }}>history</span>
             <span>Revisions</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm">v4.8</span>
+            <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, backgroundColor: '#e2e7ff', color: '#404945', fontWeight: 700 }}>v4.8</span>
           </button>
           <button
             onClick={handlePublish}
             disabled={saving}
-            className={`inline-flex items-center gap-2 px-space-lg py-2.5 rounded-lg bg-primary-container text-on-primary font-title-md text-title-md shadow-md hover:bg-primary transition-all ${
-              publishStatus === 'publishing' ? 'opacity-80 pointer-events-none' : ''
-            }`}
+            className="inline-flex items-center gap-2 px-space-lg py-2.5 rounded-lg bg-primary-container text-on-primary font-title-md text-title-md shadow-md hover:bg-primary transition-all"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 8, backgroundColor: '#1b4d3e', color: '#ffffff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,54,41,0.25)', opacity: publishStatus === 'publishing' ? 0.8 : 1 }}
           >
             {publishStatus === 'publishing' ? (
               <>
-                <span className="material-symbols-outlined animate-spin text-[19px]">refresh</span>
+                <span className="material-symbols-outlined text-[19px]" style={{ fontSize: 19 }}>refresh</span>
                 <span>Deploying to Global CDN...</span>
               </>
             ) : publishStatus === 'published' ? (
               <>
-                <span className="material-symbols-outlined text-[19px] text-secondary-fixed">check_circle</span>
+                <span className="material-symbols-outlined text-[19px]" style={{ fontSize: 19, color: '#fedeb2' }}>check_circle</span>
                 <span>Storefront Published!</span>
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined text-[19px] text-secondary-fixed">publish</span>
+                <span className="material-symbols-outlined text-[19px]" style={{ fontSize: 19, color: '#fedeb2' }}>publish</span>
                 <span>Publish Changes to Shop</span>
               </>
             )}
@@ -350,161 +350,178 @@ export default function AdminShopSettingsPage() {
         </div>
       </div>
 
-      {/* Snapshot Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-lg">
+      {/* Snapshot Analytics Cards (4 Cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-lg" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 24 }}>
         {/* Card 1 */}
-        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">Live Storefront Items</span>
-            <div className="w-8 h-8 rounded-lg bg-primary-fixed/40 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between" style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: 16, border: '1px solid #eaedff', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 110 }}>
+          <div className="flex items-center justify-between" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline" style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Live Storefront Items</span>
+            <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(186, 238, 217, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#003629' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>inventory_2</span>
             </div>
           </div>
-          <div className="mt-space-sm">
-            <div className="font-headline-md text-headline-md text-on-surface tracking-tight">
-              1,428 <span className="font-label-md text-label-md text-outline">Units</span>
+          <div style={{ marginTop: 8 }}>
+            <div className="font-headline-md text-headline-md text-on-surface tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, color: '#131b2e' }}>
+              1,428 <span style={{ fontSize: 12, color: '#707974', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>Units</span>
             </div>
-            <div className="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center gap-1.5">
-              <span className="text-primary font-semibold">6 Collections</span>
-              <span className="text-outline-variant">•</span>
+            <div className="font-body-sm text-body-sm text-on-surface-variant" style={{ fontSize: 12, color: '#404945', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: '#003629', fontWeight: 600 }}>6 Collections</span>
+              <span style={{ color: '#c0c9c3' }}>•</span>
               <span>99.4% In Stock</span>
             </div>
           </div>
         </div>
 
         {/* Card 2 */}
-        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">Showcase Spotlight</span>
-            <div className="w-8 h-8 rounded-lg bg-secondary-container/50 flex items-center justify-center text-secondary">
-              <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between" style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: 16, border: '1px solid #eaedff', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 110 }}>
+          <div className="flex items-center justify-between" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline" style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Showcase Spotlight</span>
+            <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(254, 222, 178, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#725b38' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>auto_awesome</span>
             </div>
           </div>
-          <div className="mt-space-sm">
-            <div className="font-headline-md text-headline-md text-on-surface tracking-tight">
-              8 Pieces <span className="font-label-md text-label-md text-primary">+18.4% CTR</span>
+          <div style={{ marginTop: 8 }}>
+            <div className="font-headline-md text-headline-md text-on-surface tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, color: '#131b2e' }}>
+              8 Pieces <span style={{ fontSize: 12, color: '#003629', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>+18.4% CTR</span>
             </div>
-            <div className="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            <div className="font-body-sm text-body-sm text-on-surface-variant" style={{ fontSize: 12, color: '#404945', marginTop: 4 }}>
               4 Rings, 2 Necklaces, 2 Earrings
             </div>
           </div>
         </div>
 
         {/* Card 3 */}
-        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">Active Promotional Banner</span>
-            <span className="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-semibold uppercase">Live Now</span>
+        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between" style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: 16, border: '1px solid #eaedff', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 110 }}>
+          <div className="flex items-center justify-between" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline" style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Active Promotional Banner</span>
+            <span style={{ padding: '2px 8px', borderRadius: 999, backgroundColor: '#baeed9', color: '#003629', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>Live Now</span>
           </div>
-          <div className="mt-space-sm">
-            <div className="font-title-lg text-title-lg text-on-surface truncate" title="Spring Equinox Haute Solitaire Showcase">
+          <div style={{ marginTop: 8 }}>
+            <div className="font-title-lg text-title-lg text-on-surface truncate" style={{ fontSize: 16, fontWeight: 600, color: '#131b2e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Spring Equinox Showcase
             </div>
-            <div className="font-body-sm text-body-sm text-secondary mt-1 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">confirmation_number</span>
+            <div className="font-body-sm text-body-sm text-secondary" style={{ fontSize: 12, color: '#725b38', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>confirmation_number</span>
               <span>15% Atelier VIP Privilege</span>
             </div>
           </div>
         </div>
 
         {/* Card 4 */}
-        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">Shop Conversion Rate</span>
-            <div className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-              <span className="material-symbols-outlined text-[18px]">query_stats</span>
+        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between" style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: 16, border: '1px solid #eaedff', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 110 }}>
+          <div className="flex items-center justify-between" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline" style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Shop Conversion Rate</span>
+            <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#e2e7ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#404945' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>query_stats</span>
             </div>
           </div>
-          <div className="mt-space-sm">
-            <div className="font-headline-md text-headline-md text-on-surface tracking-tight">
-              3.82% <span className="font-label-md text-label-md text-primary">+0.6% MoM</span>
+          <div style={{ marginTop: 8 }}>
+            <div className="font-headline-md text-headline-md text-on-surface tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, color: '#131b2e' }}>
+              3.82% <span style={{ fontSize: 12, color: '#003629', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>+0.6% MoM</span>
             </div>
-            <div className="font-body-sm text-body-sm text-on-surface-variant mt-1 flex items-center justify-between">
+            <div className="font-body-sm text-body-sm text-on-surface-variant" style={{ fontSize: 12, color: '#404945', marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span>Avg Time: 4m 12s</span>
-              <span className="text-outline text-label-sm">High Engagement</span>
+              <span style={{ color: '#707974', fontSize: 10 }}>High Engagement</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Section Tabs Navigation */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-space-md no-scrollbar">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-space-md py-2 rounded-lg font-title-md text-title-md transition-all whitespace-nowrap ${
-              activeTab === tab
-                ? 'bg-primary text-on-primary shadow-sm font-semibold'
-                : 'bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-space-md" style={{ display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 20 }}>
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className="px-space-md py-2 rounded-lg font-title-md text-title-md transition-all"
+              style={{
+                padding: '8px 16px',
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: isActive ? 600 : 500,
+                border: 'none',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                backgroundColor: isActive ? '#003629' : '#ffffff',
+                color: isActive ? '#ffffff' : '#404945',
+                boxShadow: isActive ? '0 1px 4px rgba(0,54,41,0.2)' : '0 1px 3px rgba(0,0,0,0.02)',
+              }}
+            >
+              {tab}
+            </button>
+          );
+        })}
       </div>
 
       {/* Primary Split Grid: Left 8-col Builder, Right 4-col Preview & Settings */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 24, alignItems: 'start' }}>
         {/* LEFT 8 COLUMNS: Content & Product Grid CMS */}
-        <div className="xl:col-span-8 space-y-space-lg">
+        <div style={{ gridColumn: 'span 8 / span 8', display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Hero Banner Showcase Module */}
-          <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
-            <div className="px-space-lg py-space-md bg-surface-container-low flex items-center justify-between">
-              <div className="flex items-center gap-space-xs">
-                <span className="material-symbols-outlined text-secondary text-[20px]">art_track</span>
-                <span className="font-title-lg text-title-lg text-on-surface">Storefront Hero Billboard Spotlight</span>
+          <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden" style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid #eaedff', boxShadow: '0 1px 4px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+            <div className="px-space-lg py-space-md bg-surface-container-low flex items-center justify-between" style={{ padding: '14px 20px', backgroundColor: '#f2f3ff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #eaedff' }}>
+              <div className="flex items-center gap-space-xs" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="material-symbols-outlined text-secondary" style={{ fontSize: 20, color: '#725b38' }}>art_track</span>
+                <span className="font-title-lg text-title-lg text-on-surface" style={{ fontSize: 15, fontWeight: 700, color: '#131b2e' }}>Storefront Hero Billboard Spotlight</span>
               </div>
-              <div className="flex items-center gap-space-sm">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={displayHero}
-                    onChange={(e) => setDisplayHero(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                  <span className="ml-2 font-label-md text-label-md text-on-surface">Display on /shop</span>
+              <div className="flex items-center gap-space-sm" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', gap: 8 }}>
+                  <div style={{ position: 'relative', width: 36, height: 20 }}>
+                    <input
+                      type="checkbox"
+                      checked={displayHero}
+                      onChange={(e) => setDisplayHero(e.target.checked)}
+                      style={{ opacity: 0, width: 0, height: 0 }}
+                    />
+                    <div style={{ position: 'absolute', inset: 0, borderRadius: 10, backgroundColor: displayHero ? '#003629' : '#c0c9c3', transition: '0.2s' }}></div>
+                    <div style={{ position: 'absolute', top: 2, left: displayHero ? 18 : 2, width: 16, height: 16, borderRadius: '50%', backgroundColor: '#ffffff', transition: '0.2s' }}></div>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#131b2e' }}>Display on /shop</span>
                 </label>
               </div>
             </div>
 
-            <div className="p-space-lg flex flex-col md:flex-row gap-space-lg items-center">
-              <div className="w-full md:w-60 h-36 rounded-lg overflow-hidden relative shrink-0 shadow-sm bg-surface-container-low">
+            <div className="p-space-lg flex flex-col md:flex-row gap-space-lg items-center" style={{ padding: 20, display: 'flex', alignItems: 'center', gap: 20 }}>
+              <div style={{ width: 240, height: 144, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', backgroundColor: '#f2f3ff' }}>
                 <img
-                  className="w-full h-full object-cover"
                   src={bannerImage}
-                  alt="Hero Billboard Showcase"
+                  alt="Hero Banner"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
-                <span className="absolute top-2 left-2 bg-primary/90 text-on-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span style={{ position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(0, 54, 41, 0.9)', color: '#ffffff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Active Billboard
                 </span>
               </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-label-sm text-label-sm text-secondary uppercase tracking-[0.15em] font-semibold">
+
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#725b38' }}>
                     {heroBadge}
                   </span>
-                  <span className="text-outline-variant">•</span>
-                  <span className="font-label-sm text-label-sm text-outline">Target URL: {heroButtonLink}</span>
+                  <span style={{ color: '#c0c9c3' }}>•</span>
+                  <span style={{ fontSize: 11, color: '#707974' }}>Target URL: {heroButtonLink}</span>
                 </div>
-                <h2 className="font-headline-md text-headline-md text-on-surface">{heroTitle}</h2>
-                <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+                <h2 style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 22, fontWeight: 600, color: '#131b2e', margin: 0, lineHeight: '28px' }}>
+                  {heroTitle}
+                </h2>
+                <p style={{ fontSize: 13, color: '#404945', margin: 0, lineHeight: '20px' }}>
                   {heroSubtitle}
                 </p>
-                <div className="pt-1 flex items-center gap-space-sm flex-wrap">
+                <div style={{ paddingTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <button
                     onClick={() => setEditCopyModalOpen(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-primary font-title-md text-title-md hover:bg-surface-container transition-all"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: 6, backgroundColor: '#f2f3ff', color: '#003629', fontSize: 12, fontWeight: 600, border: '1px solid #eaedff', cursor: 'pointer' }}
                   >
-                    <span className="material-symbols-outlined text-[16px]">edit_note</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit_note</span>
                     <span>Edit Copy &amp; CTA</span>
                   </button>
                   <button
                     onClick={() => setReplaceAssetModalOpen(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant font-title-md text-title-md hover:bg-surface-container transition-all"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: 6, backgroundColor: '#f2f3ff', color: '#404945', fontSize: 12, fontWeight: 600, border: '1px solid #eaedff', cursor: 'pointer' }}
                   >
-                    <span className="material-symbols-outlined text-[16px]">image</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>image</span>
                     <span>Replace Creative Asset</span>
                   </button>
                 </div>
@@ -513,41 +530,45 @@ export default function AdminShopSettingsPage() {
           </div>
 
           {/* Curated Product Display & Merchandising Grid */}
-          <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden" style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid #eaedff', boxShadow: '0 1px 4px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
             {/* Module Header */}
-            <div className="px-space-lg py-space-md bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+            <div style={{ padding: '16px 20px', backgroundColor: '#f2f3ff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #eaedff', flexWrap: 'wrap', gap: 12 }}>
               <div>
-                <h3 className="font-headline-md text-headline-md text-on-surface">Live Storefront Catalogue &amp; Priority Ordering</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">Drag to calibrate storefront ordering or apply batch showroom rules.</p>
+                <h3 style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 20, fontWeight: 600, color: '#131b2e', margin: 0 }}>
+                  Live Storefront Catalogue &amp; Priority Ordering
+                </h3>
+                <p style={{ fontSize: 12, color: '#404945', margin: '2px 0 0' }}>
+                  Drag to calibrate storefront ordering or apply batch showroom rules.
+                </p>
               </div>
               <Link
                 href="/admin/products/new"
-                className="inline-flex items-center gap-2 px-space-md py-2 rounded-lg bg-primary text-on-primary font-title-md text-title-md shadow-sm hover:bg-primary-container transition-all shrink-0"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, backgroundColor: '#003629', color: '#ffffff', fontSize: 12.5, fontWeight: 600, textDecoration: 'none', boxShadow: '0 2px 6px rgba(0,54,41,0.2)' }}
               >
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#fedeb2' }}>add_circle</span>
                 <span>+ Add Products to Showcase</span>
               </Link>
             </div>
 
             {/* Merchandising Controls Toolbar */}
-            <div className="p-space-md bg-surface-bright flex flex-wrap items-center justify-between gap-space-md">
-              <div className="flex flex-1 min-w-[260px] items-center relative">
-                <span className="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span>
+            <div style={{ padding: 14, backgroundColor: '#faf8ff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, borderBottom: '1px solid #eaedff' }}>
+              <div style={{ position: 'relative', flex: 1, minWidth: 260 }}>
+                <span className="material-symbols-outlined" style={{ position: 'absolute', left: 10, top: 10, fontSize: 18, color: '#707974' }}>search</span>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface-container-lowest text-body-md font-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
                   placeholder="Filter curated shop products by SKU, title or stone..."
+                  style={{ width: '100%', height: 38, paddingLeft: 36, paddingRight: 12, borderRadius: 8, border: '1px solid #eaedff', backgroundColor: '#ffffff', fontSize: 12.5, color: '#131b2e', outline: 'none' }}
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-space-sm">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 {/* Category Filter Dropdown */}
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="h-10 px-3 bg-surface-container-lowest text-on-surface font-title-md text-title-md rounded-lg focus:outline-none focus:ring-1 focus:ring-primary shadow-xs cursor-pointer"
+                  style={{ height: 38, padding: '0 12px', backgroundColor: '#ffffff', color: '#131b2e', fontSize: 12.5, fontWeight: 600, borderRadius: 8, border: '1px solid #eaedff', outline: 'none', cursor: 'pointer' }}
                 >
                   <option value="All">All Collections (Showing All 6)</option>
                   <option value="Engagement Rings">Engagement &amp; Solitaire Rings</option>
@@ -562,7 +583,7 @@ export default function AdminShopSettingsPage() {
                 <select
                   value={selectedSort}
                   onChange={(e) => setSelectedSort(e.target.value)}
-                  className="h-10 px-3 bg-surface-container-lowest text-on-surface font-title-md text-title-md rounded-lg focus:outline-none focus:ring-1 focus:ring-primary shadow-xs cursor-pointer"
+                  style={{ height: 38, padding: '0 12px', backgroundColor: '#ffffff', color: '#131b2e', fontSize: 12.5, fontWeight: 600, borderRadius: 8, border: '1px solid #eaedff', outline: 'none', cursor: 'pointer' }}
                 >
                   <option value="manual">Display Priority: Manual Drag-and-Drop</option>
                   <option value="price_desc">Price: High to Low (VIP First)</option>
@@ -571,107 +592,116 @@ export default function AdminShopSettingsPage() {
                 </select>
 
                 {/* Hidden Stock Switch */}
-                <label className="inline-flex items-center gap-2 px-3 py-2 bg-surface-container-lowest rounded-lg cursor-pointer shadow-xs">
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', backgroundColor: '#ffffff', borderRadius: 8, border: '1px solid #eaedff', fontSize: 12, color: '#131b2e', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={includeOutOfStock}
                     onChange={(e) => setIncludeOutOfStock(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                    style={{ accentColor: '#003629' }}
                   />
-                  <span className="font-body-sm text-body-sm text-on-surface">Include Out of Stock</span>
+                  <span>Include Out of Stock</span>
                 </label>
               </div>
             </div>
 
             {/* Curated Product Items List / Table */}
-            <div className="overflow-x-auto">
-              <div className="min-w-[760px] flex flex-col divide-y divide-surface-container">
+            <div style={{ overflowX: 'auto' }}>
+              <div style={{ minWidth: 760, display: 'flex', flexDirection: 'column' }}>
                 {/* Table Header */}
-                <div className="grid grid-cols-12 px-space-md py-3 bg-surface-container-low font-label-sm text-label-sm uppercase tracking-wider text-outline">
-                  <div className="col-span-1 text-center">Rank</div>
-                  <div className="col-span-5">Jewellery Piece &amp; Specifications</div>
-                  <div className="col-span-2">Retail Valuation</div>
-                  <div className="col-span-2">Merchandising Tags</div>
-                  <div className="col-span-1 text-center">Visibility</div>
-                  <div className="col-span-1 text-right">Actions</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', padding: '10px 16px', backgroundColor: '#f2f3ff', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974', borderBottom: '1px solid #eaedff' }}>
+                  <div style={{ gridColumn: 'span 1 / span 1', textAlign: 'center' }}>Rank</div>
+                  <div style={{ gridColumn: 'span 5 / span 5' }}>Jewellery Piece &amp; Specifications</div>
+                  <div style={{ gridColumn: 'span 2 / span 2' }}>Retail Valuation</div>
+                  <div style={{ gridColumn: 'span 2 / span 2' }}>Merchandising Tags</div>
+                  <div style={{ gridColumn: 'span 1 / span 1', textAlign: 'center' }}>Visibility</div>
+                  <div style={{ gridColumn: 'span 1 / span 1', textAlign: 'right' }}>Actions</div>
                 </div>
 
                 {/* Product Rows */}
                 {filteredItems.map((item) => (
                   <div
                     key={item.id}
-                    className="grid grid-cols-12 items-center px-space-md py-3.5 hover:bg-surface-container-low/70 transition-colors group"
+                    style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', alignItems: 'center', padding: '14px 16px', borderBottom: '1px solid #eaedff', transition: 'background-color 0.15s' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(242, 243, 255, 0.7)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    <div className="col-span-1 flex items-center justify-center gap-1">
-                      <span className="material-symbols-outlined text-outline cursor-grab active:cursor-grabbing text-[18px]">
+                    {/* Rank */}
+                    <div style={{ gridColumn: 'span 1 / span 1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#707974', cursor: 'grab' }}>
                         drag_indicator
                       </span>
-                      <span className="font-title-md text-title-md font-bold text-primary">#{item.rank}</span>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: '#003629' }}>#{item.rank}</span>
                     </div>
 
-                    <div className="col-span-5 flex items-center gap-space-sm">
-                      <div className="w-14 h-14 rounded-lg overflow-hidden bg-surface-container shrink-0 shadow-xs">
-                        <img
-                          className="w-full h-full object-cover"
-                          src={item.image}
-                          alt={item.title}
-                        />
+                    {/* Product & Specs */}
+                    <div style={{ gridColumn: 'span 5 / span 5', display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 8, overflow: 'hidden', backgroundColor: '#eaedff', flexShrink: 0 }}>
+                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
-                      <div className="min-w-0">
-                        <div className="font-title-md text-title-md text-on-surface truncate font-semibold">
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#131b2e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {item.title}
                         </div>
-                        <div className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5">
-                          <span className="text-outline font-mono text-[12px]">{item.sku}</span>
+                        <div style={{ fontSize: 11.5, color: '#404945', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                          <span style={{ fontFamily: 'monospace', color: '#707974', fontSize: 11 }}>{item.sku}</span>
                           <span>•</span>
-                          <span className="text-secondary font-medium">{item.specs}</span>
+                          <span style={{ color: '#725b38', fontWeight: 600 }}>{item.specs}</span>
                         </div>
-                        <div className="text-[11px] text-outline">{item.category}</div>
+                        <div style={{ fontSize: 11, color: '#707974', marginTop: 1 }}>{item.category}</div>
                       </div>
                     </div>
 
-                    <div className="col-span-2">
-                      <div className="font-title-md text-title-md text-on-surface font-semibold">{item.price}</div>
-                      <div className="font-label-sm text-label-sm text-primary uppercase">{item.statusBadge}</div>
+                    {/* Valuation */}
+                    <div style={{ gridColumn: 'span 2 / span 2' }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#131b2e' }}>{item.price}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: '#003629', letterSpacing: '0.04em' }}>
+                        {item.statusBadge}
+                      </div>
                     </div>
 
-                    <div className="col-span-2 flex flex-wrap gap-1">
+                    {/* Tags */}
+                    <div style={{ gridColumn: 'span 2 / span 2', display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                       {item.tags.map((tag, tIdx) => (
                         <span
                           key={tIdx}
-                          className={`px-2 py-0.5 rounded-full font-label-sm text-label-sm ${tag.bg} ${tag.text}`}
+                          style={{ padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 700, backgroundColor: tag.bg, color: tag.text }}
                         >
                           {tag.label}
                         </span>
                       ))}
                     </div>
 
-                    <div className="col-span-1 flex justify-center">
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={item.visible}
-                          onChange={() => toggleItemVisibility(item.id)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-7 h-4 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+                    {/* Visibility Switch */}
+                    <div style={{ gridColumn: 'span 1 / span 1', display: 'flex', justifyContent: 'center' }}>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+                        <div style={{ position: 'relative', width: 28, height: 16 }}>
+                          <input
+                            type="checkbox"
+                            checked={item.visible}
+                            onChange={() => toggleItemVisibility(item.id)}
+                            style={{ opacity: 0, width: 0, height: 0 }}
+                          />
+                          <div style={{ position: 'absolute', inset: 0, borderRadius: 8, backgroundColor: item.visible ? '#003629' : '#c0c9c3', transition: '0.2s' }}></div>
+                          <div style={{ position: 'absolute', top: 2, left: item.visible ? 14 : 2, width: 12, height: 12, borderRadius: '50%', backgroundColor: '#ffffff', transition: '0.2s' }}></div>
+                        </div>
                       </label>
                     </div>
 
-                    <div className="col-span-1 flex items-center justify-end gap-1">
+                    {/* Actions */}
+                    <div style={{ gridColumn: 'span 1 / span 1', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
                       <Link
-                        href={`/admin/products`}
-                        className="p-1 rounded hover:bg-surface-container text-on-surface-variant"
+                        href="/admin/products"
+                        style={{ padding: 4, borderRadius: 4, color: '#404945', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}
                         title="Quick Edit"
                       >
-                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
                       </Link>
                       <button
                         onClick={() => alert(`Options for ${item.title}:\n- Set as Showcase Hero\n- Remove from queue\n- Recalibrate priority`)}
-                        className="p-1 rounded hover:bg-surface-container text-on-surface-variant"
+                        style={{ padding: 4, borderRadius: 4, color: '#404945', background: 'none', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
                         title="Options"
                       >
-                        <span className="material-symbols-outlined text-[18px]">more_vert</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>more_vert</span>
                       </button>
                     </div>
                   </div>
@@ -680,20 +710,20 @@ export default function AdminShopSettingsPage() {
             </div>
 
             {/* Batch Multi-Select Action Bar */}
-            <div className="p-space-md bg-surface-container-low flex flex-wrap items-center justify-between gap-space-sm">
-              <div className="flex items-center gap-space-sm text-body-sm text-on-surface-variant font-body-sm">
-                <span className="font-semibold text-on-surface">{filteredItems.length} of 1,428</span> items in current showcase queue
+            <div style={{ padding: '14px 20px', backgroundColor: '#f2f3ff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, borderTop: '1px solid #eaedff' }}>
+              <div style={{ fontSize: 12.5, color: '#404945' }}>
+                <span style={{ fontWeight: 700, color: '#131b2e' }}>{filteredItems.length} of 1,428</span> items in current showcase queue
               </div>
-              <div className="flex items-center gap-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => alert('Selected items designated as Featured Collection.')}
-                  className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container shadow-xs"
+                  style={{ padding: '6px 14px', borderRadius: 8, backgroundColor: '#ffffff', color: '#131b2e', border: '1px solid #eaedff', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
                 >
                   Set Selected as Featured
                 </button>
                 <button
                   onClick={() => alert('Atelier Luxury Ribbon Badge applied.')}
-                  className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container shadow-xs"
+                  style={{ padding: '6px 14px', borderRadius: 8, backgroundColor: '#ffffff', color: '#131b2e', border: '1px solid #eaedff', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
                 >
                   Apply Badge
                 </button>
@@ -702,7 +732,7 @@ export default function AdminShopSettingsPage() {
                     setNotice('Vault inventory synchronized in realtime.');
                     setTimeout(() => setNotice(null), 2500);
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md hover:bg-primary-fixed shadow-xs"
+                  style={{ padding: '6px 14px', borderRadius: 8, backgroundColor: '#ffffff', color: '#003629', border: '1px solid #baeed9', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
                 >
                   Sync Inventory Realtime
                 </button>
@@ -712,51 +742,41 @@ export default function AdminShopSettingsPage() {
         </div>
 
         {/* RIGHT 4 COLUMNS: Live Preview & Page Customizer Drawer */}
-        <div className="xl:col-span-4 space-y-space-lg">
+        <div style={{ gridColumn: 'span 4 / span 4', display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Interactive Miniature /shop Preview */}
-          <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm space-y-space-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
-                <span className="font-title-md text-title-md text-on-surface font-semibold">Storefront Live Canvas</span>
+          <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm space-y-space-md" style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: 16, border: '1px solid #eaedff', boxShadow: '0 1px 4px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#003629', display: 'inline-block' }}></span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#131b2e' }}>Storefront Live Canvas</span>
               </div>
-              <div className="flex items-center p-0.5 rounded-lg bg-surface-container">
+              <div style={{ display: 'flex', alignItems: 'center', padding: 2, borderRadius: 8, backgroundColor: '#eaedff' }}>
                 <button
                   onClick={() => setPreviewDevice('desktop')}
-                  className={`p-1 rounded transition-all ${
-                    previewDevice === 'desktop'
-                      ? 'text-primary bg-surface-container-lowest shadow-xs'
-                      : 'text-outline hover:text-on-surface'
-                  }`}
+                  style={{ padding: 4, borderRadius: 6, border: 'none', backgroundColor: previewDevice === 'desktop' ? '#ffffff' : 'transparent', color: previewDevice === 'desktop' ? '#003629' : '#707974', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                   title="Desktop Preview"
                 >
-                  <span className="material-symbols-outlined text-[16px]">desktop_windows</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>desktop_windows</span>
                 </button>
                 <button
                   onClick={() => setPreviewDevice('mobile')}
-                  className={`p-1 rounded transition-all ${
-                    previewDevice === 'mobile'
-                      ? 'text-primary bg-surface-container-lowest shadow-xs'
-                      : 'text-outline hover:text-on-surface'
-                  }`}
+                  style={{ padding: 4, borderRadius: 6, border: 'none', backgroundColor: previewDevice === 'mobile' ? '#ffffff' : 'transparent', color: previewDevice === 'mobile' ? '#003629' : '#707974', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                   title="Mobile Preview"
                 >
-                  <span className="material-symbols-outlined text-[16px]">smartphone</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>smartphone</span>
                 </button>
               </div>
             </div>
 
             {/* Miniature Browser Mockup Frame */}
-            <div className={`rounded-lg bg-surface-container-low p-2 shadow-inner transition-all ${
-              previewDevice === 'mobile' ? 'max-w-[260px] mx-auto' : 'w-full'
-            }`}>
-              <div className="bg-surface-container-lowest rounded-md p-3 space-y-2.5">
+            <div style={{ borderRadius: 8, backgroundColor: '#f2f3ff', padding: 8, boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.04)', maxWidth: previewDevice === 'mobile' ? 240 : '100%', margin: previewDevice === 'mobile' ? '0 auto' : '0', transition: 'max-width 0.2s' }}>
+              <div style={{ backgroundColor: '#ffffff', borderRadius: 6, padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {/* Mock Header */}
-                <div className="flex items-center justify-between pb-2 border-b border-surface-container">
-                  <span className="font-headline-sm text-[11px] tracking-[0.2em] font-serif text-primary font-bold">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid #eaedff' }}>
+                  <span style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', color: '#003629' }}>
                     CARITAS
                   </span>
-                  <div className="flex items-center gap-1.5 text-[9px] text-outline uppercase tracking-wider">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>
                     <span>Rings</span>
                     <span>Necklaces</span>
                     <span>Watches</span>
@@ -765,82 +785,100 @@ export default function AdminShopSettingsPage() {
 
                 {/* Mini Billboard */}
                 {displayHero && (
-                  <div className="h-16 rounded bg-primary-container p-2 flex flex-col justify-end text-on-primary relative overflow-hidden">
-                    <div className="absolute -right-2 -bottom-2 w-16 h-16 rounded-full bg-secondary/30 blur-sm"></div>
-                    <span className="text-[8px] uppercase tracking-widest text-secondary-fixed">
+                  <div style={{ height: 64, borderRadius: 6, backgroundColor: '#1b4d3e', padding: 8, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', color: '#ffffff', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', right: -8, bottom: -8, width: 64, height: 64, borderRadius: '50%', backgroundColor: 'rgba(114, 91, 56, 0.3)', filter: 'blur(4px)' }}></div>
+                    <span style={{ fontSize: 7, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#fedeb2' }}>
                       {heroBadge}
                     </span>
-                    <span className="text-[10px] font-headline-md font-serif leading-tight truncate">
+                    <span style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 10, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {heroTitle}
                     </span>
                   </div>
                 )}
 
                 {/* Mini Product Cards Grid (4 cols preview) */}
-                <div className={`grid gap-1.5 pt-1 ${previewDevice === 'mobile' ? 'grid-cols-2' : 'grid-cols-4'}`}>
+                <div style={{ display: 'grid', gridTemplateColumns: previewDevice === 'mobile' ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 6, paddingTop: 4 }}>
                   {filteredItems.slice(0, 4).map((mItem, idx) => (
-                    <div key={idx} className="bg-surface-container-low p-1 rounded flex flex-col items-center">
-                      <div className="w-full h-8 rounded bg-surface-container-high mb-1 overflow-hidden">
-                        <img src={mItem.image} alt="" className="w-full h-full object-cover" />
+                    <div key={idx} style={{ backgroundColor: '#f2f3ff', padding: 4, borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ width: '100%', height: 32, borderRadius: 4, backgroundColor: '#e2e7ff', marginBottom: 4, overflow: 'hidden' }}>
+                        <img src={mItem.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
-                      <div className="w-full h-1 bg-outline-variant rounded"></div>
-                      <div className="w-8 h-1 bg-secondary rounded mt-0.5"></div>
+                      <div style={{ width: '100%', height: 3, backgroundColor: '#c0c9c3', borderRadius: 2 }}></div>
+                      <div style={{ width: 20, height: 3, backgroundColor: '#725b38', borderRadius: 2, marginTop: 2 }}></div>
                     </div>
                   ))}
                 </div>
 
-                <div className="text-center pt-1">
-                  <span className="text-[8px] text-outline font-mono">caritasluxury.com/shop</span>
+                <div style={{ textAlign: 'center', paddingTop: 4 }}>
+                  <span style={{ fontSize: 8, color: '#707974', fontFamily: 'monospace' }}>caritasluxury.com/shop</span>
                 </div>
               </div>
             </div>
 
-            <div className="text-body-sm text-body-sm text-outline text-center">
+            <div style={{ fontSize: 11, color: '#707974', textAlign: 'center' }}>
               Preview rendered at 1:4 scale with responsive breakpoint simulation.
             </div>
           </div>
 
           {/* Quick Customizer & Storefront Rules Accordion */}
-          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
-            <div className="flex items-center gap-space-xs">
-              <span className="material-symbols-outlined text-secondary text-[20px]">tune</span>
-              <h4 className="font-title-lg text-title-lg text-on-surface font-semibold">Storefront Rules &amp; Presentation</h4>
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md" style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: 20, border: '1px solid #eaedff', boxShadow: '0 1px 4px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span className="material-symbols-outlined text-secondary" style={{ fontSize: 20, color: '#725b38' }}>tune</span>
+              <h4 style={{ fontSize: 15, fontWeight: 700, color: '#131b2e', margin: 0 }}>Storefront Rules &amp; Presentation</h4>
             </div>
 
             {/* Setting 1: Grid Layout Mode */}
-            <div className="space-y-1.5">
-              <label className="font-label-md text-label-md text-on-surface font-semibold">Grid Layout Configuration</label>
-              <div className="grid grid-cols-3 gap-1.5">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: '#131b2e' }}>Grid Layout Configuration</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                 <button
                   type="button"
                   onClick={() => setGridLayout('4-col')}
-                  className={`px-2 py-2 rounded-lg font-label-md text-label-md font-semibold text-center transition-all ${
-                    gridLayout === '4-col'
-                      ? 'bg-primary-fixed/60 text-primary border border-primary/20'
-                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
+                  style={{
+                    padding: '8px',
+                    borderRadius: 8,
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    border: gridLayout === '4-col' ? '1px solid rgba(0,54,41,0.2)' : '1px solid #eaedff',
+                    backgroundColor: gridLayout === '4-col' ? '#baeed9' : '#eaedff',
+                    color: gridLayout === '4-col' ? '#003629' : '#404945',
+                  }}
                 >
                   4-Col Luxury
                 </button>
                 <button
                   type="button"
                   onClick={() => setGridLayout('3-col')}
-                  className={`px-2 py-2 rounded-lg font-label-md text-label-md font-semibold text-center transition-all ${
-                    gridLayout === '3-col'
-                      ? 'bg-primary-fixed/60 text-primary border border-primary/20'
-                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
+                  style={{
+                    padding: '8px',
+                    borderRadius: 8,
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    border: gridLayout === '3-col' ? '1px solid rgba(0,54,41,0.2)' : '1px solid #eaedff',
+                    backgroundColor: gridLayout === '3-col' ? '#baeed9' : '#eaedff',
+                    color: gridLayout === '3-col' ? '#003629' : '#404945',
+                  }}
                 >
                   3-Col Editorial
                 </button>
                 <button
                   type="button"
                   onClick={() => setGridLayout('lookbook')}
-                  className={`px-2 py-2 rounded-lg font-label-md text-label-md font-semibold text-center transition-all ${
-                    gridLayout === 'lookbook'
-                      ? 'bg-primary-fixed/60 text-primary border border-primary/20'
-                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
+                  style={{
+                    padding: '8px',
+                    borderRadius: 8,
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    border: gridLayout === 'lookbook' ? '1px solid rgba(0,54,41,0.2)' : '1px solid #eaedff',
+                    backgroundColor: gridLayout === 'lookbook' ? '#baeed9' : '#eaedff',
+                    color: gridLayout === 'lookbook' ? '#003629' : '#404945',
+                  }}
                 >
                   Lookbook
                 </button>
@@ -848,12 +886,12 @@ export default function AdminShopSettingsPage() {
             </div>
 
             {/* Setting 2: Density / Pagination */}
-            <div className="space-y-1.5">
-              <label className="font-label-md text-label-md text-on-surface font-semibold">Pieces Displayed Per Page</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: '#131b2e' }}>Pieces Displayed Per Page</label>
               <select
                 value={itemsPerPage}
                 onChange={(e) => setItemsPerPage(e.target.value)}
-                className="w-full h-10 px-3 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
+                style={{ width: '100%', height: 38, padding: '0 12px', backgroundColor: '#f2f3ff', color: '#131b2e', fontSize: 12.5, borderRadius: 8, border: '1px solid #eaedff', outline: 'none', cursor: 'pointer' }}
               >
                 <option value="24">24 Pieces (Atelier Standard Recommended)</option>
                 <option value="12">12 Pieces (High Breathing Room)</option>
@@ -863,55 +901,55 @@ export default function AdminShopSettingsPage() {
             </div>
 
             {/* Setting 3: Card Meta Badges Toggle */}
-            <div className="space-y-2">
-              <label className="font-label-md text-label-md text-on-surface font-semibold">Client Card Attribute Badging</label>
-              <div className="space-y-2">
-                <label className="flex items-center justify-between text-body-sm font-body-sm text-on-surface cursor-pointer">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: '#131b2e' }}>Client Card Attribute Badging</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: '#131b2e', cursor: 'pointer' }}>
                   <span>Show Carat Weight &amp; Metal Purity</span>
                   <input
                     type="checkbox"
                     checked={badgeCarat}
                     onChange={(e) => setBadgeCarat(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                    style={{ accentColor: '#003629' }}
                   />
                 </label>
-                <label className="flex items-center justify-between text-body-sm font-body-sm text-on-surface cursor-pointer">
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: '#131b2e', cursor: 'pointer' }}>
                   <span>Display GIA/IGI Certification Inscription</span>
                   <input
                     type="checkbox"
                     checked={badgeGia}
                     onChange={(e) => setBadgeGia(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                    style={{ accentColor: '#003629' }}
                   />
                 </label>
-                <label className="flex items-center justify-between text-body-sm font-body-sm text-on-surface cursor-pointer">
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: '#131b2e', cursor: 'pointer' }}>
                   <span>Enable &quot;Price on Request&quot; for &gt; $100k</span>
                   <input
                     type="checkbox"
                     checked={badgePriceOnReq}
                     onChange={(e) => setBadgePriceOnReq(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                    style={{ accentColor: '#003629' }}
                   />
                 </label>
-                <label className="flex items-center justify-between text-body-sm font-body-sm text-on-surface cursor-pointer">
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: '#131b2e', cursor: 'pointer' }}>
                   <span>Show &quot;New Arrival&quot; Ribbon for &lt; 30 Days</span>
                   <input
                     type="checkbox"
                     checked={badgeNewArrival}
                     onChange={(e) => setBadgeNewArrival(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                    style={{ accentColor: '#003629' }}
                   />
                 </label>
               </div>
             </div>
 
             {/* Setting 4: Currency & VIP Gateway */}
-            <div className="p-space-md rounded-lg bg-surface-container-low space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">Price Display Protocol</span>
-                <span className="font-label-sm text-label-sm text-primary font-semibold">USD Default</span>
+            <div style={{ padding: 14, borderRadius: 8, backgroundColor: '#f2f3ff', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Price Display Protocol</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#003629' }}>USD Default</span>
               </div>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <p style={{ fontSize: 11.5, color: '#404945', margin: 0, lineHeight: '16px' }}>
                 Live multi-currency geolocation active. High-net-worth VIP concierge prompt triggers after 90 seconds of browsing.
               </p>
             </div>
@@ -920,9 +958,9 @@ export default function AdminShopSettingsPage() {
             <button
               onClick={handleUpdateRules}
               disabled={saving}
-              className="w-full py-2.5 rounded-lg bg-surface-container text-on-surface font-title-md text-title-md hover:bg-surface-container-high transition-all flex items-center justify-center gap-1.5 cursor-pointer font-semibold"
+              style={{ width: '100%', padding: '10px', borderRadius: 8, backgroundColor: '#eaedff', color: '#131b2e', fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background-color 0.15s' }}
             >
-              <span className="material-symbols-outlined text-[18px] text-primary">save</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#003629' }}>save</span>
               <span>{saving ? 'Updating...' : 'Update Shop Settings'}</span>
             </button>
           </div>
@@ -931,85 +969,85 @@ export default function AdminShopSettingsPage() {
 
       {/* Modal: Edit Copy & CTA */}
       {editCopyModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface-container-lowest rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-surface-container">
-              <h3 className="font-headline-sm text-headline-sm text-on-surface">Edit Billboard Copy &amp; Target</h3>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: 16, maxWidth: 560, width: '100%', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #eaedff' }}>
+              <h3 style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 20, color: '#131b2e', margin: 0 }}>Edit Billboard Copy &amp; Target</h3>
               <button
                 onClick={() => setEditCopyModalOpen(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:text-on-surface"
+                style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: 'none', color: '#707974', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
-                <label className="font-label-md text-label-md text-on-surface font-semibold block mb-1">
+                <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#707974', display: 'block', marginBottom: 4 }}>
                   Headline Campaign (Super-Title)
                 </label>
                 <input
                   type="text"
                   value={heroBadge}
                   onChange={(e) => setHeroBadge(e.target.value)}
-                  className="w-full h-11 px-3.5 bg-surface-container-low rounded-lg text-on-surface font-body-md focus:outline-none"
+                  style={{ width: '100%', height: 40, padding: '0 12px', backgroundColor: '#f2f3ff', borderRadius: 8, border: '1px solid #eaedff', color: '#131b2e', fontSize: 13, outline: 'none' }}
                 />
               </div>
 
               <div>
-                <label className="font-label-md text-label-md text-on-surface font-semibold block mb-1">
+                <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#707974', display: 'block', marginBottom: 4 }}>
                   Main Headline
                 </label>
                 <input
                   type="text"
                   value={heroTitle}
                   onChange={(e) => setHeroTitle(e.target.value)}
-                  className="w-full h-11 px-3.5 bg-surface-container-low rounded-lg text-on-surface font-body-md focus:outline-none"
+                  style={{ width: '100%', height: 40, padding: '0 12px', backgroundColor: '#f2f3ff', borderRadius: 8, border: '1px solid #eaedff', color: '#131b2e', fontSize: 13, outline: 'none' }}
                 />
               </div>
 
               <div>
-                <label className="font-label-md text-label-md text-on-surface font-semibold block mb-1">
+                <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#707974', display: 'block', marginBottom: 4 }}>
                   Subtitle / Campaign Narrative
                 </label>
                 <textarea
                   rows={3}
                   value={heroSubtitle}
                   onChange={(e) => setHeroSubtitle(e.target.value)}
-                  className="w-full p-3 bg-surface-container-low rounded-lg text-on-surface font-body-md focus:outline-none"
+                  style={{ width: '100%', padding: '10px 12px', backgroundColor: '#f2f3ff', borderRadius: 8, border: '1px solid #eaedff', color: '#131b2e', fontSize: 13, outline: 'none' }}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
-                  <label className="font-label-md text-label-md text-on-surface font-semibold block mb-1">
+                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#707974', display: 'block', marginBottom: 4 }}>
                     Button Label
                   </label>
                   <input
                     type="text"
                     value={heroButtonText}
                     onChange={(e) => setHeroButtonText(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-surface-container-low rounded-lg text-on-surface font-body-md focus:outline-none"
+                    style={{ width: '100%', height: 40, padding: '0 12px', backgroundColor: '#f2f3ff', borderRadius: 8, border: '1px solid #eaedff', color: '#131b2e', fontSize: 13, outline: 'none' }}
                   />
                 </div>
                 <div>
-                  <label className="font-label-md text-label-md text-on-surface font-semibold block mb-1">
+                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#707974', display: 'block', marginBottom: 4 }}>
                     Target URL
                   </label>
                   <input
                     type="text"
                     value={heroButtonLink}
                     onChange={(e) => setHeroButtonLink(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-surface-container-low rounded-lg text-on-surface font-body-md focus:outline-none"
+                    style={{ width: '100%', height: 40, padding: '0 12px', backgroundColor: '#f2f3ff', borderRadius: 8, border: '1px solid #eaedff', color: '#131b2e', fontSize: 13, outline: 'none' }}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-surface-container">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #eaedff' }}>
               <button
                 onClick={() => setEditCopyModalOpen(false)}
-                className="px-4 py-2 rounded-lg bg-surface-container text-on-surface font-title-md"
+                style={{ padding: '8px 16px', borderRadius: 8, backgroundColor: '#eaedff', color: '#131b2e', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
               >
                 Cancel
               </button>
@@ -1019,7 +1057,7 @@ export default function AdminShopSettingsPage() {
                   setNotice('Billboard copy updated in staging.');
                   setTimeout(() => setNotice(null), 2500);
                 }}
-                className="px-5 py-2 rounded-lg bg-primary text-on-primary font-title-md font-semibold"
+                style={{ padding: '8px 20px', borderRadius: 8, backgroundColor: '#003629', color: '#ffffff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
               >
                 Apply Changes
               </button>
@@ -1030,20 +1068,20 @@ export default function AdminShopSettingsPage() {
 
       {/* Modal: Replace Creative Asset */}
       {replaceAssetModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface-container-lowest rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-surface-container">
-              <h3 className="font-headline-sm text-headline-sm text-on-surface">Replace Creative Billboard Asset</h3>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: 16, maxWidth: 560, width: '100%', padding: 24, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #eaedff' }}>
+              <h3 style={{ fontFamily: "'EB Garamond', Georgia, serif", fontSize: 20, color: '#131b2e', margin: 0 }}>Replace Creative Billboard Asset</h3>
               <button
                 onClick={() => setReplaceAssetModalOpen(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:text-on-surface"
+                style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: 'none', color: '#707974', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
 
-            <div className="space-y-4">
-              <p className="text-body-sm text-on-surface-variant">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <p style={{ fontSize: 12.5, color: '#404945', margin: 0, lineHeight: '18px' }}>
                 Upload a high-resolution haute joaillerie visual directly from your computer or provide a cloud asset URL. Recommended aspect ratio is 16:9 (1920 × 900px).
               </p>
 
@@ -1057,10 +1095,10 @@ export default function AdminShopSettingsPage() {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-surface-container">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #eaedff' }}>
               <button
                 onClick={() => setReplaceAssetModalOpen(false)}
-                className="px-4 py-2 rounded-lg bg-surface-container text-on-surface font-title-md"
+                style={{ padding: '8px 16px', borderRadius: 8, backgroundColor: '#eaedff', color: '#131b2e', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
               >
                 Cancel
               </button>
@@ -1070,7 +1108,7 @@ export default function AdminShopSettingsPage() {
                   setNotice('Billboard creative asset updated.');
                   setTimeout(() => setNotice(null), 2500);
                 }}
-                className="px-5 py-2 rounded-lg bg-primary text-on-primary font-title-md font-semibold"
+                style={{ padding: '8px 20px', borderRadius: 8, backgroundColor: '#003629', color: '#ffffff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
               >
                 Save Asset
               </button>
