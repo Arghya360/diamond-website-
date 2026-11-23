@@ -132,17 +132,18 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     const trimmedId = identifier.trim();
 
-    // 1. Direct credentials verification for Caritas360
+    // 1. Direct credentials verification for Caritas360 & Curator Geneve
     if (
       (trimmedId.toLowerCase() === 'caritas360' ||
-        trimmedId.toLowerCase() === 'caritas360@caritasluxury.com') &&
+        trimmedId.toLowerCase() === 'caritas360@caritasluxury.com' ||
+        trimmedId.toLowerCase() === 'curator.geneve@caritasluxury.com') &&
       pass === 'Caritas1234!@#'
     ) {
       setIsAdmin(true);
       setAdminProfile({
         uid: 'caritas360-owner',
-        email: 'Caritas360',
-        displayName: 'Caritas360 (Super Admin)',
+        email: trimmedId,
+        displayName: trimmedId.includes('curator') ? 'Elena Vance (Curator Genève)' : 'Caritas360 (Super Admin)',
         role: 'super_admin',
       });
       if (typeof window !== 'undefined') {
