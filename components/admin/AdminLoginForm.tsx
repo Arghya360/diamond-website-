@@ -303,15 +303,6 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
                   <span className="spinner" aria-hidden="true"></span>
                 </button>
 
-                <div className="demo" id="demoBox">
-                  <span>
-                    Demo login: <code>Caritas360</code> / <code>Caritas1234!@#</code>
-                  </span>
-                  <button type="button" className="ghost" id="fillDemo" onClick={handleFillDemo}>
-                    Fill in
-                  </button>
-                </div>
-
                 <p className="foot">Protected area. Authorized personnel only.</p>
               </form>
             ) : (
@@ -426,6 +417,7 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
           letter-spacing: -0.02em;
           text-wrap: balance;
           margin-bottom: 14px;
+          color: #ffffff !important;
         }
         .brand .lead {
           color: var(--brand-muted);
