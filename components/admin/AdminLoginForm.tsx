@@ -1,363 +1,856 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdminAuth } from '../../lib/firebase/auth-context';
 
 export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }) {
+  const router = useRouter();
   const { login, resetPassword, error: authError } = useAdminAuth();
-  const [identifier, setIdentifier] = useState('Caritas360');
+
+  const [email, setEmail] = useState('Caritas360');
   const [password, setPassword] = useState('Caritas1234!@#');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
-  const [resetSent, setResetSent] = useState(false);
-  const [passkeyNotice, setPasskeyNotice] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passError, setPassError] = useState<string | null>(null);
+  const [isDone, setIsDone] = useState(false);
+  const [shake, setShake] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('caritas_admin_saved_login');
+      if (saved) {
+        setEmail(saved);
+        setRememberMe(true);
+      }
+    } catch (_) {}
+  }, []);
+
+  const triggerShake = () => {
+    setShake(false);
+    setTimeout(() => setShake(true), 10);
+    setTimeout(() => setShake(false), 500);
+  };
+
+  const validate = () => {
+    let ok = true;
+    setEmailError(null);
+    setPassError(null);
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setEmailError('Enter your email or administrator username.');
+      ok = false;
+    }
+
+    if (!password) {
+      setPassError('Enter your password.');
+      ok = false;
+    } else if (password.length < 6) {
+      setPassError('Password must be at least 6 characters.');
+      ok = false;
+    }
+
+    return ok;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLocalError(null);
-    setLoading(true);
+    setFormError(null);
 
+    if (!validate()) {
+      triggerShake();
+      return;
+    }
+
+    setLoading(true);
     try {
-      const ok = await login(identifier.trim(), password);
+      const ok = await login(email.trim(), password);
       if (ok) {
-        if (onSuccess) onSuccess();
+        if (rememberMe) {
+          try {
+            localStorage.setItem('caritas_admin_saved_login', email.trim());
+          } catch (_) {}
+        } else {
+          try {
+            localStorage.removeItem('caritas_admin_saved_login');
+          } catch (_) {}
+        }
+        setIsDone(true);
+        setTimeout(() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            router.push('/admin/');
+          }
+        }, 900);
       } else {
-        setLocalError('Invalid administrative credentials. Please verify your username and password.');
+        setFormError('Incorrect email or password. Please verify your administrator credentials.');
+        triggerShake();
       }
     } catch (err: any) {
-      setLocalError(err.message || 'Authentication error occurred.');
+      setFormError(err.message || 'Authentication failed. Please try again.');
+      triggerShake();
     } finally {
       setLoading(false);
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!identifier) {
-      setLocalError('Please enter your administrator identifier / atelier email first.');
+  const handleFillDemo = () => {
+    setEmail('Caritas360');
+    setPassword('Caritas1234!@#');
+    setEmailError(null);
+    setPassError(null);
+    setFormError(null);
+  };
+
+  const handleForgotPassword = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!email) {
+      setFormError('Please enter your email address first.');
+      triggerShake();
       return;
     }
     try {
-      await resetPassword(identifier);
-      setResetSent(true);
-      setTimeout(() => setResetSent(false), 5000);
+      await resetPassword(email.trim());
+      setForgotSent(true);
+      setTimeout(() => setForgotSent(false), 6000);
     } catch (err: any) {
-      setLocalError('Password reset failed: ' + (err.message || 'Unknown error'));
+      setFormError('Password reset failed: ' + (err.message || 'Unknown error'));
+      triggerShake();
     }
   };
 
-  const handlePasskey = () => {
-    setPasskeyNotice(true);
-    setLoading(true);
-    setTimeout(async () => {
-      const ok = await login('Caritas360', 'Caritas1234!@#');
-      if (ok && onSuccess) onSuccess();
-      setLoading(false);
-      setTimeout(() => setPasskeyNotice(false), 2000);
-    }, 800);
-  };
-
   return (
-    <div className="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col justify-between relative selection:bg-secondary-container selection:text-on-secondary-container">
-      {/* Ambient background glows */}
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(197,168,128,0.12),rgba(250,248,255,0))]"></div>
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_bottom_right,rgba(27,77,62,0.04),transparent_60%)]"></div>
+    <div className="login-wrapper">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet"
+      />
 
-      {/* Passkey Floating Banner */}
-      {passkeyNotice && (
-        <div className="fixed bottom-8 right-8 z-50 bg-[#283044] text-[#eef0ff] px-5 py-3 rounded-lg shadow-xl flex items-center gap-3 font-body-sm text-body-sm transition-all animate-fade-in border border-[#baeed9]/20">
-          <span className="material-symbols-outlined text-[#fedeb2] text-[20px]">fingerprint</span>
-          <span>Requesting WebAuthn FIDO2 assertion via hardware token...</span>
-        </div>
-      )}
-
-      {/* Header */}
-      <header className="relative z-10 w-full">
-        <div className="h-20 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-          <div className="flex items-center gap-space-md">
-            <div className="flex flex-col">
-              <span className="font-headline-md text-headline-md tracking-wider uppercase text-primary leading-none">
-                Caritas
-              </span>
-              <span className="font-label-sm text-label-sm uppercase tracking-[0.25em] text-secondary mt-1">
-                Haute Joaillerie • Genève
-              </span>
+      <main className="shell">
+        {/* Brand Left Panel */}
+        <section className="brand" aria-hidden="true">
+          <div className="brand-inner">
+            <div className="logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2 3 6v6c0 5 3.8 9.3 9 10 5.2-.7 9-5 9-10V6l-9-4Z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+              <span>Caritas Luxury Admin</span>
             </div>
-          </div>
-          <div className="flex items-center gap-space-md">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-              <span className="font-label-sm text-label-sm tracking-wider uppercase text-on-surface-variant">
-                Vault Architecture • Tier IV Secured
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-              <span className="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
-              <span className="font-label-sm text-label-sm tracking-wider uppercase text-on-surface-variant">
-                FINMA Accr.
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
+            <h1>Run your platform from one dashboard.</h1>
+            <p className="lead">
+              Track orders, manage users and review activity in real time, with role-based access for every team member.
+            </p>
 
-      {/* Main Authentication Monolith */}
-      <main className="relative z-10 flex-1 flex items-center justify-center w-full px-6 py-space-xl">
-        <div className="flex flex-col w-full items-center justify-center py-6">
-          <div className="relative w-full max-w-xl">
-            {/* Atmospheric Backing Glow */}
-            <div className="absolute -top-12 -left-12 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute -bottom-10 -right-10 w-72 h-72 bg-secondary-container/20 rounded-full blur-3xl pointer-events-none"></div>
-
-            {/* Main Authentication Monolith Card */}
-            <div className="relative w-full bg-surface-container-lowest rounded-xl shadow-[0_24px_50px_-12px_rgba(19,27,46,0.08),0_4px_16px_-2px_rgba(19,27,46,0.02)] border border-[#eaedff] p-8 sm:p-12 overflow-hidden">
-              {/* Golden Accent Line at Top Edge */}
-              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-secondary/40 to-transparent"></div>
-
-              {/* Insignia & Header */}
-              <div className="flex flex-col items-center text-center">
-                {/* Diamond Emblem */}
-                <div className="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center mb-4 shadow-sm border border-secondary/20">
-                  <span className="material-symbols-outlined text-primary text-[24px]">diamond</span>
+            <div className="preview">
+              <div className="preview-head">
+                <span>Today, all regions</span>
+                <span className="live">Live</span>
+              </div>
+              <div className="stats">
+                <div className="stat">
+                  <div className="label">Active users</div>
+                  <div className="value">1,284</div>
+                  <div className="delta">+8.2%</div>
                 </div>
-                <span className="font-label-sm text-label-sm uppercase tracking-[0.28em] text-secondary font-semibold">
-                  Caritas Haute Joaillerie • Genève
-                </span>
-                <h1 className="font-headline-lg text-headline-lg text-on-surface mt-2 tracking-tight">
-                  Private Atelier Sign-In
-                </h1>
-                <p className="font-body-sm text-body-sm text-on-surface-variant max-w-md mt-2.5 leading-relaxed">
-                  Enter authorized administrative credentials to access Geneva vault telemetry, client dossiers, and live commerce custody.
-                </p>
-
-                {/* Clear Authorized Credentials Information */}
-                <div className="mt-4 p-3 rounded-lg bg-surface-container-low border border-[#eaedff] text-left w-full">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="material-symbols-outlined text-secondary text-[16px]">verified</span>
-                    <span className="font-label-sm text-label-sm font-bold uppercase tracking-wider text-primary">
-                      Authorized Atelier Credentials
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
-                    <div className="bg-surface-container-lowest p-2 rounded border border-[#eaedff]">
-                      <span className="text-outline text-[10px] block uppercase font-sans font-semibold">Username / Email</span>
-                      <strong className="text-primary font-bold">Caritas360</strong>
-                    </div>
-                    <div className="bg-surface-container-lowest p-2 rounded border border-[#eaedff]">
-                      <span className="text-outline text-[10px] block uppercase font-sans font-semibold">Master Vault Password</span>
-                      <strong className="text-primary font-bold">Caritas1234!@#</strong>
-                    </div>
-                  </div>
+                <div className="stat">
+                  <div className="label">Orders</div>
+                  <div className="value">342</div>
+                  <div className="delta">+3.1%</div>
                 </div>
-
-                {/* Node Pill */}
-                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-low text-on-surface-variant">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
-                  <span className="font-label-sm text-label-sm tracking-wider uppercase text-on-surface-variant">
-                    Access Node: Geneva Central Vault (Primary • CH-01)
-                  </span>
+                <div className="stat">
+                  <div className="label">Refunds</div>
+                  <div className="value">9</div>
+                  <div className="delta down">-1.4%</div>
                 </div>
               </div>
+              <svg className="spark" viewBox="0 0 400 72" preserveAspectRatio="none" role="img" aria-label="Orders per hour">
+                <line className="grid" x1="0" y1="18" x2="400" y2="18" />
+                <line className="grid" x1="0" y1="36" x2="400" y2="36" />
+                <line className="grid" x1="0" y1="54" x2="400" y2="54" />
+                <path
+                  className="area"
+                  d="M0 58 L40 50 L80 54 L120 38 L160 44 L200 28 L240 34 L280 20 L320 26 L360 12 L392 16 L392 72 L0 72 Z"
+                />
+                <path
+                  className="line"
+                  d="M0 58 L40 50 L80 54 L120 38 L160 44 L200 28 L240 34 L280 20 L320 26 L360 12 L392 16"
+                />
+                <circle className="dot" cx="392" cy="16" r="4" />
+              </svg>
+            </div>
+          </div>
+        </section>
 
-              {/* Error Notice */}
-              {(localError || authError) && (
-                <div className="mt-6 p-3 rounded-lg bg-red-50 text-red-800 text-body-sm flex items-center gap-2 border border-red-200">
-                  <span className="material-symbols-outlined text-[18px]">error</span>
-                  <span>{localError || authError}</span>
-                </div>
-              )}
+        {/* Form Right Side */}
+        <section className="form-side">
+          <div className={`card ${shake ? 'shake' : ''}`} id="card">
+            {!isDone ? (
+              <form id="loginForm" onSubmit={handleSubmit} noValidate>
+                <h2>Welcome back</h2>
+                <p className="sub">Sign in to your admin account.</p>
 
-              {/* Password Reset Notice */}
-              {resetSent && (
-                <div className="mt-6 p-3 rounded-lg bg-emerald-50 text-emerald-800 text-body-sm flex items-center gap-2 border border-emerald-200">
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                  <span>Password recovery instructions sent to your verified email.</span>
-                </div>
-              )}
+                {formError && (
+                  <div className="alert" role="alert">
+                    {formError}
+                  </div>
+                )}
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="mt-6 space-y-5" id="vault-auth-form">
-                {/* Identifier Input Group */}
-                <div className="space-y-1.5">
-                  <label className="block font-label-md text-label-md tracking-wider uppercase text-on-surface" htmlFor="admin-id">
-                    Administrator Identifier / Atelier Email
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary">
-                      <span className="material-symbols-outlined text-[18px]">badge</span>
-                    </span>
+                {forgotSent && (
+                  <div className="alert success" role="alert">
+                    Password reset instructions sent if account exists.
+                  </div>
+                )}
+
+                <div className={`field ${emailError ? 'invalid' : ''}`}>
+                  <label htmlFor="email">Email address or username</label>
+                  <div className="input">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                      <path d="m3 7 9 6 9-6" />
+                    </svg>
                     <input
-                      id="admin-id"
-                      name="admin-id"
                       type="text"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
+                      id="email"
+                      name="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setEmailError(null);
+                        setFormError(null);
+                      }}
                       placeholder="Caritas360"
-                      className="w-full h-11 pl-10 pr-4 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-lg border border-surface-container shadow-sm placeholder:text-outline-variant focus:outline-none focus:bg-surface-bright transition-all"
-                      required
+                      autoComplete="username"
                     />
                   </div>
+                  {emailError && <small className="msg">{emailError}</small>}
                 </div>
 
-                {/* Master Password Input Group */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block font-label-md text-label-md tracking-wider uppercase text-on-surface" htmlFor="master-pwd">
-                      Secure Master Vault Password
-                    </label>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">
-                      HSM Token V4
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary">
-                      <span className="material-symbols-outlined text-[18px]">key</span>
-                    </span>
+                <div className={`field ${passError ? 'invalid' : ''}`}>
+                  <label htmlFor="password">Password</label>
+                  <div className="input">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="4" y="11" width="16" height="10" rx="2" />
+                      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                    </svg>
                     <input
-                      id="master-pwd"
-                      name="master-pwd"
                       type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••••••"
-                      className="w-full h-11 pl-10 pr-11 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-lg border border-surface-container shadow-sm placeholder:text-outline-variant focus:outline-none focus:bg-surface-bright transition-all"
-                      required
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setPassError(null);
+                        setFormError(null);
+                      }}
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
                     />
                     <button
                       type="button"
-                      aria-label="Toggle password visibility"
+                      id="togglePw"
+                      className="eye"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-outline hover:text-on-surface transition-colors focus:outline-none"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {showPassword ? 'visibility_off' : 'visibility'}
-                      </span>
+                      {showPassword ? (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.9 17.9A10.1 10.1 0 0 1 12 19c-6.4 0-10-7-10-7a18 18 0 0 1 4.1-5.1M9.9 5.2A9.7 9.7 0 0 1 12 5c6.4 0 10 7 10 7a18 18 0 0 1-2.2 3.2" />
+                          <path d="M14.1 14.1A3 3 0 0 1 9.9 9.9" />
+                          <path d="m2 2 20 20" />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
                     </button>
                   </div>
+                  {passError && <small className="msg">{passError}</small>}
                 </div>
 
-                {/* Checkbox & Forgotten Password Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <div className="row">
+                  <label className="check" htmlFor="remember">
                     <input
-                      id="remember-device"
                       type="checkbox"
-                      defaultChecked
-                      className="w-4 h-4 rounded text-primary-container focus:ring-0 cursor-pointer accent-[#1b4d3e]"
+                      id="remember"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
                     />
-                    <span className="font-body-sm text-body-sm text-on-surface-variant">Remember terminal for 30 days</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    className="font-label-md text-label-md text-secondary hover:text-primary transition-colors inline-flex items-center gap-1 text-left"
-                  >
-                    <span>Vault Recovery Protocol</span>
-                    <span className="material-symbols-outlined text-[14px]">arrow_outward</span>
-                  </button>
-                </div>
-
-                {/* Primary Action Button */}
-                <div className="pt-2">
-                  <button
-                    id="auth-submit-btn"
-                    type="submit"
-                    disabled={loading}
-                    className="group relative w-full h-12 px-6 rounded-lg bg-primary-container text-on-primary font-title-md text-title-md tracking-wide shadow-md hover:bg-primary transition-all duration-150 flex items-center justify-center gap-2 overflow-hidden disabled:opacity-50 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[20px] text-tertiary-fixed-dim transition-transform group-hover:scale-110">
-                      lock_open
+                    <span className="box">
+                      <svg viewBox="0 0 24 24" fill="none" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m5 12 5 5L20 7" />
+                      </svg>
                     </span>
-                    <span>{loading ? 'Verifying Geneva Enclave Credentials...' : 'Authenticate & Enter Atelier Vault'}</span>
+                    Remember me
+                  </label>
+                  <a href="#forgot" onClick={handleForgotPassword} className="link">
+                    Forgot password?
+                  </a>
+                </div>
+
+                <button type="submit" id="submitBtn" className={`btn ${loading ? 'loading' : ''}`} disabled={loading}>
+                  <span className="btn-text">{loading ? 'Signing in...' : 'Sign in'}</span>
+                  <span className="spinner" aria-hidden="true"></span>
+                </button>
+
+                <div className="demo" id="demoBox">
+                  <span>
+                    Demo login: <code>Caritas360</code> / <code>Caritas1234!@#</code>
+                  </span>
+                  <button type="button" className="ghost" id="fillDemo" onClick={handleFillDemo}>
+                    Fill in
                   </button>
                 </div>
 
-                {/* Divider with Architectural Ornament */}
-                <div className="relative py-2 flex items-center justify-center">
-                  <div className="w-full h-px bg-surface-container-high"></div>
-                  <span className="absolute px-3 bg-surface-container-lowest font-label-sm text-label-sm tracking-widest text-on-surface-variant uppercase">
-                    Fiduciary Verification
-                  </span>
-                </div>
-
-                {/* Fast Passkey / YubiKey / Hardware Token Option */}
-                <button
-                  type="button"
-                  onClick={handlePasskey}
-                  disabled={loading}
-                  className="w-full h-11 px-4 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-title-md text-title-md flex items-center justify-center gap-2.5 shadow-sm transition-all cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[20px] text-secondary">fingerprint</span>
-                  <span className="font-body-md text-body-md text-on-surface font-medium">Authenticate via Hardware Key / FIDO2 Passkey</span>
-                  <span className="ml-auto font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container-lowest text-secondary uppercase font-semibold">
-                    Touch ID
-                  </span>
-                </button>
+                <p className="foot">Protected area. Authorized personnel only.</p>
               </form>
-
-              {/* Security Telemetry & Node Badge */}
-              <div className="mt-8 pt-6 border-t border-surface-container-low flex flex-col gap-3">
-                <div className="flex items-center gap-2 justify-center text-center">
-                  <span className="material-symbols-outlined text-[16px] text-primary">security</span>
-                  <span className="font-label-sm text-label-sm tracking-wider uppercase text-on-surface-variant">
-                    Swiss Banking Level AES-256 HSM Encryption • FINMA Tier-3 Secured
-                  </span>
+            ) : (
+              <div className="done" id="done">
+                <div className="tick">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m5 12 5 5L20 7" />
+                  </svg>
                 </div>
-                {/* Warning / Security Log Disclaimer */}
-                <div className="p-3.5 rounded-lg bg-surface-container-low text-center">
-                  <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                    All session attempts are immutably signed and mirrored to the Zurich Security Operations Center. 
-                    For escalated access protocols, contact the <span className="font-semibold text-on-surface">Chief Vault Custodian</span>.
-                  </p>
-                </div>
+                <h2>You're signed in</h2>
+                <p id="doneText">Redirecting to your dashboard...</p>
               </div>
-            </div>
-
-            {/* Quick Telemetry & Status Strip Below Monolith */}
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 px-3 text-on-surface-variant">
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                <span className="font-label-sm text-label-sm uppercase tracking-wider">HSM State: Synchronized (0.42ms)</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="font-label-sm text-label-sm tracking-wider uppercase">Auth Protocol: v4.88-PROD</span>
-                <span className="font-label-sm text-label-sm tracking-wider uppercase">Region: EMEA-CH-GVA</span>
-              </div>
-            </div>
+            )}
           </div>
-        </div>
+        </section>
       </main>
 
-      {/* Footer matching Specification */}
-      <footer className="relative z-10 w-full bg-surface-container-low/60 backdrop-blur-md shadow-[0_-1px_8px_rgba(0,0,0,0.02)]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3 text-on-surface-variant">
-            <span className="material-symbols-outlined text-[16px] text-primary">lock</span>
-            <span className="font-body-sm text-body-sm text-on-surface-variant">
-              256-Bit Hardware Encrypted Handshake • Geneva Depository
-            </span>
-          </div>
-          <div className="font-body-sm text-body-sm text-on-surface-variant text-center">
-            © 2025 Caritas Haute Joaillerie S.A. Authorized personnel &amp; fiduciary curators only.
-          </div>
-          <div className="flex items-center gap-6">
-            <a
-              className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-1"
-              href="#"
-            >
-              <span className="material-symbols-outlined text-[14px]">language</span>
-              <span>FR / EN</span>
-            </a>
-            <a
-              className="font-label-sm text-label-sm uppercase tracking-wider text-secondary hover:text-on-surface transition-colors flex items-center gap-1"
-              href="#"
-            >
-              <span className="material-symbols-outlined text-[14px]">support_agent</span>
-              <span>Private Concierge</span>
-            </a>
-          </div>
-        </div>
-      </footer>
+      <style jsx>{`
+        .login-wrapper {
+          --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+          --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+          --bg: #f3f5f9;
+          --surface: #ffffff;
+          --field: #ffffff;
+          --fg: #101828;
+          --muted: #5b6578;
+          --line: #dde2ec;
+          --accent: #2750e0;
+          --accent-hover: #1e3fb8;
+          --accent-ink: #ffffff;
+          --ring: rgba(39, 80, 224, 0.18);
+          --danger: #c62a2a;
+          --danger-bg: #fdecec;
+          --danger-line: #f5c2c2;
+          --ok: #17803d;
+          --ok-bg: #e9f7ee;
+          --ok-line: #bfe3cb;
+
+          --brand-bg: #0f1b3d;
+          --brand-fg: #f2f5ff;
+          --brand-muted: #aab6d8;
+          --brand-line: rgba(255, 255, 255, 0.12);
+          --brand-card: rgba(255, 255, 255, 0.07);
+          --brand-accent: #8fb0ff;
+          --brand-good: #6fe0a0;
+
+          font-family: var(--font-body);
+          font-size: 15px;
+          background: var(--bg);
+          color: var(--fg);
+          -webkit-font-smoothing: antialiased;
+          min-height: 100vh;
+          width: 100%;
+        }
+
+        .shell {
+          display: grid;
+          grid-template-columns: 1.1fr 1fr;
+          min-height: 100vh;
+        }
+
+        /* ---------- Brand panel ---------- */
+        .brand {
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          padding-block: 56px;
+          padding-left: max(48px, env(safe-area-inset-left, 0px));
+          padding-right: 48px;
+          background: var(--brand-bg);
+          color: var(--brand-fg);
+        }
+        .brand::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(var(--brand-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--brand-line) 1px, transparent 1px);
+          background-size: 44px 44px;
+          -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 75%);
+          mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 75%);
+          opacity: 0.55;
+        }
+        .brand-inner {
+          position: relative;
+          width: 100%;
+          max-width: 480px;
+          min-width: 0;
+        }
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-family: var(--font-display);
+          font-weight: 600;
+          font-size: 19px;
+          margin-bottom: 48px;
+        }
+        .logo svg {
+          width: 26px;
+          height: 26px;
+          color: var(--brand-accent);
+        }
+        .brand h1 {
+          font-family: var(--font-display);
+          font-size: clamp(30px, 3.4vw, 40px);
+          line-height: 1.12;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          text-wrap: balance;
+          margin-bottom: 14px;
+        }
+        .brand .lead {
+          color: var(--brand-muted);
+          line-height: 1.6;
+          max-width: 44ch;
+          margin-bottom: 32px;
+        }
+
+        .preview {
+          background: var(--brand-card);
+          border: 1px solid var(--brand-line);
+          border-radius: 14px;
+          padding: 18px;
+          display: grid;
+          gap: 16px;
+        }
+        .preview-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          font-size: 12.5px;
+          color: var(--brand-muted);
+        }
+        .live {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          color: var(--brand-good);
+          font-weight: 500;
+        }
+        .live::before {
+          content: "";
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: var(--brand-good);
+        }
+        .stats {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+        }
+        .stat .label {
+          font-size: 12px;
+          color: var(--brand-muted);
+          margin-bottom: 4px;
+        }
+        .stat .value {
+          font-family: var(--font-display);
+          font-size: 21px;
+          font-weight: 600;
+          font-variant-numeric: tabular-nums;
+        }
+        .stat .delta {
+          font-size: 12px;
+          color: var(--brand-good);
+          font-variant-numeric: tabular-nums;
+        }
+        .stat .delta.down {
+          color: #ffb4a0;
+        }
+        .spark {
+          width: 100%;
+          height: 72px;
+          display: block;
+        }
+        .spark .grid {
+          stroke: var(--brand-line);
+          stroke-width: 1;
+        }
+        .spark .line {
+          fill: none;
+          stroke: var(--brand-accent);
+          stroke-width: 2;
+          stroke-linejoin: round;
+          stroke-linecap: round;
+        }
+        .spark .area {
+          fill: var(--brand-accent);
+          opacity: 0.16;
+        }
+        .spark .dot {
+          fill: var(--brand-bg);
+          stroke: var(--brand-accent);
+          stroke-width: 2;
+        }
+
+        /* ---------- Form side ---------- */
+        .form-side {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding-block: 32px;
+          padding-left: max(16px, env(safe-area-inset-left, 0px));
+          padding-right: max(16px, env(safe-area-inset-right, 0px));
+        }
+        .card {
+          width: 100%;
+          max-width: 420px;
+          min-width: 0;
+          background: var(--surface);
+          border: 1px solid var(--line);
+          border-radius: 16px;
+          padding: 36px 34px;
+          box-shadow: 0 12px 40px rgba(16, 24, 40, 0.06);
+        }
+        .card h2 {
+          font-family: var(--font-display);
+          font-size: 26px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+        .sub {
+          color: var(--muted);
+          margin-top: 6px;
+          font-size: 14.5px;
+          margin-bottom: 24px;
+        }
+
+        .alert {
+          padding: 11px 14px;
+          border-radius: 10px;
+          font-size: 14px;
+          margin-bottom: 18px;
+          background: var(--danger-bg);
+          color: var(--danger);
+          border: 1px solid var(--danger-line);
+        }
+        .alert.success {
+          background: var(--ok-bg);
+          color: var(--ok);
+          border-color: var(--ok-line);
+        }
+
+        .field {
+          margin-bottom: 16px;
+        }
+        .field label {
+          display: block;
+          font-size: 13.5px;
+          font-weight: 600;
+          margin-bottom: 7px;
+        }
+        .input {
+          display: flex;
+          align-items: center;
+          border: 1.5px solid var(--line);
+          border-radius: 10px;
+          background: var(--field);
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .input:focus-within {
+          border-color: var(--accent);
+          box-shadow: 0 0 0 4px var(--ring);
+        }
+        .input > svg {
+          width: 18px;
+          height: 18px;
+          margin-left: 13px;
+          color: var(--muted);
+          flex: none;
+        }
+        .input input {
+          flex: 1;
+          min-width: 0;
+          border: 0;
+          outline: 0;
+          background: transparent;
+          padding: 12px 13px;
+          font: inherit;
+          font-size: 14.5px;
+          color: var(--fg);
+        }
+        .input input::placeholder {
+          color: var(--muted);
+          opacity: 0.7;
+        }
+        .eye {
+          border: 0;
+          background: none;
+          cursor: pointer;
+          padding: 8px 13px;
+          color: var(--muted);
+          display: flex;
+          border-radius: 8px;
+        }
+        .eye svg {
+          width: 18px;
+          height: 18px;
+        }
+        .eye:hover {
+          color: var(--fg);
+        }
+        .eye:focus-visible,
+        .btn:focus-visible,
+        .link:focus-visible,
+        .ghost:focus-visible {
+          outline: 2px solid var(--accent);
+          outline-offset: 2px;
+        }
+
+        .msg {
+          display: block;
+          margin-top: 6px;
+          font-size: 12.5px;
+          color: var(--danger);
+        }
+        .field.invalid .input {
+          border-color: var(--danger);
+          box-shadow: 0 0 0 4px var(--danger-bg);
+        }
+
+        .row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin: 4px 0 22px;
+        }
+        .check {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          font-size: 14px;
+          color: var(--muted);
+          cursor: pointer;
+          user-select: none;
+          position: relative;
+        }
+        .check input {
+          position: absolute;
+          opacity: 0;
+          width: 18px;
+          height: 18px;
+        }
+        .check .box {
+          width: 18px;
+          height: 18px;
+          border-radius: 5px;
+          border: 1.5px solid var(--line);
+          background: var(--field);
+          display: grid;
+          place-items: center;
+          transition: 0.15s;
+        }
+        .check .box svg {
+          width: 12px;
+          height: 12px;
+          stroke: var(--accent-ink);
+          opacity: 0;
+        }
+        .check input:checked + .box {
+          background: var(--accent);
+          border-color: var(--accent);
+        }
+        .check input:checked + .box svg {
+          opacity: 1;
+        }
+        .check input:focus-visible + .box {
+          box-shadow: 0 0 0 4px var(--ring);
+        }
+        .link {
+          color: var(--accent);
+          font-size: 14px;
+          font-weight: 500;
+          text-decoration: none;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+        }
+        .link:hover {
+          text-decoration: underline;
+        }
+
+        .btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 13px;
+          border: 0;
+          border-radius: 10px;
+          background: var(--accent);
+          color: var(--accent-ink);
+          font: inherit;
+          font-weight: 600;
+          font-size: 15px;
+          cursor: pointer;
+          transition: background 0.15s, transform 0.05s;
+        }
+        .btn:hover {
+          background: var(--accent-hover);
+        }
+        .btn:active {
+          transform: translateY(1px);
+        }
+        .btn:disabled {
+          opacity: 0.75;
+          cursor: not-allowed;
+        }
+        .spinner {
+          display: none;
+          width: 16px;
+          height: 16px;
+          border: 2px solid currentColor;
+          border-right-color: transparent;
+          border-radius: 50%;
+          animation: spin 0.7s linear infinite;
+        }
+        .btn.loading .spinner {
+          display: block;
+        }
+
+        .demo {
+          margin-top: 20px;
+          padding: 12px 14px;
+          border: 1px dashed var(--line);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+          font-size: 13px;
+          color: var(--muted);
+        }
+        .demo code {
+          font-family: ui-monospace, "SF Mono", Menlo, monospace;
+          font-size: 12.5px;
+          color: var(--fg);
+          overflow-wrap: anywhere;
+        }
+        .ghost {
+          border: 1px solid var(--line);
+          background: transparent;
+          color: var(--fg);
+          font: inherit;
+          font-size: 13px;
+          font-weight: 500;
+          padding: 6px 12px;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+        .ghost:hover {
+          border-color: var(--accent);
+          color: var(--accent);
+        }
+
+        .foot {
+          text-align: center;
+          color: var(--muted);
+          font-size: 12.5px;
+          margin-top: 20px;
+        }
+
+        .done {
+          text-align: center;
+          padding: 12px 0;
+        }
+        .done .tick {
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          background: var(--ok-bg);
+          color: var(--ok);
+          display: grid;
+          place-items: center;
+          margin: 0 auto 16px;
+        }
+        .done .tick svg {
+          width: 26px;
+          height: 26px;
+        }
+        .done h2 {
+          font-size: 22px;
+          margin-bottom: 6px;
+        }
+        .done p {
+          color: var(--muted);
+          font-size: 14px;
+          margin-bottom: 20px;
+          line-height: 1.5;
+        }
+
+        .card.shake {
+          animation: shake 0.4s;
+        }
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        @keyframes shake {
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          20%,
+          60% {
+            transform: translateX(-8px);
+          }
+          40%,
+          80% {
+            transform: translateX(8px);
+          }
+        }
+
+        @media (max-width: 900px) {
+          .shell {
+            grid-template-columns: 1fr;
+          }
+          .brand {
+            display: none;
+          }
+        }
+        @media (max-width: 480px) {
+          .card {
+            padding: 28px 20px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
