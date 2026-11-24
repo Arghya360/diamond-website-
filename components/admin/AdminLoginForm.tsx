@@ -6,7 +6,7 @@ import { useAdminAuth } from '../../lib/firebase/auth-context';
 
 export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
-  const { login, resetPassword, error: authError } = useAdminAuth();
+  const { login, error: authError } = useAdminAuth();
 
   const [email, setEmail] = useState('Caritas360');
   const [password, setPassword] = useState('Caritas1234!@#');
@@ -14,19 +14,13 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [passError, setPassError] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
   const [shake, setShake] = useState(false);
-  const [forgotSent, setForgotSent] = useState(false);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem('caritas_admin_saved_login');
-      if (saved) {
-        setEmail(saved);
-        setRememberMe(true);
-      }
+      if (saved) { setEmail(saved); setRememberMe(true); }
     } catch (_) {}
   }, []);
 
@@ -36,60 +30,27 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
     setTimeout(() => setShake(false), 500);
   };
 
-  const validate = () => {
-    let ok = true;
-    setEmailError(null);
-    setPassError(null);
-
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
-      setEmailError('Enter your email or administrator username.');
-      ok = false;
-    }
-
-    if (!password) {
-      setPassError('Enter your password.');
-      ok = false;
-    } else if (password.length < 6) {
-      setPassError('Password must be at least 6 characters.');
-      ok = false;
-    }
-
-    return ok;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-
-    if (!validate()) {
+    if (!email.trim() || !password) {
+      setFormError('Please enter your administrator identifier and password.');
       triggerShake();
       return;
     }
-
     setLoading(true);
     try {
       const ok = await login(email.trim(), password);
       if (ok) {
         if (rememberMe) {
-          try {
-            localStorage.setItem('caritas_admin_saved_login', email.trim());
-          } catch (_) {}
+          try { localStorage.setItem('caritas_admin_saved_login', email.trim()); } catch (_) {}
         } else {
-          try {
-            localStorage.removeItem('caritas_admin_saved_login');
-          } catch (_) {}
+          try { localStorage.removeItem('caritas_admin_saved_login'); } catch (_) {}
         }
         setIsDone(true);
-        setTimeout(() => {
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            router.push('/admin/');
-          }
-        }, 900);
+        setTimeout(() => { if (onSuccess) { onSuccess(); } else { router.push('/admin/'); } }, 900);
       } else {
-        setFormError('Incorrect email or password. Please verify your administrator credentials.');
+        setFormError('Incorrect credentials. Please verify your administrator identifier and vault password.');
         triggerShake();
       }
     } catch (err: any) {
@@ -100,749 +61,363 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
     }
   };
 
-  const handleFillDemo = () => {
-    setEmail('Caritas360');
-    setPassword('Caritas1234!@#');
-    setEmailError(null);
-    setPassError(null);
-    setFormError(null);
-  };
-
-  const handleForgotPassword = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!email) {
-      setFormError('Please enter your email address first.');
-      triggerShake();
-      return;
-    }
-    try {
-      await resetPassword(email.trim());
-      setForgotSent(true);
-      setTimeout(() => setForgotSent(false), 6000);
-    } catch (err: any) {
-      setFormError('Password reset failed: ' + (err.message || 'Unknown error'));
-      triggerShake();
-    }
-  };
-
   return (
-    <div className="login-wrapper">
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
-        rel="stylesheet"
-      />
-
-      <main className="shell">
-        {/* Brand Left Panel */}
-        <section className="brand" aria-hidden="true">
-          <div className="brand-inner">
-            <div className="logo">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2 3 6v6c0 5 3.8 9.3 9 10 5.2-.7 9-5 9-10V6l-9-4Z" />
-                <path d="m9 12 2 2 4-4" />
-              </svg>
-              <span>Caritas Luxury Admin</span>
-            </div>
-            <h1>Run your platform from one dashboard.</h1>
-            <p className="lead">
-              Track orders, manage users and review activity in real time, with role-based access for every team member.
-            </p>
-
-            <div className="preview">
-              <div className="preview-head">
-                <span>Today, all regions</span>
-                <span className="live">Live</span>
-              </div>
-              <div className="stats">
-                <div className="stat">
-                  <div className="label">Active users</div>
-                  <div className="value">1,284</div>
-                  <div className="delta">+8.2%</div>
-                </div>
-                <div className="stat">
-                  <div className="label">Orders</div>
-                  <div className="value">342</div>
-                  <div className="delta">+3.1%</div>
-                </div>
-                <div className="stat">
-                  <div className="label">Refunds</div>
-                  <div className="value">9</div>
-                  <div className="delta down">-1.4%</div>
-                </div>
-              </div>
-              <svg className="spark" viewBox="0 0 400 72" preserveAspectRatio="none" role="img" aria-label="Orders per hour">
-                <line className="grid" x1="0" y1="18" x2="400" y2="18" />
-                <line className="grid" x1="0" y1="36" x2="400" y2="36" />
-                <line className="grid" x1="0" y1="54" x2="400" y2="54" />
-                <path
-                  className="area"
-                  d="M0 58 L40 50 L80 54 L120 38 L160 44 L200 28 L240 34 L280 20 L320 26 L360 12 L392 16 L392 72 L0 72 Z"
-                />
-                <path
-                  className="line"
-                  d="M0 58 L40 50 L80 54 L120 38 L160 44 L200 28 L240 34 L280 20 L320 26 L360 12 L392 16"
-                />
-                <circle className="dot" cx="392" cy="16" r="4" />
-              </svg>
-            </div>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F3F0F8', fontFamily: "'Inter', system-ui, sans-serif" }}>
+      {/* Top Bar */}
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '20px 40px', background: 'transparent',
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontFamily: "'Cormorant Garamond', 'Georgia', serif", fontSize: 22, fontWeight: 700, letterSpacing: '0.12em', color: '#1a1a2e', textTransform: 'uppercase' }}>
+            CARITAS
+          </span>
+          <span style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.22em', color: '#1a1a2e', textTransform: 'uppercase', marginTop: -2 }}>
+            HAUTE JOAILLERIE • GENÈVE
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, letterSpacing: '0.08em', color: '#444', textTransform: 'uppercase' }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2d6a4f', display: 'inline-block' }} />
+            VAULT ARCHITECTURE • TIER IV SECURED
           </div>
-        </section>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, letterSpacing: '0.08em', color: '#444', textTransform: 'uppercase' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            FINMA ACCR.
+          </div>
+        </div>
+      </header>
 
-        {/* Form Right Side */}
-        <section className="form-side">
-          <div className={`card ${shake ? 'shake' : ''}`} id="card">
-            {!isDone ? (
-              <form id="loginForm" onSubmit={handleSubmit} noValidate>
-                <h2>Welcome back</h2>
-                <p className="sub">Sign in to your admin account.</p>
+      {/* Main centered card */}
+      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px' }}>
+        <div
+          className={shake ? 'caritas-login-card caritas-shake' : 'caritas-login-card'}
+          style={{
+            background: '#FFFFFF',
+            borderRadius: 18,
+            padding: '52px 56px',
+            width: '100%',
+            maxWidth: 480,
+            boxShadow: '0 4px 40px rgba(0,0,0,0.08)',
+          }}
+        >
+          {isDone ? (
+            <div style={{ textAlign: 'center', padding: '24px 0' }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%',
+                background: '#e8f5e9', display: 'grid', placeItems: 'center', margin: '0 auto 20px',
+              }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <div style={{ fontFamily: "'Cormorant Garamond','Georgia',serif", fontSize: 26, fontWeight: 700, color: '#1a1a2e', marginBottom: 8 }}>
+                Access Granted
+              </div>
+              <p style={{ color: '#6b7280', fontSize: 14 }}>Entering the Atelier Vault…</p>
+            </div>
+          ) : (
+            <>
+              {/* Diamond gem icon */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: '50%', background: '#F0EDFA',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B4EFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 3h12l4 6-10 13L2 9z" />
+                    <path d="M11 3L8 9l4 13 4-13-3-6" />
+                    <path d="M2 9h20" />
+                  </svg>
+                </div>
+              </div>
 
-                {formError && (
-                  <div className="alert" role="alert">
-                    {formError}
-                  </div>
-                )}
+              {/* Brand caption */}
+              <div style={{ textAlign: 'center', marginBottom: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.18em', color: '#888', textTransform: 'uppercase' }}>
+                  CARITAS HAUTE JOAILLERIE • GENÈVE
+                </span>
+              </div>
 
-                {forgotSent && (
-                  <div className="alert success" role="alert">
-                    Password reset instructions sent if account exists.
-                  </div>
-                )}
+              {/* Title */}
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond','Georgia',serif",
+                fontSize: 32, fontWeight: 700, textAlign: 'center',
+                color: '#1a1a2e', margin: '0 0 12px', lineHeight: 1.2,
+              }}>
+                Private Atelier Sign-In
+              </h1>
 
-                <div className={`field ${emailError ? 'invalid' : ''}`}>
-                  <label htmlFor="email">Email address or username</label>
-                  <div className="input">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="5" width="18" height="14" rx="2" />
-                      <path d="m3 7 9 6 9-6" />
+              {/* Subtitle */}
+              <p style={{ textAlign: 'center', color: '#6b7280', fontSize: 13.5, lineHeight: 1.6, margin: '0 0 20px' }}>
+                Enter authorized administrative credentials to access Geneva vault telemetry,
+                client dossiers, and live commerce custody.
+              </p>
+
+              {/* Access node badge */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '5px 14px', borderRadius: 20, border: '1px solid #e0e0e0',
+                  fontSize: 10.5, letterSpacing: '0.07em', color: '#444',
+                  background: 'transparent',
+                }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#2d6a4f', display: 'inline-block' }} />
+                  ACCESS NODE: GENEVA CENTRAL VAULT (PRIMARY • CH-01)
+                </div>
+              </div>
+
+              {/* Error banner */}
+              {(formError || authError) && (
+                <div style={{
+                  padding: '10px 14px', background: '#fdf2f2', border: '1px solid #f5c2c2',
+                  borderRadius: 10, fontSize: 13, color: '#c62a2a', marginBottom: 18,
+                }}>
+                  {formError || authError}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} noValidate>
+                {/* Email / Identifier */}
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: 'block', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#374151', marginBottom: 7 }}>
+                    Administrator Identifier / Atelier Email
+                  </label>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '11px 14px', border: '1.5px solid #E5E7EB',
+                    borderRadius: 10, background: '#FAFAFA',
+                  }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="16" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
                     </svg>
                     <input
                       type="text"
-                      id="email"
-                      name="email"
                       value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setEmailError(null);
-                        setFormError(null);
-                      }}
-                      placeholder="Caritas360"
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="curator.geneve@caritasluxury.com"
                       autoComplete="username"
+                      style={{
+                        flex: 1, border: 'none', outline: 'none', background: 'transparent',
+                        fontSize: 14, color: '#1a1a2e', fontFamily: 'inherit',
+                      }}
                     />
                   </div>
-                  {emailError && <small className="msg">{emailError}</small>}
                 </div>
 
-                <div className={`field ${passError ? 'invalid' : ''}`}>
-                  <label htmlFor="password">Password</label>
-                  <div className="input">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="4" y="11" width="16" height="10" rx="2" />
-                      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                {/* Password */}
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
+                    <label style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#374151' }}>
+                      Secure Master Vault Password
+                    </label>
+                    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.07em', color: '#888', textTransform: 'uppercase' }}>
+                      HSM TOKEN V4
+                    </span>
+                  </div>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '11px 14px', border: '1.5px solid #E5E7EB',
+                    borderRadius: 10, background: '#FAFAFA',
+                  }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="11" r="3" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /><rect x="3" y="11" width="18" height="11" rx="2" />
                     </svg>
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      id="password"
-                      name="password"
                       value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setPassError(null);
-                        setFormError(null);
-                      }}
-                      placeholder="Enter your password"
+                      onChange={e => setPassword(e.target.value)}
                       autoComplete="current-password"
+                      style={{
+                        flex: 1, border: 'none', outline: 'none', background: 'transparent',
+                        fontSize: 14, color: '#1a1a2e', fontFamily: 'inherit',
+                        letterSpacing: showPassword ? 'normal' : '0.18em',
+                      }}
                     />
                     <button
                       type="button"
-                      id="togglePw"
-                      className="eye"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword(v => !v)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#9ca3af', display: 'flex', alignItems: 'center' }}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M17.9 17.9A10.1 10.1 0 0 1 12 19c-6.4 0-10-7-10-7a18 18 0 0 1 4.1-5.1M9.9 5.2A9.7 9.7 0 0 1 12 5c6.4 0 10 7 10 7a18 18 0 0 1-2.2 3.2" />
-                          <path d="M14.1 14.1A3 3 0 0 1 9.9 9.9" />
-                          <path d="m2 2 20 20" />
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
                         </svg>
                       ) : (
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
-                          <circle cx="12" cy="12" r="3" />
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
                         </svg>
                       )}
                     </button>
                   </div>
-                  {passError && <small className="msg">{passError}</small>}
                 </div>
 
-                <div className="row">
-                  <label className="check" htmlFor="remember">
-                    <input
-                      type="checkbox"
-                      id="remember"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                    />
-                    <span className="box">
-                      <svg viewBox="0 0 24 24" fill="none" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m5 12 5 5L20 7" />
-                      </svg>
-                    </span>
-                    Remember me
+                {/* Remember me + Vault Recovery */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', userSelect: 'none' }}>
+                    <div
+                      onClick={() => setRememberMe(v => !v)}
+                      style={{
+                        width: 18, height: 18, borderRadius: 5,
+                        border: rememberMe ? '1.5px solid #2d6a4f' : '1.5px solid #d1d5db',
+                        background: rememberMe ? '#2d6a4f' : '#fff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', transition: 'all 0.15s', flexShrink: 0,
+                      }}
+                    >
+                      {rememberMe && (
+                        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="1.5 6 4.5 9 10.5 3" />
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{ fontSize: 13.5, color: '#374151' }}>Remember terminal for 30 days</span>
                   </label>
-                  <a href="#forgot" onClick={handleForgotPassword} className="link">
-                    Forgot password?
-                  </a>
+                  <span style={{ fontSize: 13.5, color: '#2d6a4f', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3 }}>
+                    Vault Recovery Protocol
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </span>
                 </div>
 
-                <button type="submit" id="submitBtn" className={`btn ${loading ? 'loading' : ''}`} disabled={loading}>
-                  <span className="btn-text">{loading ? 'Signing in...' : 'Sign in'}</span>
-                  <span className="spinner" aria-hidden="true"></span>
+                {/* Submit button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                    padding: '14px', border: 'none', borderRadius: 10,
+                    background: '#1a3c34', color: '#fff',
+                    fontSize: 15, fontWeight: 600, fontFamily: 'inherit',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.75 : 1,
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  {loading ? 'Authenticating…' : 'Authenticate & Enter Atelier Vault'}
                 </button>
 
-                <p className="foot">Protected area. Authorized personnel only.</p>
-              </form>
-            ) : (
-              <div className="done" id="done">
-                <div className="tick">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m5 12 5 5L20 7" />
-                  </svg>
+                {/* Divider */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0 16px' }}>
+                  <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
+                  <span style={{ fontSize: 11, letterSpacing: '0.1em', color: '#9ca3af', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                    FIDUCIARY VERIFICATION
+                  </span>
+                  <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
                 </div>
-                <h2>You're signed in</h2>
-                <p id="doneText">Redirecting to your dashboard...</p>
+
+                {/* Hardware key button */}
+                <button
+                  type="button"
+                  onClick={() => alert('Hardware key / FIDO2 Passkey authentication is not configured for this installation.')}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 16px', border: '1.5px solid #E5E7EB', borderRadius: 10,
+                    background: '#FAFAFA', cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <span style={{ fontSize: 14, color: '#374151', fontWeight: 500 }}>Authenticate via Hardware Key / FIDO2 Passkey</span>
+                  </div>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#6b7280', textTransform: 'uppercase', border: '1px solid #E5E7EB', padding: '3px 8px', borderRadius: 5 }}>
+                    TOUCH ID
+                  </span>
+                </button>
+              </form>
+
+              {/* Security info */}
+              <div style={{ marginTop: 24, padding: '14px 16px', background: '#F9F9FB', border: '1px solid #EBEBF0', borderRadius: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#6b7280', textTransform: 'uppercase' }}>
+                    SWISS BANKING LEVEL AES-256 HSM ENCRYPTION • FINMA TIER-3 SECURED
+                  </span>
+                </div>
+                <p style={{ fontSize: 12.5, color: '#6b7280', lineHeight: 1.6, margin: 0 }}>
+                  All session attempts are immutably signed and mirrored to the Zurich Security Operations Center. For escalated access protocols, contact the{' '}
+                  <span style={{ color: '#1a3c34', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Chief Vault Custodian</span>.
+                </p>
               </div>
-            )}
-          </div>
-        </section>
+            </>
+          )}
+        </div>
       </main>
 
-      <style jsx>{`
-        .login-wrapper {
-          --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
-          --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      {/* Status Bar */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32,
+        padding: '10px 40px', borderTop: '1px solid rgba(0,0,0,0.06)',
+        background: 'transparent', flexWrap: 'wrap',
+      }}>
+        <StatusItem dot="#2d6a4f" label="HSM STATE: SYNCHRONIZED (0.42MS)" />
+        <StatusItem dot={undefined} label="AUTH PROTOCOL: V4.88-PROD" />
+        <StatusItem dot={undefined} label="REGION: EMEA-CH-GVA" />
+      </div>
 
-          --bg: #f3f5f9;
-          --surface: #ffffff;
-          --field: #ffffff;
-          --fg: #101828;
-          --muted: #5b6578;
-          --line: #dde2ec;
-          --accent: #2750e0;
-          --accent-hover: #1e3fb8;
-          --accent-ink: #ffffff;
-          --ring: rgba(39, 80, 224, 0.18);
-          --danger: #c62a2a;
-          --danger-bg: #fdecec;
-          --danger-line: #f5c2c2;
-          --ok: #17803d;
-          --ok-bg: #e9f7ee;
-          --ok-line: #bfe3cb;
+      {/* Footer */}
+      <footer style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '14px 40px', flexWrap: 'wrap', gap: 10,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 11.5, color: '#6b7280' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          256-Bit Hardware Encrypted Handshake • Geneva Depository
+        </div>
+        <span style={{ fontSize: 11.5, color: '#6b7280', textAlign: 'center' }}>
+          © 2025 Caritas Haute Joaillerie S.A. Authorized personnel &amp; fiduciary curators only.
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 11.5, color: '#6b7280' }}>
+          <span style={{ cursor: 'pointer' }}>🌐 FR / EN</span>
+          <span style={{ cursor: 'pointer' }}>💎 PRIVATE CONCIERGE</span>
+        </div>
+      </footer>
 
-          --brand-bg: #0f1b3d;
-          --brand-fg: #f2f5ff;
-          --brand-muted: #aab6d8;
-          --brand-line: rgba(255, 255, 255, 0.12);
-          --brand-card: rgba(255, 255, 255, 0.07);
-          --brand-accent: #8fb0ff;
-          --brand-good: #6fe0a0;
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600&display=swap');
 
-          font-family: var(--font-body);
-          font-size: 15px;
-          background: var(--bg);
-          color: var(--fg);
-          -webkit-font-smoothing: antialiased;
-          min-height: 100vh;
-          width: 100%;
-        }
+        .caritas-login-card { transition: transform 0.05s; }
 
-        .shell {
-          display: grid;
-          grid-template-columns: 1.1fr 1fr;
-          min-height: 100vh;
+        @keyframes caritas-shake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-8px); }
+          40%, 80% { transform: translateX(8px); }
         }
+        .caritas-shake { animation: caritas-shake 0.4s; }
 
-        /* ---------- Brand panel ---------- */
-        .brand {
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          padding-block: 56px;
-          padding-left: max(48px, env(safe-area-inset-left, 0px));
-          padding-right: 48px;
-          background: var(--brand-bg);
-          color: var(--brand-fg);
-        }
-        .brand::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(var(--brand-line) 1px, transparent 1px),
-            linear-gradient(90deg, var(--brand-line) 1px, transparent 1px);
-          background-size: 44px 44px;
-          -webkit-mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 75%);
-          mask-image: radial-gradient(ellipse at 30% 40%, #000 0%, transparent 75%);
-          opacity: 0.55;
-        }
-        .brand-inner {
-          position: relative;
-          width: 100%;
-          max-width: 480px;
-          min-width: 0;
-        }
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-family: var(--font-display);
-          font-weight: 600;
-          font-size: 19px;
-          margin-bottom: 48px;
-        }
-        .logo svg {
-          width: 26px;
-          height: 26px;
-          color: var(--brand-accent);
-        }
-        .brand h1 {
-          font-family: var(--font-display);
-          font-size: clamp(30px, 3.4vw, 40px);
-          line-height: 1.12;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          text-wrap: balance;
-          margin-bottom: 14px;
-          color: #ffffff !important;
-        }
-        .brand .lead {
-          color: var(--brand-muted);
-          line-height: 1.6;
-          max-width: 44ch;
-          margin-bottom: 32px;
-        }
+        input::placeholder { color: #9ca3af; }
+        input:focus { outline: none; }
 
-        .preview {
-          background: var(--brand-card);
-          border: 1px solid var(--brand-line);
-          border-radius: 14px;
-          padding: 18px;
-          display: grid;
-          gap: 16px;
-        }
-        .preview-head {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 12px;
-          font-size: 12.5px;
-          color: var(--brand-muted);
-        }
-        .live {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          color: var(--brand-good);
-          font-weight: 500;
-        }
-        .live::before {
-          content: "";
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: var(--brand-good);
-        }
-        .stats {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-        }
-        .stat .label {
-          font-size: 12px;
-          color: var(--brand-muted);
-          margin-bottom: 4px;
-        }
-        .stat .value {
-          font-family: var(--font-display);
-          font-size: 21px;
-          font-weight: 600;
-          font-variant-numeric: tabular-nums;
-        }
-        .stat .delta {
-          font-size: 12px;
-          color: var(--brand-good);
-          font-variant-numeric: tabular-nums;
-        }
-        .stat .delta.down {
-          color: #ffb4a0;
-        }
-        .spark {
-          width: 100%;
-          height: 72px;
-          display: block;
-        }
-        .spark .grid {
-          stroke: var(--brand-line);
-          stroke-width: 1;
-        }
-        .spark .line {
-          fill: none;
-          stroke: var(--brand-accent);
-          stroke-width: 2;
-          stroke-linejoin: round;
-          stroke-linecap: round;
-        }
-        .spark .area {
-          fill: var(--brand-accent);
-          opacity: 0.16;
-        }
-        .spark .dot {
-          fill: var(--brand-bg);
-          stroke: var(--brand-accent);
-          stroke-width: 2;
-        }
+        button[type="submit"]:hover:not(:disabled) { background: #244f43 !important; }
 
-        /* ---------- Form side ---------- */
-        .form-side {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding-block: 32px;
-          padding-left: max(16px, env(safe-area-inset-left, 0px));
-          padding-right: max(16px, env(safe-area-inset-right, 0px));
-        }
-        .card {
-          width: 100%;
-          max-width: 420px;
-          min-width: 0;
-          background: var(--surface);
-          border: 1px solid var(--line);
-          border-radius: 16px;
-          padding: 36px 34px;
-          box-shadow: 0 12px 40px rgba(16, 24, 40, 0.06);
-        }
-        .card h2 {
-          font-family: var(--font-display);
-          font-size: 26px;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-        }
-        .sub {
-          color: var(--muted);
-          margin-top: 6px;
-          font-size: 14.5px;
-          margin-bottom: 24px;
-        }
-
-        .alert {
-          padding: 11px 14px;
-          border-radius: 10px;
-          font-size: 14px;
-          margin-bottom: 18px;
-          background: var(--danger-bg);
-          color: var(--danger);
-          border: 1px solid var(--danger-line);
-        }
-        .alert.success {
-          background: var(--ok-bg);
-          color: var(--ok);
-          border-color: var(--ok-line);
-        }
-
-        .field {
-          margin-bottom: 16px;
-        }
-        .field label {
-          display: block;
-          font-size: 13.5px;
-          font-weight: 600;
-          margin-bottom: 7px;
-        }
-        .input {
-          display: flex;
-          align-items: center;
-          border: 1.5px solid var(--line);
-          border-radius: 10px;
-          background: var(--field);
-          transition: border-color 0.15s, box-shadow 0.15s;
-        }
-        .input:focus-within {
-          border-color: var(--accent);
-          box-shadow: 0 0 0 4px var(--ring);
-        }
-        .input > svg {
-          width: 18px;
-          height: 18px;
-          margin-left: 13px;
-          color: var(--muted);
-          flex: none;
-        }
-        .input input {
-          flex: 1;
-          min-width: 0;
-          border: 0;
-          outline: 0;
-          background: transparent;
-          padding: 12px 13px;
-          font: inherit;
-          font-size: 14.5px;
-          color: var(--fg);
-        }
-        .input input::placeholder {
-          color: var(--muted);
-          opacity: 0.7;
-        }
-        .eye {
-          border: 0;
-          background: none;
-          cursor: pointer;
-          padding: 8px 13px;
-          color: var(--muted);
-          display: flex;
-          border-radius: 8px;
-        }
-        .eye svg {
-          width: 18px;
-          height: 18px;
-        }
-        .eye:hover {
-          color: var(--fg);
-        }
-        .eye:focus-visible,
-        .btn:focus-visible,
-        .link:focus-visible,
-        .ghost:focus-visible {
-          outline: 2px solid var(--accent);
-          outline-offset: 2px;
-        }
-
-        .msg {
-          display: block;
-          margin-top: 6px;
-          font-size: 12.5px;
-          color: var(--danger);
-        }
-        .field.invalid .input {
-          border-color: var(--danger);
-          box-shadow: 0 0 0 4px var(--danger-bg);
-        }
-
-        .row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 12px;
-          flex-wrap: wrap;
-          margin: 4px 0 22px;
-        }
-        .check {
-          display: flex;
-          align-items: center;
-          gap: 9px;
-          font-size: 14px;
-          color: var(--muted);
-          cursor: pointer;
-          user-select: none;
-          position: relative;
-        }
-        .check input {
-          position: absolute;
-          opacity: 0;
-          width: 18px;
-          height: 18px;
-        }
-        .check .box {
-          width: 18px;
-          height: 18px;
-          border-radius: 5px;
-          border: 1.5px solid var(--line);
-          background: var(--field);
-          display: grid;
-          place-items: center;
-          transition: 0.15s;
-        }
-        .check .box svg {
-          width: 12px;
-          height: 12px;
-          stroke: var(--accent-ink);
-          opacity: 0;
-        }
-        .check input:checked + .box {
-          background: var(--accent);
-          border-color: var(--accent);
-        }
-        .check input:checked + .box svg {
-          opacity: 1;
-        }
-        .check input:focus-visible + .box {
-          box-shadow: 0 0 0 4px var(--ring);
-        }
-        .link {
-          color: var(--accent);
-          font-size: 14px;
-          font-weight: 500;
-          text-decoration: none;
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 0;
-        }
-        .link:hover {
-          text-decoration: underline;
-        }
-
-        .btn {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          padding: 13px;
-          border: 0;
-          border-radius: 10px;
-          background: var(--accent);
-          color: var(--accent-ink);
-          font: inherit;
-          font-weight: 600;
-          font-size: 15px;
-          cursor: pointer;
-          transition: background 0.15s, transform 0.05s;
-        }
-        .btn:hover {
-          background: var(--accent-hover);
-        }
-        .btn:active {
-          transform: translateY(1px);
-        }
-        .btn:disabled {
-          opacity: 0.75;
-          cursor: not-allowed;
-        }
-        .spinner {
-          display: none;
-          width: 16px;
-          height: 16px;
-          border: 2px solid currentColor;
-          border-right-color: transparent;
-          border-radius: 50%;
-          animation: spin 0.7s linear infinite;
-        }
-        .btn.loading .spinner {
-          display: block;
-        }
-
-        .demo {
-          margin-top: 20px;
-          padding: 12px 14px;
-          border: 1px dashed var(--line);
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          flex-wrap: wrap;
-          font-size: 13px;
-          color: var(--muted);
-        }
-        .demo code {
-          font-family: ui-monospace, "SF Mono", Menlo, monospace;
-          font-size: 12.5px;
-          color: var(--fg);
-          overflow-wrap: anywhere;
-        }
-        .ghost {
-          border: 1px solid var(--line);
-          background: transparent;
-          color: var(--fg);
-          font: inherit;
-          font-size: 13px;
-          font-weight: 500;
-          padding: 6px 12px;
-          border-radius: 8px;
-          cursor: pointer;
-        }
-        .ghost:hover {
-          border-color: var(--accent);
-          color: var(--accent);
-        }
-
-        .foot {
-          text-align: center;
-          color: var(--muted);
-          font-size: 12.5px;
-          margin-top: 20px;
-        }
-
-        .done {
-          text-align: center;
-          padding: 12px 0;
-        }
-        .done .tick {
-          width: 52px;
-          height: 52px;
-          border-radius: 50%;
-          background: var(--ok-bg);
-          color: var(--ok);
-          display: grid;
-          place-items: center;
-          margin: 0 auto 16px;
-        }
-        .done .tick svg {
-          width: 26px;
-          height: 26px;
-        }
-        .done h2 {
-          font-size: 22px;
-          margin-bottom: 6px;
-        }
-        .done p {
-          color: var(--muted);
-          font-size: 14px;
-          margin-bottom: 20px;
-          line-height: 1.5;
-        }
-
-        .card.shake {
-          animation: shake 0.4s;
-        }
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        @keyframes shake {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          20%,
-          60% {
-            transform: translateX(-8px);
-          }
-          40%,
-          80% {
-            transform: translateX(8px);
-          }
-        }
-
-        @media (max-width: 900px) {
-          .shell {
-            grid-template-columns: 1fr;
-          }
-          .brand {
-            display: none;
-          }
-        }
-        @media (max-width: 480px) {
-          .card {
-            padding: 28px 20px;
-          }
+        @media (max-width: 540px) {
+          .caritas-login-card { padding: 36px 22px !important; }
         }
       `}</style>
+    </div>
+  );
+}
+
+function StatusItem({ dot, label }: { dot?: string; label: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, letterSpacing: '0.07em', color: '#888', textTransform: 'uppercase' }}>
+      {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: dot, display: 'inline-block' }} />}
+      {label}
     </div>
   );
 }
