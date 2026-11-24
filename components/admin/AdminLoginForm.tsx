@@ -8,22 +8,16 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
   const router = useRouter();
   const { login, error: authError } = useAdminAuth();
 
-  const [email, setEmail] = useState('Caritas360');
-  const [password, setPassword] = useState('Caritas1234!@#');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
   const [shake, setShake] = useState(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('caritas_admin_saved_login');
-      if (saved) { setEmail(saved); setRememberMe(true); }
-    } catch (_) {}
-  }, []);
-
+  // Trigger card shake on invalid submit or bad credentials
   const triggerShake = () => {
     setShake(false);
     setTimeout(() => setShake(true), 10);
@@ -229,6 +223,7 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••••••"
                       autoComplete="current-password"
                       style={{
                         flex: 1, border: 'none', outline: 'none', background: 'transparent',
@@ -275,7 +270,7 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
                         </svg>
                       )}
                     </div>
-                    <span style={{ fontSize: 13.5, color: '#374151' }}>Remember terminal for 30 days</span>
+                    <span style={{ fontSize: 13.5, color: '#374151' }}>Remember this terminal</span>
                   </label>
                   <span style={{ fontSize: 13.5, color: '#2d6a4f', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3 }}>
                     Vault Recovery Protocol
