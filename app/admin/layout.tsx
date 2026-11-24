@@ -219,7 +219,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
               <img
                 alt="Caritas Luxury Monogram"
                 style={{ height: 32, width: 'auto', objectFit: 'contain' }}
-                src="https://lh3.googleusercontent.com/aida/ALJJyrCCJ653tQbXPh9O2xDjwaCQY3wTn_-4A9jpzlglnIkNZ-BfQ6urx0evGiNyGngMrAs0GBxZQlRsW9jbcDzSJkuK9Cy1gVb4d6K7Z5TLz_kGRrdcwc3yrGLne58X2L8a6IfPs-sQnkO_Hvxc2_FfsSFJ9RjK0GnZHfXn1uLSQZvamn06w8maLjD0J9T9nfDXf5IhFKPMyMPV7lj7mrUqyPArSXwG830LAA4Gbzu-GEqk4w"
+                src="/images/favicon.png"
               />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 700, color: '#003629', letterSpacing: '1px', lineHeight: 1 }}>
