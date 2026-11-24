@@ -1765,3 +1765,9 @@ body.admin-body,
 .text-red-600 { color: #dc2626 !important; }
 .text-red-700 { color: #b91c1c !important; }
 .text-secondary\/70 { color: rgba(114, 91, 56, 0.7) !important; }
+.mb-space-xl { margin-bottom: 2.5rem !important; }
+.no-scrollbar::-webkit-scrollbar { display: none !important; }
+.no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+.text-\[26px\] { font-size: 26px !important; }
+.bg-surface-container-highest\/20 { background-color: rgba(218, 226, 253, 0.2) !important; }
+

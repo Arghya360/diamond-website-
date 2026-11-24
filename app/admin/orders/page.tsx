@@ -9,26 +9,37 @@ interface DisplayOrder {
   orderRef: string;
   date: string;
   orderType: string;
+  orderTypeClass?: string;
   clientName: string;
+  clientVerified?: boolean;
   clientEmail: string;
   clientPhone?: string;
   salonLocation: string;
   clientTier: string;
+  tierBadgeClass?: string;
   pieceTitle: string;
   pieceCategory: string;
   masterBench: string;
-  imageUrl: string;
+  imageUrl?: string;
+  iconType?: 'earbuds' | 'auto_awesome' | 'gem';
   gemSpecs: string;
   metalSpecs: string;
   certNumber: string;
   totalFormatted: string;
   numericTotal: number;
   escrowStatus: string;
+  escrowStatusIcon?: string;
+  escrowStatusClass?: string;
+  escrowSecondary: string;
   paymentMethod: string;
   dispatchStatus: string;
+  dispatchStatusClass?: string;
+  hasPulseDot?: boolean;
+  dispatchIcon?: string;
   logisticsCarrier: string;
   logisticsEta: string;
   rawStatus: string;
+  isFirstRowActive?: boolean;
 }
 
 export default function AdminOrdersPage() {
@@ -66,7 +77,9 @@ export default function AdminOrdersPage() {
         prev.map((o) => (o.id === orderId ? { ...o, orderStatus: newStatus } : o))
       );
       if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder((prev) => prev ? { ...prev, rawStatus: newStatus, dispatchStatus: getStatusLabel(newStatus) } : null);
+        setSelectedOrder((prev) =>
+          prev ? { ...prev, rawStatus: newStatus, dispatchStatus: getStatusLabel(newStatus) } : null
+        );
       }
       setNotice(`Order ${orderId} updated to ${getStatusLabel(newStatus)}.`);
       setTimeout(() => setNotice(null), 3500);
@@ -79,53 +92,65 @@ export default function AdminOrdersPage() {
 
   function getStatusLabel(st: string) {
     switch (st) {
-      case 'payment_received': return 'Escrow Cleared';
-      case 'confirmed': return 'Confirmed';
+      case 'payment_received': return '100% Escrow Cleared';
+      case 'confirmed': return 'In Vault Ready';
       case 'processing': return 'In Atelier Crafting';
-      case 'shipped': return 'Armored Transit';
-      case 'delivered': return 'Delivered & Cleared';
+      case 'shipped': return 'Armored VIP Transit';
+      case 'delivered': return 'Delivered & Handed Over';
       default: return 'Pending Escrow';
     }
   }
 
-  // Museum-grade baseline orders from Caritas Luxury Atelier dossier
+  // Exact 5 Baseline Orders from Caritas Haute Joaillerie Spec
   const baselineOrders: DisplayOrder[] = [
     {
       id: 'CRT-2026-8942',
       orderRef: '#CRT-2026-8942',
       date: 'Oct 24, 2026',
       orderType: 'Bespoke #441',
+      orderTypeClass: 'text-secondary font-semibold',
       clientName: 'Elena Rostova',
+      clientVerified: true,
       clientEmail: 'elena.rostova@genevaprivate.ch',
       clientPhone: '+41 22 819 4001',
       salonLocation: 'Zurich Salon • Baur au Lac',
       clientTier: 'Tier 1 UHNW',
+      tierBadgeClass: 'bg-secondary-fixed text-on-secondary-fixed',
       pieceTitle: 'The Celestial Marquise',
       pieceCategory: 'Solitaire Diamond Ring',
       masterBench: 'Master Bench: H. Laurent',
       imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBqeljXMpeTXeybCtNFgdcnQup_Z5xfIo3fWzI0Thv6_ffeLcMlh_9RJWiAt3UkRtA2eBpp7BWO0ceWJNj0DbYCNTM6zj_G6eq-Cso9io_vOTGUkKLnQyZ4KJUEpNkcHGhvj8P5jtM3LvoJFAI4Ea8KGUpyphwakyXtWfG2YBYmtTUQAPyTcop1Wf6RNbXDFEcglAqIkDgwgnI9NxKaWS6FZt9iS8dpsRXZsP6TLGG8',
-      gemSpecs: '3.20 ct D/IF Type IIa',
-      metalSpecs: 'Platinum 950 Hand-Pronged',
+      gemSpecs: '3.20 ct D/IF Platinum 950',
+      metalSpecs: 'Super Ideal Cut • No Fluor.',
       certNumber: 'GIA #2489104921',
       totalFormatted: '$64,500',
       numericTotal: 64500,
       escrowStatus: '100% Escrow Cleared',
+      escrowStatusIcon: 'check_circle',
+      escrowStatusClass: 'text-surface-tint font-semibold',
+      escrowSecondary: 'Swiss Wire • Credit Suisse',
       paymentMethod: 'Swiss Wire • Credit Suisse',
       dispatchStatus: 'Armored Transit',
+      dispatchStatusClass: 'bg-secondary-fixed text-on-secondary-fixed font-semibold',
+      hasPulseDot: true,
       logisticsCarrier: 'Malca-Amit #MA-89211',
       logisticsEta: 'ETA Today, 16:30 CET',
       rawStatus: 'shipped',
+      isFirstRowActive: true,
     },
     {
       id: 'CRT-2026-8941',
       orderRef: '#CRT-2026-8941',
       date: 'Oct 23, 2026',
       orderType: 'Vault Stock',
+      orderTypeClass: 'text-outline',
       clientName: 'H.E. Sheikh Al-Maktoum',
+      clientVerified: true,
       clientEmail: 'private.office@difc-holdings.ae',
       clientPhone: '+971 4 362 7000',
       salonLocation: 'Dubai DIFC Salon',
       clientTier: 'Tier 1 UHNW',
+      tierBadgeClass: 'bg-surface-container-highest text-primary font-semibold',
       pieceTitle: 'Verdant Sovereign Collier',
       pieceCategory: 'Haute Joaillerie Necklace',
       masterBench: 'Private Collection #08',
@@ -133,39 +158,52 @@ export default function AdminOrdersPage() {
       gemSpecs: '18.4 ct Royal Emerald & VVS',
       metalSpecs: '18K Yellow Gold Hand-Chased',
       certNumber: 'SSEF #99281 Certified',
-      totalFormatted: '$148,000',
-      numericTotal: 148000,
-      escrowStatus: '100% Escrow Cleared',
+      totalFormatted: '$185,000',
+      numericTotal: 185000,
+      escrowStatus: 'Deposit 50% Held',
+      escrowStatusIcon: 'check_circle',
+      escrowStatusClass: 'text-surface-tint font-semibold',
+      escrowSecondary: 'Escrow Balance $92.5k',
       paymentMethod: 'Emirates NBD Sovereign Wire',
-      dispatchStatus: 'Armored Transit',
-      logisticsCarrier: 'Ferrari Logistics #FL-4921',
-      logisticsEta: 'Vault Sealed • DIFC Armored Escort',
-      rawStatus: 'shipped',
+      dispatchStatus: 'In Vault Ready',
+      dispatchStatusClass: 'bg-primary-fixed text-on-primary-fixed font-semibold',
+      hasPulseDot: false,
+      logisticsCarrier: 'DIFC Private Salon Safe',
+      logisticsEta: 'Biometric Access Key Locked',
+      rawStatus: 'confirmed',
     },
     {
       id: 'CRT-2026-8940',
       orderRef: '#CRT-2026-8940',
       date: 'Oct 22, 2026',
-      orderType: 'Bespoke Bridal',
-      clientName: 'Arthur & Lady Pendelton',
-      clientEmail: 'arthur.pendelton@mayfair-advisory.co.uk',
+      orderType: 'Custom Atelier',
+      orderTypeClass: 'text-secondary font-semibold',
+      clientName: 'Lord Marcus Sterling',
+      clientVerified: false,
+      clientEmail: 'marcus.sterling@mayfair-holdings.co.uk',
       clientPhone: '+44 20 7946 0921',
-      salonLocation: 'London Mayfair Salon',
+      salonLocation: 'London Mayfair',
       clientTier: 'Bespoke Bridal',
+      tierBadgeClass: 'bg-secondary-fixed text-on-secondary-fixed font-semibold',
       pieceTitle: 'Aura Pavé Bridal Suite',
       pieceCategory: 'Tiara & Bracelet Ensemble',
       masterBench: 'Master Bench: P. Moreau',
       imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAovDebsdVdX5e3Q5Rzzzi0eRhcY6F50uBR-Bdb-RUGThRhM83aSGyo02vK5z5OvbCXvmh4qfvuYqfxvM4-rjM6Bb4HSXvm21GX-FaPW80l97RjRqd5_D_iSywl9RxJ50l8WxQychPlULi9SUUdlQyU9fnFSAgLu2HdhV2D2aMOjzMuH051eoXVOu7pDpszGya6QQ_SrY4PAQ9ZVQy9LPMQFI9dnYPBR-6xwAC1jWZK',
       gemSpecs: '5.15 ct TW Round F/VVS1',
       metalSpecs: 'Platinum 950 Hand-Pronged',
-      certNumber: 'GIA Dossier Complete',
+      certNumber: 'GIA Dossier Set Complete',
       totalFormatted: '$92,000',
       numericTotal: 92000,
       escrowStatus: 'Awaiting Wire Clear',
+      escrowStatusIcon: 'timelapse',
+      escrowStatusClass: 'text-secondary font-semibold',
+      escrowSecondary: 'Coutts London Private Banking',
       paymentMethod: 'Coutts London Private Banking',
-      dispatchStatus: 'In Atelier Crafting',
+      dispatchStatus: 'Atelier Hand-Setting',
+      dispatchStatusClass: 'bg-surface-container text-on-surface font-semibold',
+      dispatchIcon: 'handyman',
       logisticsCarrier: 'Geneva Master Bench',
-      logisticsEta: 'Est. 3 Days Crafting',
+      logisticsEta: 'Estimated 3 Days Crafting',
       rawStatus: 'processing',
     },
     {
@@ -173,23 +211,31 @@ export default function AdminOrdersPage() {
       orderRef: '#CRT-2026-8939',
       date: 'Oct 21, 2026',
       orderType: 'Direct Catalog',
+      orderTypeClass: 'text-outline',
       clientName: 'Sophie Chen',
+      clientVerified: false,
       clientEmail: 'sophie.chen@marinabay-invest.sg',
       clientPhone: '+65 6732 9900',
       salonLocation: 'Singapore Marina Bay',
       clientTier: 'VIP Patron',
+      tierBadgeClass: 'bg-secondary-fixed text-on-secondary-fixed font-semibold',
       pieceTitle: 'Lumière Pear Earrings',
       pieceCategory: 'Drop Earrings in 18K Gold',
       masterBench: 'Matched Pair Cert #901',
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB16K9e64e56n9L-kIq7X_16t7hW77wM_3k085aQ3p4254v7_50c-v50t_d78f2_a7w19e4=w600',
+      iconType: 'earbuds',
       gemSpecs: '4.10 ct TW Vivid Yellow',
       metalSpecs: '18K Yellow Gold & Pt Pavé',
       certNumber: 'GIA #772910381',
       totalFormatted: '$54,200',
       numericTotal: 54200,
       escrowStatus: '100% Escrow Cleared',
+      escrowStatusIcon: 'check_circle',
+      escrowStatusClass: 'text-surface-tint font-semibold',
+      escrowSecondary: 'DBS Private Bank Singapore',
       paymentMethod: 'DBS Private Bank Singapore',
-      dispatchStatus: 'Armored Transit',
+      dispatchStatus: 'Armored VIP Transit',
+      dispatchStatusClass: 'bg-secondary-fixed text-on-secondary-fixed font-semibold',
+      hasPulseDot: true,
       logisticsCarrier: "Brink's International",
       logisticsEta: 'Flight SQ346 En Route',
       rawStatus: 'shipped',
@@ -199,67 +245,85 @@ export default function AdminOrdersPage() {
       orderRef: '#CRT-2026-8938',
       date: 'Oct 19, 2026',
       orderType: 'Private Reserve',
+      orderTypeClass: 'text-secondary font-semibold',
       clientName: 'Camilla de Bourbon',
+      clientVerified: true,
       clientEmail: 'camilla.bourbon@vendome-heritage.fr',
       clientPhone: '+33 1 42 68 55 00',
       salonLocation: 'Paris Place Vendôme',
       clientTier: 'Tier 1 UHNW',
+      tierBadgeClass: 'bg-surface-container-highest text-primary font-semibold',
       pieceTitle: 'Vendôme Deco Brooch',
       pieceCategory: 'Art Deco Certified Brooch',
       masterBench: 'Historical Archive Piece',
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBgLqSodf-JzLBjCzzqrV9TVJgJEzAk_wSfp3Dg_M3TQISbT7OEkrOWeaE_vdcNzJy3UV2Ch8Tn-_P0L7a_TPaV8cOLvfuT6DdLwuM2cuhspWUwRdOOcP7tLfj9EyMba2SZxphn-YHVVkbjLv0NNypVI1x7mORJ0e9_af3ueeX3sQ3YaeNT5GK39nskAVq3pN2lsuDWLSgxt_36_SWw3Cc5xE8ayVRPGUspCgDWJ_07',
+      iconType: 'auto_awesome',
       gemSpecs: 'Rare Burma Ruby & Diamond',
       metalSpecs: 'Platinum & 18K White Gold',
       certNumber: 'Gübelin #201944 Certified',
       totalFormatted: '$110,000',
       numericTotal: 110000,
       escrowStatus: '100% Escrow Cleared',
+      escrowStatusIcon: 'check_circle',
+      escrowStatusClass: 'text-surface-tint font-semibold',
+      escrowSecondary: 'BNP Paribas Wealth Paris',
       paymentMethod: 'BNP Paribas Wealth Paris',
-      dispatchStatus: 'Delivered & Cleared',
+      dispatchStatus: 'Delivered & Handed Over',
+      dispatchStatusClass: 'bg-surface-container-highest text-on-surface font-semibold',
+      dispatchIcon: 'task_alt',
       logisticsCarrier: 'Signed In-Salon by Client',
       logisticsEta: 'Salon Lead: A. Dubois',
       rawStatus: 'delivered',
     },
   ];
 
-  // Map real Firestore orders if any exist
+  // Map real Firestore orders if existing alongside baseline
   const combinedOrders: DisplayOrder[] = orders.length > 0
-    ? orders.map((o) => {
-        const firstItem = o.items?.[0] as any;
-        const oAny = o as any;
-        const isBespoke = (firstItem?.title || '').toLowerCase().includes('bespoke') || (o.total || 0) > 20000;
-        return {
-          id: o.id,
-          orderRef: (o.id || '').startsWith('#') ? (o.id || '') : `#CRT-${(o.id || '').slice(0, 8).toUpperCase()}`,
-          date: o.createdAt ? new Date((o.createdAt as any)?.seconds ? (o.createdAt as any).seconds * 1000 : o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Nov 23, 2026',
-          orderType: isBespoke ? 'Bespoke Commission' : 'Direct Catalog',
-          clientName: o.customerName || 'Private Patron',
-          clientEmail: o.customerEmail || 'patron@caritasluxury.com',
-          clientPhone: (o.shippingAddress as any)?.phone || o.customerPhone || '+41 22 819 3000',
-          salonLocation: o.shippingAddress?.city ? `${o.shippingAddress.city} Salon` : 'Geneva Central Atelier',
-          clientTier: (o.total || 0) > 50000 ? 'Tier 1 UHNW' : 'VIP Patron',
-          pieceTitle: firstItem?.title || firstItem?.productName || 'Certified Haute Joaillerie Selection',
-          pieceCategory: firstItem?.category || 'High Jewellery Piece',
-          masterBench: 'Master Bench: Geneva Atelier',
-          imageUrl: firstItem?.image || firstItem?.productImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBqeljXMpeTXeybCtNFgdcnQup_Z5xfIo3fWzI0Thv6_ffeLcMlh_9RJWiAt3UkRtA2eBpp7BWO0ceWJNj0DbYCNTM6zj_G6eq-Cso9io_vOTGUkKLnQyZ4KJUEpNkcHGhvj8P5jtM3LvoJFAI4Ea8KGUpyphwakyXtWfG2YBYmtTUQAPyTcop1Wf6RNbXDFEcglAqIkDgwgnI9NxKaWS6FZt9iS8dpsRXZsP6TLGG8',
-          gemSpecs: firstItem?.carat ? `${firstItem.carat} ct ${firstItem?.color || 'D'}/${firstItem?.clarity || 'VVS1'}` : '3.00 ct D/VVS1 Lab-Grown',
-          metalSpecs: firstItem?.metal || 'Platinum 950 Hand-Pronged',
-          certNumber: 'GIA / IGI Certified Dossier',
-          totalFormatted: `$${(o.total || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-          numericTotal: o.total || 0,
-          escrowStatus: o.paymentStatus === 'paid' ? '100% Escrow Cleared' : 'Pending Escrow Deposit',
-          paymentMethod: oAny.paymentMethod || 'Bank Wire Escrow',
-          dispatchStatus: getStatusLabel(o.orderStatus),
-          logisticsCarrier: o.orderStatus === 'shipped' ? "Malca-Amit Armored Express" : o.orderStatus === 'delivered' ? "Delivered & Cleared" : "Geneva Vault Reserve",
-          logisticsEta: o.orderStatus === 'delivered' ? 'Completed & Handed Over' : 'In Protected Transit',
-          rawStatus: o.orderStatus,
-        };
-      })
+    ? [
+        ...orders.map((o) => {
+          const firstItem = o.items?.[0] as any;
+          const oAny = o as any;
+          const isBespoke = (firstItem?.title || '').toLowerCase().includes('bespoke') || (o.total || 0) > 20000;
+          return {
+            id: o.id,
+            orderRef: (o.id || '').startsWith('#') ? (o.id || '') : `#CRT-${(o.id || '').slice(0, 8).toUpperCase()}`,
+            date: o.createdAt ? new Date((o.createdAt as any)?.seconds ? (o.createdAt as any).seconds * 1000 : o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Oct 24, 2026',
+            orderType: isBespoke ? 'Bespoke Commission' : 'Direct Catalog',
+            orderTypeClass: 'text-secondary font-semibold',
+            clientName: o.customerName || 'Private Patron',
+            clientVerified: true,
+            clientEmail: o.customerEmail || 'patron@caritasluxury.com',
+            clientPhone: (o.shippingAddress as any)?.phone || o.customerPhone || '+41 22 819 3000',
+            salonLocation: o.shippingAddress?.city ? `${o.shippingAddress.city} Salon` : 'Geneva Central Atelier',
+            clientTier: (o.total || 0) > 50000 ? 'Tier 1 UHNW' : 'VIP Patron',
+            tierBadgeClass: (o.total || 0) > 50000 ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-surface-container-highest text-primary',
+            pieceTitle: firstItem?.title || firstItem?.productName || 'Certified Haute Joaillerie Selection',
+            pieceCategory: firstItem?.category || 'High Jewellery Piece',
+            masterBench: 'Master Bench: Geneva Atelier',
+            imageUrl: firstItem?.image || firstItem?.productImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBqeljXMpeTXeybCtNFgdcnQup_Z5xfIo3fWzI0Thv6_ffeLcMlh_9RJWiAt3UkRtA2eBpp7BWO0ceWJNj0DbYCNTM6zj_G6eq-Cso9io_vOTGUkKLnQyZ4KJUEpNkcHGhvj8P5jtM3LvoJFAI4Ea8KGUpyphwakyXtWfG2YBYmtTUQAPyTcop1Wf6RNbXDFEcglAqIkDgwgnI9NxKaWS6FZt9iS8dpsRXZsP6TLGG8',
+            gemSpecs: firstItem?.carat ? `${firstItem.carat} ct ${firstItem?.color || 'D'}/${firstItem?.clarity || 'VVS1'}` : '3.20 ct D/IF Platinum 950',
+            metalSpecs: firstItem?.metal || 'Super Ideal Cut • No Fluor.',
+            certNumber: 'GIA #2489104921',
+            totalFormatted: `$${(o.total || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            numericTotal: o.total || 0,
+            escrowStatus: o.paymentStatus === 'paid' ? '100% Escrow Cleared' : 'Pending Escrow Deposit',
+            escrowStatusIcon: 'check_circle',
+            escrowStatusClass: 'text-surface-tint font-semibold',
+            escrowSecondary: 'Swiss Wire • Escrow Account',
+            paymentMethod: oAny.paymentMethod || 'Swiss Wire • Escrow',
+            dispatchStatus: getStatusLabel(o.orderStatus),
+            dispatchStatusClass: o.orderStatus === 'shipped' ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-primary-fixed text-on-primary-fixed',
+            hasPulseDot: o.orderStatus === 'shipped',
+            logisticsCarrier: o.orderStatus === 'shipped' ? "Malca-Amit #MA-89211" : "Geneva Private Safe",
+            logisticsEta: o.orderStatus === 'delivered' ? 'Delivered & Handed Over' : 'In Protected Transit',
+            rawStatus: o.orderStatus,
+          };
+        }),
+        ...baselineOrders,
+      ]
     : baselineOrders;
 
-  // Tab Filtering
+  // Filter orders
   const filteredOrders = combinedOrders.filter((order) => {
-    // Search filter
     if (search.trim()) {
       const q = search.toLowerCase();
       const matchSearch =
@@ -271,35 +335,22 @@ export default function AdminOrdersPage() {
       if (!matchSearch) return false;
     }
 
-    // Tier filter
     if (selectedTier !== 'All') {
       if (!order.clientTier.toLowerCase().includes(selectedTier.toLowerCase())) return false;
     }
 
-    // Tab filter
-    if (activeTab === 'pending') {
-      return order.rawStatus === 'pending';
+    if (selectedEscrow !== 'All') {
+      if (!order.escrowStatus.toLowerCase().includes(selectedEscrow.toLowerCase()) && !order.paymentMethod.toLowerCase().includes(selectedEscrow.toLowerCase())) return false;
     }
-    if (activeTab === 'crafting') {
-      return order.rawStatus === 'processing';
-    }
-    if (activeTab === 'secured') {
-      return order.rawStatus === 'confirmed';
-    }
-    if (activeTab === 'transit') {
-      return order.rawStatus === 'shipped';
-    }
-    if (activeTab === 'delivered') {
-      return order.rawStatus === 'delivered';
-    }
+
+    if (activeTab === 'pending') return order.rawStatus === 'pending';
+    if (activeTab === 'crafting') return order.rawStatus === 'processing';
+    if (activeTab === 'secured') return order.rawStatus === 'confirmed';
+    if (activeTab === 'transit') return order.rawStatus === 'shipped';
+    if (activeTab === 'delivered') return order.rawStatus === 'delivered';
 
     return true;
   });
-
-  // Calculate live KPI metrics
-  const totalOrdersCount = combinedOrders.length;
-  const grossValue = combinedOrders.reduce((sum, o) => sum + (o.numericTotal || 0), 0);
-  const activeEscrows = combinedOrders.filter((o) => o.rawStatus !== 'delivered').length;
 
   return (
     <div className="flex flex-col w-full">
@@ -312,18 +363,16 @@ export default function AdminOrdersPage() {
 
       {/* Breadcrumbs & Editorial Header Bar */}
       <div className="flex flex-col gap-space-sm mb-space-lg">
-        <div className="flex items-center gap-2 font-label-sm text-label-sm uppercase tracking-widest text-outline">
-          <span>Business</span>
-          <span className="text-xs">/</span>
-          <span>High-Net-Worth Commissions</span>
-          <span className="text-xs">/</span>
-          <span className="text-secondary font-semibold">Orders &amp; Client Base</span>
+        <div className="flex items-center gap-2">
+          <span className="font-label-sm text-label-sm text-outline uppercase tracking-widest">Business</span>
+          <span className="text-outline text-xs">/</span>
+          <span className="font-label-sm text-label-sm text-outline uppercase tracking-widest">High-Net-Worth Commissions</span>
+          <span className="text-outline text-xs">/</span>
+          <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest font-semibold">Orders &amp; Client Base</span>
         </div>
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
           <div className="flex flex-col max-w-3xl">
-            <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
-              Orders &amp; Client Portfolio Management
-            </h1>
+            <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">Orders &amp; Client Portfolio Management</h1>
             <p className="font-body-md text-body-md text-on-surface-variant mt-1">
               Oversee bespoke haute joaillerie acquisitions, private salon reserves, armored courier dispatches, and high-net-worth client profiles.
             </p>
@@ -337,7 +386,7 @@ export default function AdminOrdersPage() {
               <span className="font-title-md text-title-md">Export Escrow Ledger</span>
             </button>
             <button
-              onClick={() => alert('New Private Order form activated. Select client patron and stone allocation.')}
+              onClick={() => alert('New Private Order / Commission form initiated. Allocate stone & select client patron.')}
               className="flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-all shadow-md"
             >
               <span className="material-symbols-outlined text-[20px]">add</span>
@@ -366,8 +415,8 @@ export default function AdminOrdersPage() {
               <span className="font-label-md text-label-md text-surface-tint font-semibold">+12.4%</span>
               <span className="font-body-sm text-body-sm text-outline">vs last quarter</span>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
-              {activeEscrows} Active Escrows
+            <span className="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
+              38 Active Escrows
             </span>
           </div>
         </div>
@@ -446,7 +495,9 @@ export default function AdminOrdersPage() {
           }`}
         >
           <span>All Orders</span>
-          <span className={`px-2 py-0.5 rounded-full font-label-sm text-label-sm ${activeTab === 'all' ? 'bg-primary-container text-on-primary' : 'bg-surface-container-high text-on-surface-variant'}`}>
+          <span className={`px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
+            activeTab === 'all' ? 'bg-primary-container text-on-primary' : 'bg-surface-container-high text-on-surface-variant'
+          }`}>
             1,680
           </span>
         </button>
@@ -510,205 +561,258 @@ export default function AdminOrdersPage() {
           <span>Delivered &amp; Cleared</span>
           <span className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">1,509</span>
         </button>
+
+        <button
+          onClick={() => alert('Redirecting to Client Directory & CRM.')}
+          className="px-4 py-2 rounded-lg bg-surface-container-lowest text-secondary hover:text-primary hover:bg-surface-container font-title-md text-title-md shrink-0 transition-all flex items-center gap-1.5 ml-auto shadow-sm"
+        >
+          <span className="material-symbols-outlined text-[18px]">account_box</span>
+          <span>Client Directory &amp; CRM</span>
+        </button>
       </div>
 
-      {/* Filter and Refinement Bar */}
-      <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md mb-space-lg">
-        <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
-            <span className="material-symbols-outlined text-[18px]">filter_list</span>
+      {/* Main Content Mosaic: Orders Registry */}
+      <div className="grid-cols-1 gap-space-lg items-start">
+        <div className="flex flex-col gap-space-md w-full">
+          {/* Filter and Refinement Bar */}
+          <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                <span className="material-symbols-outlined text-[18px]">filter_list</span>
+              </div>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full h-10 pl-10 pr-4 bg-surface-container-low text-body-md font-body-md text-on-surface rounded-lg placeholder-outline focus:outline-none focus:bg-surface-container-lowest transition-all"
+                placeholder="Search by Order #, Client Name, Jewel SKU, or GIA Cert..."
+                type="text"
+              />
+            </div>
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              <div className="relative">
+                <select
+                  value={selectedTier}
+                  onChange={(e) => setSelectedTier(e.target.value)}
+                  className="appearance-none bg-surface-container-low h-10 pl-3 pr-8 rounded-lg font-title-md text-title-md text-on-surface focus:outline-none cursor-pointer"
+                >
+                  <option value="All">Client Tier: All VIPs</option>
+                  <option value="UHNW">Royalty / UHNW</option>
+                  <option value="Bridal">Bespoke Patron</option>
+                  <option value="Patron">Private Collector</option>
+                </select>
+                <span className="material-symbols-outlined absolute right-2 top-2.5 text-outline pointer-events-none text-[18px]">expand_more</span>
+              </div>
+              <div className="relative">
+                <select
+                  value={selectedEscrow}
+                  onChange={(e) => setSelectedEscrow(e.target.value)}
+                  className="appearance-none bg-surface-container-low h-10 pl-3 pr-8 rounded-lg font-title-md text-title-md text-on-surface focus:outline-none cursor-pointer"
+                >
+                  <option value="All">Payment: All Escrows</option>
+                  <option value="Cleared">Swiss Wire Cleared</option>
+                  <option value="Held">Bank Escrow Held</option>
+                  <option value="Crypto">Concierge Crypto</option>
+                </select>
+                <span className="material-symbols-outlined absolute right-2 top-2.5 text-outline pointer-events-none text-[18px]">expand_more</span>
+              </div>
+              <button
+                onClick={() => { setSearch(''); setSelectedTier('All'); setSelectedEscrow('All'); }}
+                className="h-10 px-3 bg-surface-container-low hover:bg-surface-container rounded-lg text-on-surface-variant flex items-center justify-center transition-colors"
+                title="Calendar / Reset Date Range"
+              >
+                <span className="material-symbols-outlined text-[20px]">calendar_today</span>
+              </button>
+            </div>
           </div>
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-10 pl-10 pr-4 bg-surface-container-low text-body-md font-body-md text-on-surface rounded-lg placeholder-outline focus:outline-none focus:bg-surface-container-lowest transition-all"
-            placeholder="Search by Order #, Client Name, Jewel SKU, or GIA Cert..."
-            type="text"
-          />
-        </div>
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <div className="relative">
-            <select
-              value={selectedTier}
-              onChange={(e) => setSelectedTier(e.target.value)}
-              className="appearance-none bg-surface-container-low h-10 pl-3 pr-8 rounded-lg font-title-md text-title-md text-on-surface focus:outline-none cursor-pointer"
-            >
-              <option value="All">Client Tier: All VIPs</option>
-              <option value="UHNW">Royalty / UHNW</option>
-              <option value="Bridal">Bespoke Bridal</option>
-              <option value="Patron">Private Collector</option>
-            </select>
-            <span className="material-symbols-outlined absolute right-2 top-2.5 text-outline pointer-events-none text-[18px]">expand_more</span>
-          </div>
-          <div className="relative">
-            <select
-              value={selectedEscrow}
-              onChange={(e) => setSelectedEscrow(e.target.value)}
-              className="appearance-none bg-surface-container-low h-10 pl-3 pr-8 rounded-lg font-title-md text-title-md text-on-surface focus:outline-none cursor-pointer"
-            >
-              <option value="All">Payment: All Escrows</option>
-              <option value="Cleared">Swiss Wire Cleared</option>
-              <option value="Held">Bank Escrow Held</option>
-              <option value="Crypto">Concierge Escrow</option>
-            </select>
-            <span className="material-symbols-outlined absolute right-2 top-2.5 text-outline pointer-events-none text-[18px]">expand_more</span>
-          </div>
-          <button
-            onClick={() => { setSearch(''); setSelectedTier('All'); setSelectedEscrow('All'); }}
-            className="h-10 px-3 bg-surface-container-low hover:bg-surface-container rounded-lg text-on-surface-variant flex items-center justify-center transition-colors font-title-md text-title-md gap-1"
-            title="Reset Filters"
-          >
-            <span className="material-symbols-outlined text-[18px]">restart_alt</span>
-            <span className="hidden sm:inline">Reset</span>
-          </button>
-        </div>
-      </div>
 
-      {/* Luxury Orders Table Card */}
-      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-space-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-container-low text-outline font-label-sm text-label-sm uppercase tracking-wider">
-                <th className="py-3.5 px-6">Order Ref &amp; Date</th>
-                <th className="py-3.5 px-6">Client &amp; Salon</th>
-                <th className="py-3.5 px-6">Haute Piece &amp; Item</th>
-                <th className="py-3.5 px-6">Gemological &amp; Metal Specs</th>
-                <th className="py-3.5 px-6">Valuation &amp; Escrow</th>
-                <th className="py-3.5 px-6">Vault &amp; Dispatch Status</th>
-                <th className="py-3.5 px-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
-              {filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[36px] text-outline mb-2 block">search_off</span>
-                    No orders matching your criteria found.
-                  </td>
-                </tr>
-              ) : (
-                filteredOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    onClick={() => setSelectedOrder(order)}
-                    className="hover:bg-surface-container-low/70 transition-colors cursor-pointer group"
-                  >
-                    <td className="py-5 px-6 align-top whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <span className="font-title-md text-title-md text-primary font-semibold group-hover:text-primary-container">
-                          {order.orderRef}
-                        </span>
-                        <span className="font-body-sm text-body-sm text-outline">{order.date}</span>
-                        <span className="mt-1 font-label-sm text-label-sm text-secondary font-semibold">{order.orderType}</span>
-                      </div>
-                    </td>
-                    <td className="py-5 px-6 align-top whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-title-md text-title-md text-on-surface font-semibold">{order.clientName}</span>
-                          <span className="material-symbols-outlined text-secondary text-[16px]">verified</span>
-                        </div>
-                        <span className="font-body-sm text-body-sm text-on-surface-variant">{order.salonLocation}</span>
-                        <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm w-max font-semibold">
-                          {order.clientTier}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-5 px-6 align-top">
-                      <div className="flex items-center gap-3.5 min-w-[220px]">
-                        <img
-                          className="w-14 h-14 rounded-xl object-cover bg-surface-container-low shrink-0 shadow-sm"
-                          src={order.imageUrl}
-                          alt={order.pieceTitle}
-                        />
-                        <div className="flex flex-col min-w-0">
-                          <span className="font-title-md text-title-md text-on-surface font-semibold truncate" title={order.pieceTitle}>
-                            {order.pieceTitle}
-                          </span>
-                          <span className="font-body-sm text-body-sm text-on-surface-variant">{order.pieceCategory}</span>
-                          <span className="font-label-sm text-label-sm text-outline">{order.masterBench}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-5 px-6 align-top">
-                      <div className="flex flex-col min-w-[190px]">
-                        <span className="font-title-md text-title-md text-on-surface font-medium">{order.gemSpecs}</span>
-                        <span className="font-body-sm text-body-sm text-outline">{order.metalSpecs}</span>
-                        <span className="font-label-sm text-label-sm text-secondary font-semibold mt-0.5">{order.certNumber}</span>
-                      </div>
-                    </td>
-                    <td className="py-5 px-6 align-top whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <span className="font-headline-sm text-headline-sm text-primary font-bold">{order.totalFormatted}</span>
-                        <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-surface-tint font-semibold mt-0.5">
-                          <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                          {order.escrowStatus}
-                        </span>
-                        <span className="font-body-sm text-body-sm text-outline">{order.paymentMethod}</span>
-                      </div>
-                    </td>
-                    <td className="py-5 px-6 align-top">
-                      <div className="flex flex-col gap-1 min-w-[180px]">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-label-sm text-label-sm font-semibold w-max ${
-                          order.rawStatus === 'delivered'
-                            ? 'bg-surface-container-highest text-on-surface'
-                            : order.rawStatus === 'shipped'
-                            ? 'bg-secondary-fixed text-on-secondary-fixed'
-                            : 'bg-primary-fixed text-on-primary-fixed'
-                        }`}>
-                          <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                          {order.dispatchStatus}
-                        </span>
-                        <span className="font-body-sm text-body-sm text-on-surface-variant font-medium">{order.logisticsCarrier}</span>
-                        <span className="font-label-sm text-label-sm text-outline">{order.logisticsEta}</span>
-                      </div>
-                    </td>
-                    <td className="py-5 px-6 align-top text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => setSelectedOrder(order)}
-                          className="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-title-md text-title-md hover:bg-primary-container transition-colors shadow-sm flex items-center gap-1"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">visibility</span>
-                          <span>Dossier</span>
-                        </button>
-                        <button
-                          onClick={() => alert(`Official Swiss VAT & Escrow Receipt generated for ${order.orderRef}.`)}
-                          className="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors flex items-center justify-center"
-                          title="Generate Swiss Escrow Invoice"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-                        </button>
-                        <button
-                          onClick={() => alert(`Armored Carrier Telemetry: ${order.logisticsCarrier} — ${order.logisticsEta}`)}
-                          className="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors flex items-center justify-center"
-                          title="Carrier Tracking Telemetry"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">local_shipping</span>
-                        </button>
-                      </div>
-                    </td>
+          {/* Luxury Orders Table Card */}
+          <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-space-xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-surface-container-low text-outline font-label-sm text-label-sm uppercase tracking-wider">
+                    <th className="py-3.5 px-6">Order Ref &amp; Date</th>
+                    <th className="py-3.5 px-6">Client &amp; Salon</th>
+                    <th className="py-3.5 px-6">Haute Piece &amp; Item</th>
+                    <th className="py-3.5 px-6">Gemological &amp; Metal Specs</th>
+                    <th className="py-3.5 px-6">Valuation &amp; Escrow</th>
+                    <th className="py-3.5 px-6">Vault &amp; Dispatch Status</th>
+                    <th className="py-3.5 px-6 text-right">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
+                  {filteredOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-on-surface-variant">
+                        <span className="material-symbols-outlined text-[36px] text-outline mb-2 block">search_off</span>
+                        No orders matching your criteria found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredOrders.map((order, idx) => (
+                      <tr
+                        key={order.id}
+                        onClick={() => setSelectedOrder(order)}
+                        className={`hover:bg-surface-container-low transition-colors cursor-pointer ${
+                          idx === 0 ? 'bg-surface-container-highest/20' : ''
+                        }`}
+                      >
+                        {/* 1. Order Ref & Date */}
+                        <td className="py-5 px-6 align-top whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <span className="font-title-md text-title-md text-primary font-semibold">
+                              {order.orderRef}
+                            </span>
+                            <span className="font-body-sm text-body-sm text-outline">{order.date}</span>
+                            <span className={`mt-1 font-label-sm text-label-sm ${order.orderTypeClass || 'text-secondary font-semibold'}`}>
+                              {order.orderType}
+                            </span>
+                          </div>
+                        </td>
 
-        {/* Table Pagination & Audit Summary */}
-        <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm">
-          <span className="font-body-sm text-body-sm text-on-surface-variant">
-            Showing 1–{filteredOrders.length} of {totalOrdersCount} high-net-worth orders &amp; commissions
-          </span>
-          <div className="flex items-center gap-2">
-            <button className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-title-md shadow-sm disabled:opacity-40" disabled>
-              Previous
-            </button>
-            <span className="px-3 py-1 font-label-md text-label-md text-primary font-semibold">Page 1 of 1</span>
-            <button className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-title-md shadow-sm disabled:opacity-40" disabled>
-              Next
-            </button>
+                        {/* 2. Client & Salon */}
+                        <td className="py-5 px-6 align-top whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-title-md text-title-md text-on-surface font-semibold">{order.clientName}</span>
+                              {order.clientVerified && (
+                                <span className="material-symbols-outlined text-secondary text-[16px]">verified</span>
+                              )}
+                            </div>
+                            <span className="font-body-sm text-body-sm text-on-surface-variant">{order.salonLocation}</span>
+                            <span className={`mt-1 inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-label-sm w-max font-semibold ${
+                              order.tierBadgeClass || 'bg-secondary-fixed text-on-secondary-fixed'
+                            }`}>
+                              {order.clientTier}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* 3. Haute Piece & Item */}
+                        <td className="py-5 px-6 align-top">
+                          <div className="flex items-center gap-3.5 min-w-[220px]">
+                            {order.imageUrl ? (
+                              <img
+                                className="w-14 h-14 rounded-xl object-cover bg-surface-container-low shrink-0 shadow-sm"
+                                src={order.imageUrl}
+                                alt={order.pieceTitle}
+                              />
+                            ) : order.iconType === 'earbuds' ? (
+                              <div className="w-14 h-14 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0 shadow-sm">
+                                <span className="material-symbols-outlined text-[26px]">earbuds</span>
+                              </div>
+                            ) : (
+                              <div className="w-14 h-14 rounded-xl bg-surface-container flex items-center justify-center text-secondary shrink-0 shadow-sm">
+                                <span className="material-symbols-outlined text-[26px]">auto_awesome</span>
+                              </div>
+                            )}
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-title-md text-title-md text-on-surface font-semibold truncate" title={order.pieceTitle}>
+                                {order.pieceTitle}
+                              </span>
+                              <span className="font-body-sm text-body-sm text-on-surface-variant">{order.pieceCategory}</span>
+                              <span className="font-label-sm text-label-sm text-outline">{order.masterBench}</span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* 4. Gemological & Metal Specs */}
+                        <td className="py-5 px-6 align-top">
+                          <div className="flex flex-col min-w-[190px]">
+                            <span className="font-title-md text-title-md text-on-surface font-medium">{order.gemSpecs}</span>
+                            <span className="font-body-sm text-body-sm text-outline">{order.metalSpecs}</span>
+                            <span className="font-label-sm text-label-sm text-secondary font-semibold mt-0.5">{order.certNumber}</span>
+                          </div>
+                        </td>
+
+                        {/* 5. Valuation & Escrow */}
+                        <td className="py-5 px-6 align-top whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <span className="font-headline-sm text-headline-sm text-primary font-bold">{order.totalFormatted}</span>
+                            <span className={`inline-flex items-center gap-1 font-label-sm text-label-sm mt-0.5 ${order.escrowStatusClass || 'text-surface-tint font-semibold'}`}>
+                              <span className="material-symbols-outlined text-[14px]">{order.escrowStatusIcon || 'check_circle'}</span>
+                              {order.escrowStatus}
+                            </span>
+                            <span className="font-body-sm text-body-sm text-outline">{order.escrowSecondary || order.paymentMethod}</span>
+                          </div>
+                        </td>
+
+                        {/* 6. Vault & Dispatch Status */}
+                        <td className="py-5 px-6 align-top">
+                          <div className="flex flex-col gap-1 min-w-[180px]">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-label-sm text-label-sm font-semibold w-max ${
+                              order.dispatchStatusClass || 'bg-secondary-fixed text-on-secondary-fixed'
+                            }`}>
+                              {order.hasPulseDot ? (
+                                <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                              ) : order.dispatchIcon ? (
+                                <span className={`material-symbols-outlined text-[14px] ${order.dispatchIcon === 'task_alt' ? 'text-surface-tint' : 'text-secondary'}`}>
+                                  {order.dispatchIcon}
+                                </span>
+                              ) : (
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                              )}
+                              {order.dispatchStatus}
+                            </span>
+                            <span className="font-body-sm text-body-sm text-on-surface-variant font-medium">{order.logisticsCarrier}</span>
+                            <span className="font-label-sm text-label-sm text-outline">{order.logisticsEta}</span>
+                          </div>
+                        </td>
+
+                        {/* 7. Actions */}
+                        <td className="py-5 px-6 align-top text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => setSelectedOrder(order)}
+                              className={`px-3 py-1.5 rounded-lg font-title-md text-title-md transition-colors shadow-sm flex items-center gap-1 ${
+                                idx === 0
+                                  ? 'bg-primary text-on-primary hover:bg-primary-container'
+                                  : 'bg-surface-container-low text-on-surface hover:bg-surface-container'
+                              }`}
+                            >
+                              <span className="material-symbols-outlined text-[16px]">visibility</span>
+                              <span>Dossier</span>
+                            </button>
+                            <button
+                              onClick={() => alert(`Official Swiss VAT & Escrow Receipt generated for ${order.orderRef}.`)}
+                              className="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors flex items-center justify-center"
+                              title="Generate Swiss Escrow Invoice"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                            </button>
+                            <button
+                              onClick={() => alert(`Logistics Telemetry: ${order.logisticsCarrier} — ${order.logisticsEta}`)}
+                              className="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors flex items-center justify-center"
+                              title="Carrier Telemetry / More Details"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">
+                                {idx === 0 || idx === 3 ? 'local_shipping' : 'more_vert'}
+                              </span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Table Pagination & Audit Summary */}
+            <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+              <span className="font-body-sm text-body-sm text-on-surface-variant">
+                Showing 1–{filteredOrders.length} of 1,680 high-net-worth orders &amp; commissions
+              </span>
+              <div className="flex items-center gap-2">
+                <button className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-title-md shadow-sm disabled:opacity-40" disabled>
+                  Previous
+                </button>
+                <span className="px-3 py-1 font-label-md text-label-md text-primary font-semibold">Page 1 of 336</span>
+                <button className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface font-title-md text-title-md shadow-sm">
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -747,11 +851,19 @@ export default function AdminOrdersPage() {
             <div className="py-space-md space-y-space-md">
               {/* Piece Presentation */}
               <div className="flex items-center gap-space-md p-space-md bg-surface-container-low rounded-xl">
-                <img
-                  src={selectedOrder.imageUrl}
-                  alt={selectedOrder.pieceTitle}
-                  className="w-20 h-20 rounded-xl object-cover shadow-sm bg-white shrink-0"
-                />
+                {selectedOrder.imageUrl ? (
+                  <img
+                    src={selectedOrder.imageUrl}
+                    alt={selectedOrder.pieceTitle}
+                    className="w-20 h-20 rounded-xl object-cover shadow-sm bg-white shrink-0"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-xl bg-surface-container flex items-center justify-center text-secondary shrink-0 shadow-sm">
+                    <span className="material-symbols-outlined text-[32px]">
+                      {selectedOrder.iconType || 'diamond'}
+                    </span>
+                  </div>
+                )}
                 <div className="flex flex-col">
                   <span className="font-title-lg text-title-lg text-on-surface font-semibold">{selectedOrder.pieceTitle}</span>
                   <span className="font-body-md text-body-md text-on-surface-variant">{selectedOrder.gemSpecs}</span>
