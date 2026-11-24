@@ -8,12 +8,13 @@ RewriteBase /
 # 1. Custom 404 Error Page
 ErrorDocument 404 /404.html
 
-# 2. Image Path & Asset Normalization (Handles spaces, hyphens, and encoding)
-RewriteRule ^(.*)Gritty.*Jewelrysmith.*Workbench\.png$ "/wp-content/uploads/home page header picture/Gritty-Jewelrysmiths-Workbench.png" [L,NC]
-RewriteRule ^(.*)Golden.*Desert.*Oasis.*\.png$ "/wp-content/uploads/home page header picture/Golden-Desert-Oasis-at-Sunset.png" [L,NC]
-RewriteRule ^(.*)Artisan.*Setting.*Diamond.*Ring\.png$ "/wp-content/uploads/home page header picture/Artisan-Setting-a-Diamond-Ring.png" [L,NC]
-RewriteRule ^(.*)Precision.*Lapidary.*Machine.*\.png$ "/wp-content/uploads/home page header picture/Precision-Lapidary-Machine-in-Action.png" [L,NC]
-RewriteRule ^(.*)caritas-logo-dark.*perloader\.png$ "/wp-content/uploads/caritas-logo-dark-perloader.png" [L,NC]
+# 2. Image Path & Asset Normalization (Maps legacy uploads cleanly to /images/ and handles encoding)
+RewriteRule ^(.*)favicon\.png$ "/images/favicon.png" [L,NC]
+RewriteRule ^(.*)caritas-logo-dark.*perloader\.png$ "/images/caritas-logo-dark-preloader.png" [L,NC]
+RewriteRule ^(.*)Gritty.*Jewelrysmith.*Workbench\.png$ "/images/hero/gritty-jewelrysmiths-workbench.png" [L,NC]
+RewriteRule ^(.*)Golden.*Desert.*Oasis.*\.png$ "/images/hero/golden-desert-oasis-at-sunset.png" [L,NC]
+RewriteRule ^(.*)Artisan.*Setting.*Diamond.*Ring\.png$ "/images/hero/artisan-setting-a-diamond-ring.png" [L,NC]
+RewriteRule ^(.*)Precision.*Lapidary.*Machine.*\.png$ "/images/hero/precision-lapidary-machine-in-action.png" [L,NC]
 
 # 3. Clean Legacy Redirections
 RewriteRule ^about/?$ /about-us/ [R=301,L]

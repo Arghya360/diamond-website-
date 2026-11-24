@@ -36,7 +36,7 @@ export default function SitePage({ currentPath, pageTitle, bgImage, children }) 
         return (
           <div id="pt-loading" key="pt-loading">
             <div id="pt-loading-center">
-              <img src="/wp-content/uploads/caritas-logo-dark perloader.png" alt="loading" />
+              <img src="/images/caritas-logo-dark-preloader.png" alt="loading" />
             </div>
           </div>
         );

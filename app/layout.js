@@ -3,7 +3,7 @@ import LegacyStyles from '../components/LegacyStyles.jsx';
 import { getSiteDocument } from '../lib/source-page.js';
 
 const site = getSiteDocument();
-const favicon = '/wp-content/uploads/2024/02/favicon.png';
+const favicon = '/images/favicon.png';
 const title = 'Caritas Luxury – Lab-Grown Diamonds in Extraordinary Colour';
 const description = 'Caritas Luxury creates bespoke jewellery with lab-grown diamonds. Discover our signature pink and white lab-grown diamonds.';
 

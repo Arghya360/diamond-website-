@@ -1,6 +1,7 @@
 {
-  "name": "gemzie-nextjs",
+  "name": "caritas-luxury",
   "version": "1.0.0",
+  "description": "Caritas Luxury Haute Joaillerie & Diamond Atelier",
   "private": true,
   "type": "module",
   "scripts": {
