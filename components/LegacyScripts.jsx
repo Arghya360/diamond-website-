@@ -58,6 +58,27 @@ export default function LegacyScripts({ scripts }) {
       }
 
       window.dispatchEvent(new Event('load'));
+
+      // Trigger animation and scroll waypoints to reveal animated elements reliably
+      setTimeout(() => {
+        try {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('resize'));
+            window.dispatchEvent(new Event('scroll'));
+            if (window.jQuery) {
+              window.jQuery(window).trigger('resize').trigger('scroll');
+              window.jQuery('.elementor-invisible').each(function () {
+                const $el = window.jQuery(this);
+                const settings = $el.data('settings');
+                const anim = (typeof settings === 'object' && settings?._animation) || 'fadeInUp';
+                $el.removeClass('elementor-invisible').addClass('animated ' + anim);
+              });
+            }
+          }
+        } catch (e) {
+          console.warn('Animation trigger fallback:', e);
+        }
+      }, 500);
     }
 
     loadScripts().catch((error) => {

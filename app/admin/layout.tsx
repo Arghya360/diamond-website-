@@ -46,7 +46,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { adminProfile, isAdmin, loading, logout } = useAdminAuth();
+  const { user, adminProfile, isAdmin, loading, logout } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [navSearch, setNavSearch] = useState('');
   const [omniSearch, setOmniSearch] = useState('');
@@ -112,7 +112,42 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Auth Guard: Direct in-place login form rendering (never gets stuck in redirect loops)
+  // State 3: User Signed In but Not an Administrator
+  if (user && !isAdmin) {
+    return (
+      <div className="admin-body" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAF8FF', padding: 24 }}>
+        <div style={{ maxWidth: 460, width: '100%', background: '#fff', border: '1px solid #E2E7FF', borderRadius: 8, padding: 36, textAlign: 'center', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#FFF1F0', color: '#CF1322', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>
+            <span className="material-symbols-outlined">lock</span>
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: '#1A1C1E', margin: '0 0 8px' }}>
+            Restricted Atelier Access
+          </h2>
+          <p style={{ color: '#56605B', fontSize: 13, lineHeight: '1.6', margin: '0 0 20px' }}>
+            The account <strong>{user.email || 'authenticated user'}</strong> is signed in but does not possess administrator privileges for CARITAS LUXURY Atelier Vault.
+          </p>
+          <button
+            onClick={() => logout()}
+            style={{
+              padding: '10px 24px',
+              background: '#003629',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 4,
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+              letterSpacing: '0.5px'
+            }}
+          >
+            Sign Out & Switch Account
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // State 2: User Not Signed In -> Direct in-place login form rendering (never gets stuck in redirect loops)
   if (!isAdmin) {
     return (
       <div className="admin-body">

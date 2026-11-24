@@ -113,3 +113,23 @@ img, video, iframe, embed, object {
 [data-id="d60f2d0"] {
   display: none !important;
 }
+
+/* ==========================================================================
+   Animation Safety — Anti-Invisibility Safeguard
+   Ensures that elements marked as elementor-invisible by static templates
+   gracefully animate or reveal themselves even if JS/Waypoints is delayed.
+   ========================================================================== */
+@keyframes caritasElementorReveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+.elementor-invisible {
+  animation: caritasElementorReveal 0.4s ease-out 1.2s forwards;
+}
+

@@ -8,11 +8,14 @@ RewriteBase /
 # 1. Custom 404 Error Page
 ErrorDocument 404 /404.html
 
-# Fallback for header slide image variants (handles any apostrophe, quote or encoding)
+# 2. Image Path & Asset Normalization (Handles spaces, hyphens, and encoding)
 RewriteRule ^(.*)Gritty.*Jewelrysmith.*Workbench\.png$ "/wp-content/uploads/home page header picture/Gritty-Jewelrysmiths-Workbench.png" [L,NC]
 RewriteRule ^(.*)Golden.*Desert.*Oasis.*\.png$ "/wp-content/uploads/home page header picture/Golden-Desert-Oasis-at-Sunset.png" [L,NC]
+RewriteRule ^(.*)Artisan.*Setting.*Diamond.*Ring\.png$ "/wp-content/uploads/home page header picture/Artisan-Setting-a-Diamond-Ring.png" [L,NC]
+RewriteRule ^(.*)Precision.*Lapidary.*Machine.*\.png$ "/wp-content/uploads/home page header picture/Precision-Lapidary-Machine-in-Action.png" [L,NC]
+RewriteRule ^(.*)caritas-logo-dark.*perloader\.png$ "/wp-content/uploads/caritas-logo-dark-perloader.png" [L,NC]
 
-# 2. Redirects for Clean URLs and Legacy Paths
+# 3. Clean Legacy Redirections
 RewriteRule ^about/?$ /about-us/ [R=301,L]
 RewriteRule ^all-diamonds/?$ /diamonds/ [R=301,L]
 RewriteRule ^custom-ring/?$ /create-your-own/ [R=301,L]
@@ -20,19 +23,25 @@ RewriteRule ^contact-us/?$ /contact/ [R=301,L]
 RewriteRule ^terms-and-conditions/?$ /terms/ [R=301,L]
 RewriteRule ^privacy-policy/?$ /privacy/ [R=301,L]
 
-# 3. Ensure Directory Slashing (Serves /page/index.html automatically)
+# 4. Directory Slashing & Subdirectory HTML Serving
 DirectoryIndex index.html
 
+# If requested path is a directory containing index.html, ensure trailing slash
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
 RewriteRule ^(.*)(?<!/)$ /$1/ [L,R=301]
 
-# 4. Enable Gzip Compression for Fast Loading
+# If requested as /path/ and /path/index.html exists, serve it
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}/index.html -f
+RewriteRule ^(.*)/$ $1/index.html [L]
+
+# 5. Enable Gzip Compression for Fast Loading
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
 </IfModule>
 
-# 5. Enable Browser Caching
+# 6. Enable Browser Caching
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType image/jpg "access plus 1 year"
@@ -46,7 +55,7 @@ RewriteRule ^(.*)(?<!/)$ /$1/ [L,R=301]
   ExpiresByType application/x-javascript "access plus 1 month"
 </IfModule>
 
-# 6. Security Headers
+# 7. Security Headers
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
