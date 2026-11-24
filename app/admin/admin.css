@@ -1672,3 +1672,96 @@ body.admin-body,
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   CARITAS LUXURY — Static Built-In Utility Rules (Replaces Tailwind CDN)
+   Guarantees 100% offline/static styling without runtime CDN or console warnings
+   ========================================================================== */
+
+.bg-white { background-color: #ffffff !important; }
+.bg-center { background-position: center !important; }
+.bg-cover { background-size: cover !important; }
+.bg-current { background-color: currentColor !important; }
+.bg-black\/50 { background-color: rgba(0, 0, 0, 0.5) !important; }
+.bg-\[\#003629\] { background-color: #003629 !important; }
+.bg-primary-fixed\/40 { background-color: rgba(186, 238, 217, 0.4) !important; }
+.bg-primary\/5 { background-color: rgba(0, 54, 41, 0.05) !important; }
+.bg-red-100 { background-color: #fee2e2 !important; }
+.bg-secondary-container\/50 { background-color: rgba(254, 222, 178, 0.5) !important; }
+.bg-secondary-fixed\/50 { background-color: rgba(254, 222, 178, 0.5) !important; }
+.bg-secondary\/5 { background-color: rgba(114, 91, 56, 0.05) !important; }
+.bg-surface-container-low\/50 { background-color: rgba(242, 243, 255, 0.5) !important; }
+
+.border-b { border-bottom-width: 1px !important; }
+.border-t { border-top-width: 1px !important; }
+.border-collapse { border-collapse: collapse !important; }
+.border-\[\#baeed9\]\/20 { border-color: rgba(186, 238, 217, 0.2) !important; }
+.border-surface-container { border-color: var(--surface-container) !important; }
+.border-surface-container-low { border-color: var(--surface-container-low) !important; }
+
+.my-space-md { margin-top: 1rem !important; margin-bottom: 1rem !important; }
+
+.p-0\.5 { padding: 0.125rem !important; }
+.p-1\.5 { padding: 0.375rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 0.75rem !important; }
+.p-4 { padding: 1rem !important; }
+
+.px-1\.5 { padding-left: 0.375rem !important; padding-right: 0.375rem !important; }
+.px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+.px-2\.5 { padding-left: 0.625rem !important; padding-right: 0.625rem !important; }
+.px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+.px-3\.5 { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
+.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+.px-5 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+.px-6 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+
+.py-0\.5 { padding-top: 0.125rem !important; padding-bottom: 0.125rem !important; }
+.py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+.py-1\.5 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
+.py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+.py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+.py-3 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+.py-3\.5 { padding-top: 0.875rem !important; padding-bottom: 0.875rem !important; }
+.py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+.py-5 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+.py-12 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+
+.rounded-l-lg { border-top-left-radius: 0.5rem !important; border-bottom-left-radius: 0.5rem !important; }
+.rounded-r-lg { border-top-right-radius: 0.5rem !important; border-bottom-right-radius: 0.5rem !important; }
+.shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important; }
+
+.text-white { color: #ffffff !important; }
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
+.text-right { text-align: right !important; }
+.text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
+.text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+
+.text-\[\#baeed9\] { color: #baeed9 !important; }
+.text-\[12px\] { font-size: 12px !important; }
+.text-\[13px\] { font-size: 13px !important; }
+.text-\[14px\] { font-size: 14px !important; }
+.text-\[15px\] { font-size: 15px !important; }
+.text-\[16px\] { font-size: 16px !important; }
+.text-\[18px\] { font-size: 18px !important; }
+.text-\[19px\] { font-size: 19px !important; }
+.text-\[20px\] { font-size: 20px !important; }
+.text-\[22px\] { font-size: 22px !important; }
+.text-\[36px\] { font-size: 36px !important; }
+
+.text-body-md { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 14px !important; }
+.text-body-sm { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 12px !important; }
+.text-display { font-family: 'EB Garamond', serif !important; font-size: 36px !important; }
+.text-headline-lg { font-family: 'EB Garamond', serif !important; font-size: 28px !important; }
+.text-headline-md { font-family: 'EB Garamond', serif !important; font-size: 24px !important; }
+.text-headline-sm { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 20px !important; }
+.text-label-md { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 12px !important; font-weight: 500 !important; }
+.text-label-sm { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 11px !important; font-weight: 500 !important; }
+.text-title-lg { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 18px !important; font-weight: 600 !important; }
+.text-title-md { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 16px !important; font-weight: 600 !important; }
+
+.text-primary\/70 { color: rgba(0, 54, 41, 0.7) !important; }
+.text-red-600 { color: #dc2626 !important; }
+.text-red-700 { color: #b91c1c !important; }
+.text-secondary\/70 { color: rgba(114, 91, 56, 0.7) !important; }

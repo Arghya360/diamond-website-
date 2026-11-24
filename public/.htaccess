@@ -23,7 +23,13 @@ RewriteRule ^contact-us/?$ /contact/ [R=301,L]
 RewriteRule ^terms-and-conditions/?$ /terms/ [R=301,L]
 RewriteRule ^privacy-policy/?$ /privacy/ [R=301,L]
 
-# 4. Directory Slashing & Subdirectory HTML Serving
+# 4. Explicit Admin Routes (Zero redirect hops, serves static files directly)
+RewriteRule ^admin/login/?$ /admin/login/index.html [L]
+RewriteRule ^admin/?$ /admin/index.html [L]
+RewriteRule ^admin/([^/]+)/?$ /admin/$1/index.html [L]
+RewriteRule ^admin/([^/]+)/([^/]+)/?$ /admin/$1/$2/index.html [L]
+
+# 5. Directory Slashing & Subdirectory HTML Serving
 DirectoryIndex index.html
 
 # If requested path is a directory containing index.html, ensure trailing slash
