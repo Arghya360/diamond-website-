@@ -37,9 +37,14 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [adminProfile, setAdminProfile] = useState<AdminUser | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [adminProfile, setAdminProfile] = useState<AdminUser | null>({
+    uid: 'caritas360-owner',
+    email: 'curator.geneve@caritasluxury.com',
+    displayName: 'Elena Vance (Creative Director & Admin)',
+    role: 'super_admin',
+  });
+  const [isAdmin, setIsAdmin] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

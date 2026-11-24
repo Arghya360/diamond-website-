@@ -216,23 +216,11 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
             {/* Brand header */}
             <div style={{ height: 80, padding: '0 24px', display: 'flex', alignItems: 'center', gap: '14px', borderBottom: '1px solid #F2F3FF' }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                borderRadius: '50%',
-                backgroundColor: '#003629',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FEDEB2',
-                fontFamily: 'var(--font-serif)',
-                fontSize: 18,
-                fontWeight: 700,
-                boxShadow: '0 2px 6px rgba(0,54,41,0.2)',
-                flexShrink: 0,
-              }}>
-                ✦
-              </div>
+              <img
+                alt="Caritas Luxury Monogram"
+                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+                src="https://lh3.googleusercontent.com/aida/ALJJyrCCJ653tQbXPh9O2xDjwaCQY3wTn_-4A9jpzlglnIkNZ-BfQ6urx0evGiNyGngMrAs0GBxZQlRsW9jbcDzSJkuK9Cy1gVb4d6K7Z5TLz_kGRrdcwc3yrGLne58X2L8a6IfPs-sQnkO_Hvxc2_FfsSFJ9RjK0GnZHfXn1uLSQZvamn06w8maLjD0J9T9nfDXf5IhFKPMyMPV7lj7mrUqyPArSXwG830LAA4Gbzu-GEqk4w"
+              />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 700, color: '#003629', letterSpacing: '1px', lineHeight: 1 }}>
                   CARITAS
