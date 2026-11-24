@@ -65,7 +65,6 @@ export default function MultiImageUpload({
         });
       } catch (err: any) {
         console.error('Failed to upload file:', file.name, err);
-        // Fallback local blob URL
         try {
           const blobUrl = URL.createObjectURL(file);
           uploadedImages.push({
@@ -106,42 +105,48 @@ export default function MultiImageUpload({
     }
   };
 
+  const handleRemove = (index: number) => {
+    const next = images.filter((_, i) => i !== index);
+    if (images[index].isMain && next.length > 0) {
+      next[0].isMain = true;
+    }
+    onChange(next);
+  };
+
   const handleSetMain = (index: number) => {
-    const updated = images.map((img, i) => ({
+    const next = images.map((img, i) => ({
       ...img,
       isMain: i === index,
     }));
-    onChange(updated);
+    onChange(next);
   };
 
-  const handleRemove = (index: number) => {
-    const updated = images.filter((_, i) => i !== index);
-    // If we removed the main image, make the first one main
-    if (updated.length > 0 && !updated.some((img) => img.isMain)) {
-      updated[0].isMain = true;
-    }
-    onChange(updated);
-  };
-
-  const handleAltChange = (index: number, newAlt: string) => {
-    const updated = images.map((img, i) => (i === index ? { ...img, alt: newAlt } : img));
-    onChange(updated);
+  const handleAltChange = (index: number, alt: string) => {
+    const next = images.map((img, i) => (i === index ? { ...img, alt } : img));
+    onChange(next);
   };
 
   const handleAddManualUrl = (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualUrl.trim()) return;
-    const newImg: ProductImage = {
-      url: manualUrl.trim(),
-      alt: 'Product photograph',
-      isMain: images.length === 0,
-    };
-    onChange([...images, newImg]);
+    if (images.length >= maxImages) {
+      setError(`Maximum limit is ${maxImages} photographs.`);
+      return;
+    }
+
+    onChange([
+      ...images,
+      {
+        url: manualUrl.trim(),
+        alt: 'Haute Joaillerie Piece',
+        isMain: images.length === 0,
+      },
+    ]);
     setManualUrl('');
   };
 
   return (
-    <div className="admin-multi-upload-wrap">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -152,9 +157,9 @@ export default function MultiImageUpload({
         onChange={(e) => e.target.files && handleUploadFiles(e.target.files)}
       />
 
-      {/* Header / Meta bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+      {/* Meta Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontSize: 12, fontWeight: 500, color: '#707974' }}>
           {images.length} of {maxImages} gallery photographs added
         </div>
         <button
@@ -163,138 +168,244 @@ export default function MultiImageUpload({
           style={{
             background: 'none',
             border: 'none',
-            color: 'var(--primary-gold)',
-            fontSize: '11px',
-            fontFamily: 'var(--font-title)',
+            color: '#725B38',
+            fontSize: 12,
+            fontWeight: 600,
             cursor: 'pointer',
             padding: 0,
             textDecoration: 'underline',
           }}
         >
-          {showManualAdd ? 'Hide manual URL' : '+ Add image by URL'}
+          {showManualAdd ? '✕ Close manual URL' : '+ Add photo by URL'}
         </button>
       </div>
 
       {showManualAdd && (
-        <form onSubmit={handleAddManualUrl} style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', gap: 8 }}>
           <input
             type="text"
-            className="admin-input"
-            placeholder="Paste image URL (e.g. /wp-content/uploads/shop page/pro-21-300x300.png)"
+            placeholder="Paste image URL (e.g. /images/products/diamond-ring.png)"
             value={manualUrl}
             onChange={(e) => setManualUrl(e.target.value)}
-            style={{ flex: 1, fontSize: '12px', height: '36px' }}
+            style={{
+              flex: 1,
+              height: 38,
+              padding: '0 12px',
+              borderRadius: 8,
+              border: '1px solid #EAEDFF',
+              backgroundColor: '#F2F3FF',
+              fontSize: 12.5,
+              color: '#131B2E',
+              outline: 'none',
+            }}
           />
-          <button type="submit" className="btn-caritas-secondary" style={{ padding: '0 14px', height: '36px', fontSize: '12px' }}>
-            Add
+          <button
+            type="button"
+            onClick={handleAddManualUrl}
+            style={{
+              padding: '0 16px',
+              height: 38,
+              borderRadius: 8,
+              border: 'none',
+              backgroundColor: '#003629',
+              color: '#FFFFFF',
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Add URL
           </button>
-        </form>
+        </div>
       )}
 
       {error && (
         <div
           style={{
-            backgroundColor: 'rgba(192, 50, 58, 0.08)',
-            border: '1px solid rgba(192, 50, 58, 0.25)',
-            color: 'var(--crimson)',
-            padding: '8px 12px',
-            borderRadius: 'var(--radius-sm)',
-            fontSize: '12px',
-            marginBottom: '12px',
+            backgroundColor: '#FFDAD6',
+            border: '1px solid #FFB4AB',
+            color: '#BA1A1A',
+            padding: '10px 14px',
+            borderRadius: 8,
+            fontSize: 12.5,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
-          ⚠️ {error}
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>warning</span>
+          <span>{error}</span>
         </div>
       )}
 
-      {/* Dropzone */}
+      {/* Luxury Dropzone */}
       {images.length < maxImages && (
         <div
-          className={`admin-dropzone ${isDragging ? 'dragging' : ''} ${uploadingCount > 0 ? 'uploading' : ''}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => uploadingCount === 0 && fileInputRef.current?.click()}
-          role="button"
-          tabIndex={0}
-          style={{ marginBottom: '16px' }}
+          style={{
+            border: isDragging ? '2px dashed #003629' : '2px dashed #DAE2FD',
+            backgroundColor: isDragging ? '#F2F3FF' : '#FAFAFF',
+            borderRadius: 12,
+            padding: '28px 16px',
+            textAlign: 'center',
+            cursor: uploadingCount > 0 ? 'wait' : 'pointer',
+            transition: 'all 0.15s ease',
+          }}
         >
           {uploadingCount > 0 ? (
-            <div style={{ textAlign: 'center', padding: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
               <div
                 style={{
-                  width: '28px',
-                  height: '28px',
-                  border: '3px solid #E8E2D9',
-                  borderTopColor: 'var(--primary-gold)',
+                  width: 28,
+                  height: 28,
+                  border: '3px solid #EAEDFF',
+                  borderTopColor: '#003629',
                   borderRadius: '50%',
                   animation: 'caritasSpin 0.8s linear infinite',
-                  margin: '0 auto 10px',
                 }}
               />
-              <div style={{ fontFamily: 'var(--font-title)', fontWeight: 600, fontSize: '13px' }}>
-                Uploading {uploadingCount} image{uploadingCount === 1 ? '' : 's'} to Firebase...
-              </div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#131B2E' }}>
+                Uploading {uploadingCount} photograph{uploadingCount === 1 ? '' : 's'} to secure storage...
+              </span>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '24px 16px' }}>
-              <div className="admin-dropzone-icon">📷</div>
-              <div style={{ fontFamily: 'var(--font-title)', fontWeight: 600, fontSize: '13.5px', color: 'var(--dark-obsidian)', marginBottom: '4px' }}>
-                <span style={{ color: 'var(--primary-gold)', textDecoration: 'underline' }}>Browse local computer</span> or drag &amp; drop multiple diamond photographs
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  backgroundColor: '#EAEDFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#003629',
+                  marginBottom: 4,
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 24 }}>add_photo_alternate</span>
               </div>
-              <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-                JPG, PNG, WEBP up to 10MB each. High-resolution square crops (800 × 800px) look best on the storefront.
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#131B2E' }}>
+                <span style={{ color: '#003629', textDecoration: 'underline' }}>Browse local computer</span> or drag &amp; drop multiple photographs
+              </div>
+              <div style={{ fontSize: 11.5, color: '#707974', maxWidth: 440 }}>
+                High-resolution PNG, WEBP, or JPG up to 10MB each. 800 × 800px square crops render with optimal brilliance in the atelier showcase.
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Image Gallery Grid */}
+      {/* Gallery Grid */}
       {images.length > 0 && (
-        <div className="admin-gallery-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 12 }}>
           {images.map((img, idx) => (
             <div
               key={idx}
-              className={`admin-gallery-card ${img.isMain ? 'is-main' : ''}`}
+              style={{
+                position: 'relative',
+                borderRadius: 10,
+                border: img.isMain ? '2px solid #003629' : '1px solid #EAEDFF',
+                backgroundColor: '#FFFFFF',
+                overflow: 'hidden',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
             >
               <div
-                className="admin-gallery-thumb"
-                style={{ backgroundImage: `url("${img.url}")` }}
+                style={{
+                  height: 110,
+                  width: '100%',
+                  backgroundColor: '#F2F3FF',
+                  backgroundImage: `url("${img.url}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  position: 'relative',
+                }}
               >
                 {img.isMain && (
-                  <span className="admin-gallery-main-badge">
-                    ★ Primary
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 6,
+                      left: 6,
+                      backgroundColor: '#003629',
+                      color: '#FFFFFF',
+                      fontSize: 9.5,
+                      fontWeight: 700,
+                      padding: '2px 7px',
+                      borderRadius: 4,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    ★ Main
                   </span>
                 )}
                 <button
                   type="button"
                   onClick={() => handleRemove(idx)}
-                  className="admin-gallery-delete-btn"
-                  title="Remove image"
+                  style={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    width: 22,
+                    height: 22,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(19, 27, 46, 0.65)',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 11,
+                    cursor: 'pointer',
+                  }}
+                  title="Remove photograph"
                 >
                   ✕
                 </button>
               </div>
 
-              <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <input
                   type="text"
-                  placeholder="Alt text / caption..."
+                  placeholder="Alt text..."
                   value={img.alt || ''}
                   onChange={(e) => handleAltChange(idx, e.target.value)}
-                  className="admin-input"
-                  style={{ fontSize: '11px', height: '28px', padding: '4px 8px' }}
+                  style={{
+                    width: '100%',
+                    height: 24,
+                    padding: '0 6px',
+                    borderRadius: 4,
+                    border: '1px solid #EAEDFF',
+                    backgroundColor: '#F8F9FE',
+                    fontSize: 10.5,
+                    color: '#131B2E',
+                    outline: 'none',
+                  }}
                 />
-
                 {!img.isMain && (
                   <button
                     type="button"
                     onClick={() => handleSetMain(idx)}
-                    className="btn-caritas-secondary"
-                    style={{ fontSize: '10.5px', padding: '3px 8px', height: '26px', justifyContent: 'center' }}
+                    style={{
+                      width: '100%',
+                      height: 22,
+                      borderRadius: 4,
+                      border: '1px solid #EAEDFF',
+                      backgroundColor: '#FFFFFF',
+                      color: '#725B38',
+                      fontSize: 10,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
                   >
-                    Set as Main
+                    Set as Primary
                   </button>
                 )}
               </div>
