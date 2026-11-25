@@ -119,7 +119,7 @@ export default function AdminOrdersPage() {
       pieceTitle: 'The Celestial Marquise',
       pieceCategory: 'Solitaire Diamond Ring',
       masterBench: 'Master Bench: H. Laurent',
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBqeljXMpeTXeybCtNFgdcnQup_Z5xfIo3fWzI0Thv6_ffeLcMlh_9RJWiAt3UkRtA2eBpp7BWO0ceWJNj0DbYCNTM6zj_G6eq-Cso9io_vOTGUkKLnQyZ4KJUEpNkcHGhvj8P5jtM3LvoJFAI4Ea8KGUpyphwakyXtWfG2YBYmtTUQAPyTcop1Wf6RNbXDFEcglAqIkDgwgnI9NxKaWS6FZt9iS8dpsRXZsP6TLGG8',
+      imageUrl: '/images/diamonds/diamond-01.jpg',
       gemSpecs: '3.20 ct D/IF Platinum 950',
       metalSpecs: 'Super Ideal Cut • No Fluor.',
       certNumber: 'GIA #2489104921',
@@ -154,7 +154,7 @@ export default function AdminOrdersPage() {
       pieceTitle: 'Verdant Sovereign Collier',
       pieceCategory: 'Haute Joaillerie Necklace',
       masterBench: 'Private Collection #08',
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCAyo5DHdCsJnb7unQmbBW9cd2B6427xqzcSlgOOS0LV5Edu9wMfeJxOKCPOUIfbfiOlV1ql-6FjsZU24u8gJg9_Mk68bayUVZOSi8tipE8LQFUN4xAACuU_Gc_Fk3ECjQYMYXA7u2cd9XPO_NhoufTW2NPDrdrx71s05DL0YpAefhD9DiuJD-wfPvazo9gWyOETN2pH1bey70ibgNxk66AyQQx8MWRiL_WZ0vSacNS',
+      imageUrl: '/images/diamonds/diamond-02.jpg',
       gemSpecs: '18.4 ct Royal Emerald & VVS',
       metalSpecs: '18K Yellow Gold Hand-Chased',
       certNumber: 'SSEF #99281 Certified',
@@ -188,7 +188,7 @@ export default function AdminOrdersPage() {
       pieceTitle: 'Aura Pavé Bridal Suite',
       pieceCategory: 'Tiara & Bracelet Ensemble',
       masterBench: 'Master Bench: P. Moreau',
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAovDebsdVdX5e3Q5Rzzzi0eRhcY6F50uBR-Bdb-RUGThRhM83aSGyo02vK5z5OvbCXvmh4qfvuYqfxvM4-rjM6Bb4HSXvm21GX-FaPW80l97RjRqd5_D_iSywl9RxJ50l8WxQychPlULi9SUUdlQyU9fnFSAgLu2HdhV2D2aMOjzMuH051eoXVOu7pDpszGya6QQ_SrY4PAQ9ZVQy9LPMQFI9dnYPBR-6xwAC1jWZK',
+      imageUrl: '/images/diamonds/diamond-03.jpg',
       gemSpecs: '5.15 ct TW Round F/VVS1',
       metalSpecs: 'Platinum 950 Hand-Pronged',
       certNumber: 'GIA Dossier Set Complete',
@@ -299,7 +299,7 @@ export default function AdminOrdersPage() {
             pieceTitle: firstItem?.title || firstItem?.productName || 'Certified Haute Joaillerie Selection',
             pieceCategory: firstItem?.category || 'High Jewellery Piece',
             masterBench: 'Master Bench: Geneva Atelier',
-            imageUrl: firstItem?.image || firstItem?.productImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBqeljXMpeTXeybCtNFgdcnQup_Z5xfIo3fWzI0Thv6_ffeLcMlh_9RJWiAt3UkRtA2eBpp7BWO0ceWJNj0DbYCNTM6zj_G6eq-Cso9io_vOTGUkKLnQyZ4KJUEpNkcHGhvj8P5jtM3LvoJFAI4Ea8KGUpyphwakyXtWfG2YBYmtTUQAPyTcop1Wf6RNbXDFEcglAqIkDgwgnI9NxKaWS6FZt9iS8dpsRXZsP6TLGG8',
+            imageUrl: firstItem?.image || firstItem?.productImage || '/images/diamonds/diamond-01.jpg',
             gemSpecs: firstItem?.carat ? `${firstItem.carat} ct ${firstItem?.color || 'D'}/${firstItem?.clarity || 'VVS1'}` : '3.20 ct D/IF Platinum 950',
             metalSpecs: firstItem?.metal || 'Super Ideal Cut • No Fluor.',
             certNumber: 'GIA #2489104921',
@@ -693,9 +693,12 @@ export default function AdminOrdersPage() {
                           <div className="flex items-center gap-3.5 min-w-[220px]">
                             {order.imageUrl ? (
                               <img
-                                className="w-14 h-14 rounded-xl object-cover bg-surface-container-low shrink-0 shadow-sm"
+                                className="w-14 h-14 rounded-xl object-contain bg-surface-container-low shrink-0 shadow-sm p-1"
                                 src={order.imageUrl}
                                 alt={order.pieceTitle}
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).src = '/images/diamonds/diamond-01.jpg';
+                                }}
                               />
                             ) : order.iconType === 'earbuds' ? (
                               <div className="w-14 h-14 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0 shadow-sm">
@@ -855,7 +858,10 @@ export default function AdminOrdersPage() {
                   <img
                     src={selectedOrder.imageUrl}
                     alt={selectedOrder.pieceTitle}
-                    className="w-20 h-20 rounded-xl object-cover shadow-sm bg-white shrink-0"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/images/diamonds/diamond-01.jpg';
+                    }}
+                    className="w-20 h-20 rounded-xl object-contain shadow-sm bg-white shrink-0 p-1"
                   />
                 ) : (
                   <div className="w-20 h-20 rounded-xl bg-surface-container flex items-center justify-center text-secondary shrink-0 shadow-sm">

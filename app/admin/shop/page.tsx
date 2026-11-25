@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getShopSettings, updateShopSettings, getProducts } from '../../../lib/firebase/admin-service';
+import { getShopSettings, updateShopSettings, getProducts, subscribeProducts, subscribeShopSettings } from '../../../lib/firebase/admin-service';
 import ImageUpload from '../../../components/admin/ImageUpload';
 
 interface CuratedItem {
@@ -34,7 +34,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
       { label: 'Spot #1', bg: '#baeed9', text: '#003629' },
     ],
     visible: true,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDg_0A6olI5NR8AvgSKpdz4Jeq_mWsnAZBiU-E0Hjef26MhVbxS733h2qMvD6sqk0XnTYFRmCDvoC2DY1SfnQmA0aG_Oo3MVIPjmkuad4d7PoK6jVc82OLsaYM8SPsxfXv15B2VjZO-y83YoGxZ-rRde3uDsbUIvpUp_iIzkkSEDYHEQF5l-MF9Vs3cLml7lM_nVrvOmG7lGxO8iF2Ayds__eRBDw1m9LGfbuvTlZ1M',
+    image: '/images/shop/banner-01.jpg',
   },
   {
     id: 'CRT-NC-3304',
@@ -49,7 +49,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
       { label: 'Trending Spotlight', bg: '#eaedff', text: '#404945' },
     ],
     visible: true,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDi0YvrRdmLCmY23in9Xf48uE730OqWjPonq2Pvje1b3-WI2c6UHwR3H2tlgN5K1zHpc8vLv0bHud8vM49y2pAgTJu2yhFe2q0d826I6NamdrfPHZRJr7___lsluW9vzf6JCZhrXIprv93xtIE0hNd7x7lK7c0JvhX1BckLWLvFMCr1ZieGID_6Bt7er8__RnUHrZOVG6JY-fCbKeJGTZdmfi3emQVgNo_DQFyAeo-V',
+    image: '/images/shop/banner-02.jpg',
   },
   {
     id: 'CRT-EM-5120',
@@ -65,7 +65,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
       { label: 'Grid #3', bg: '#eaedff', text: '#404945' },
     ],
     visible: true,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFXtAP78hDoyEkiBIzc1c3nudwp6OOKdC_z3WfClfM7Wvj-CFSyPmd1hZGkbkZ7Kba03N4mcvq_r2kr58Jgevf1nQrel16EApUXSTf8LWHBxscJEN3fEOY0L1k4w22ZXmw_S1JoLDGwM7-1RjEngt5kWrFSbZIktHYV7s-VLKJUPCVuw479_7yzuEDC2yNOk4ov8sPcee9BQvSXP8nrdlAJ6wSBuCBgmuVzdgcQuB1',
+    image: '/images/shop/pro-21-300x300.png',
   },
   {
     id: 'CRT-PR-8812',
@@ -80,7 +80,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
       { label: 'VIP Reserved', bg: '#fedeb2', text: '#78603e' },
     ],
     visible: true,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCEDt_xjwiJ3hY4rM1rqUYuEtZ-G7VDSdocHo2N_UM7TMOqzc_TmvirczgPMiQM-1_WJifWO8zPZsjEpLvY284i0kjh-oX3gJWax5QOhPtfbSm8tfqvQ707q8UT9KsB1j7GEEabpWhaCGQWuo4I2KgSPH5ldWS4GTF67q14u6h5gMTom5JvLZs0Y7KlWMTb6aIA6SkARTFL0IcWvDxq21ii8AWAVr_yrSX55Ehgv1uL',
+    image: '/images/shop/pro-03-300x300.jpg',
   },
   {
     id: 'CRT-RG-7703',
@@ -95,7 +95,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
       { label: 'Salon Exclusive', bg: '#dae2fd', text: '#131b2e' },
     ],
     visible: true,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAEuVGT0gIrhf-vUlPaCgc4nM7Ry95j6qFcQSYeBEZ9s5bdGNSPgQXKLozKV8BUUvZO0COqIayzlsH0gULqCBVKeYnaepR5yyfoj4s-KEn9vp4Kim1eQBBDSSJ5cJu8hrbNibLI_QKQ7wYOk89p915WYWVxb_LVlBiCvhtAreVSFPXDa-2C7vjsCQueX9jKR_Kp4tgWxWVCCPB6UhLOx4cI-dxn78ski-J7L5N5LhFK',
+    image: '/images/shop/pro-05-300x300.jpg',
   },
   {
     id: 'CRT-BR-1102',
@@ -110,7 +110,7 @@ const INITIAL_CURATED_ITEMS: CuratedItem[] = [
       { label: 'Best Seller', bg: '#e0c298', text: '#281800' },
     ],
     visible: true,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVxf8Ssr2XsH9gn6Vujk19OcAfzQ6KGNKhK16Od3nH2VWKgV1GUrFgydPxxMYjZPZK8uLj46bgiKiFCbXYDyTBJi5CyA-CKVCsNH8GhMx_sJLAgVEr7vWrDdGDaMQY-_YDIGSAAiaZWoDaDMR4n5WFD8wT7CTFYEDTgQ6uhgfNzsadeWJVWXE1Il3Xe_1k8UPy2HDRsu4KOFBpcTp8XU_cwTcw-MJ30N8DffHGCXh1',
+    image: '/images/shop/pro-07-300x300.jpg',
   },
 ];
 
@@ -129,7 +129,7 @@ export default function AdminShopSettingsPage() {
   const [heroSubtitle, setHeroSubtitle] = useState('Bespoke solitaire allocations certified by GIA. Featuring our proprietary 8-prong platinum crown and museum-grade colorless diamond cuts.');
   const [heroButtonText, setHeroButtonText] = useState('Explore Solitaires');
   const [heroButtonLink, setHeroButtonLink] = useState('/shop/solitaires');
-  const [bannerImage, setBannerImage] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuBgLqSodf-JzLBjCzzqrV9TVJgJEzAk_wSfp3Dg_M3TQISbT7OEkrOWeaE_vdcNzJy3UV2Ch8Tn-_P0L7a_TPaV8cOLvfuT6DdLwuM2cuhspWUwRdOOcP7tLfj9EyMba2SZxphn-YHVVkbjLv0NNypVI1x7mORJ0e9_af3ueeX3sQ3YaeNT5GK39nskAVq3pN2lsuDWLSgxt_36_SWw3Cc5xE8ayVRPGUspCgDWJ_07');
+  const [bannerImage, setBannerImage] = useState('/images/hero/golden-desert-oasis-at-sunset.png');
 
   // Modals for Hero Editing
   const [editCopyModalOpen, setEditCopyModalOpen] = useState(false);
@@ -150,53 +150,50 @@ export default function AdminShopSettingsPage() {
   const [selectedSort, setSelectedSort] = useState('manual');
   const [includeOutOfStock, setIncludeOutOfStock] = useState(false);
 
-  // Firestore DB synchronization
+  // Firestore DB real-time synchronization
   useEffect(() => {
-    async function load() {
-      try {
-        const [settings, products] = await Promise.all([
-          getShopSettings().catch(() => null),
-          getProducts().catch(() => []),
-        ]);
+    setLoading(true);
 
-        if (settings) {
-          if (settings.heroBadge) setHeroBadge(settings.heroBadge);
-          if (settings.heroTitle) setHeroTitle(settings.heroTitle);
-          if (settings.heroSubtitle) setHeroSubtitle(settings.heroSubtitle);
-          if (settings.heroButtonText) setHeroButtonText(settings.heroButtonText);
-          if (settings.heroButtonLink) setHeroButtonLink(settings.heroButtonLink);
-          if (settings.bannerImage) setBannerImage(settings.bannerImage);
-          if (settings.productsPerPage) setItemsPerPage(String(settings.productsPerPage));
-        }
-
-        // If products exist in Firestore, supplement the initial curated list
-        if (products && products.length > 0) {
-          const mappedDb: CuratedItem[] = products.slice(0, 6).map((p, idx) => ({
-            id: p.id || `CRT-${idx + 1000}`,
-            rank: idx + 1,
-            title: p.name,
-            sku: p.sku || `CRT-${(p.id || '').slice(0, 6).toUpperCase()}`,
-            specs: p.weight ? `${p.weight} • 18K / Platinum` : 'High Fine Jewellery',
-            category: p.category || 'Fine Jewellery',
-            price: p.price ? `$${Number(p.price).toLocaleString()}` : '$28,000',
-            statusBadge: p.stock && p.stock > 0 ? `In Stock (${p.stock})` : 'Direct Atelier',
-            tags: [
-              { label: idx === 0 ? 'Homepage Hero' : 'Featured Selection', bg: idx === 0 ? '#fedeb2' : '#baeed9', text: idx === 0 ? '#78603e' : '#003629' },
-            ],
-            visible: p.published !== false,
-            image: p.images?.[0]?.url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDg_0A6olI5NR8AvgSKpdz4Jeq_mWsnAZBiU-E0Hjef26MhVbxS733h2qMvD6sqk0XnTYFRmCDvoC2DY1SfnQmA0aG_Oo3MVIPjmkuad4d7PoK6jVc82OLsaYM8SPsxfXv15B2VjZO-y83YoGxZ-rRde3uDsbUIvpUp_iIzkkSEDYHEQF5l-MF9Vs3cLml7lM_nVrvOmG7lGxO8iF2Ayds__eRBDw1m9LGfbuvTlZ1M',
-          }));
-          if (mappedDb.length >= 3) {
-            setCuratedItems(mappedDb);
-          }
-        }
-      } catch (err) {
-        console.error('Error loading shop settings:', err);
-      } finally {
-        setLoading(false);
+    const unsubSettings = subscribeShopSettings((settings) => {
+      if (settings) {
+        if (settings.heroBadge) setHeroBadge(settings.heroBadge);
+        if (settings.heroTitle) setHeroTitle(settings.heroTitle);
+        if (settings.heroSubtitle) setHeroSubtitle(settings.heroSubtitle);
+        if (settings.heroButtonText) setHeroButtonText(settings.heroButtonText);
+        if (settings.heroButtonLink) setHeroButtonLink(settings.heroButtonLink);
+        if (settings.bannerImage) setBannerImage(settings.bannerImage);
+        if (settings.productsPerPage) setItemsPerPage(String(settings.productsPerPage));
       }
-    }
-    load();
+    });
+
+    const unsubProducts = subscribeProducts((products) => {
+      if (products && products.length > 0) {
+        const mappedDb: CuratedItem[] = products.slice(0, 6).map((p, idx) => ({
+          id: p.id || `CRT-${idx + 1000}`,
+          rank: idx + 1,
+          title: p.name,
+          sku: p.sku || `CRT-${(p.id || '').slice(0, 6).toUpperCase()}`,
+          specs: p.weight ? `${p.weight} • 18K / Platinum` : 'High Fine Jewellery',
+          category: p.category || 'Fine Jewellery',
+          price: p.price ? `$${Number(p.price).toLocaleString()}` : '$28,000',
+          statusBadge: p.stock && p.stock > 0 ? `In Stock (${p.stock})` : 'Direct Atelier',
+          tags: [
+            { label: idx === 0 ? 'Homepage Hero' : 'Featured Selection', bg: idx === 0 ? '#fedeb2' : '#baeed9', text: idx === 0 ? '#78603e' : '#003629' },
+          ],
+          visible: p.published !== false,
+          image: p.images?.[0]?.url || '/images/shop/banner-01.jpg',
+        }));
+        if (mappedDb.length >= 3) {
+          setCuratedItems(mappedDb);
+        }
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      unsubSettings();
+      unsubProducts();
+    };
   }, []);
 
   const handlePublish = async () => {
@@ -636,7 +633,14 @@ export default function AdminShopSettingsPage() {
                     {/* Product & Specs */}
                     <div style={{ gridColumn: 'span 5 / span 5', display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{ width: 56, height: 56, borderRadius: 8, overflow: 'hidden', backgroundColor: '#eaedff', flexShrink: 0 }}>
-                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/images/shop/banner-01.jpg';
+                          }}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#fff' }}
+                        />
                       </div>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 700, color: '#131b2e', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -801,7 +805,14 @@ export default function AdminShopSettingsPage() {
                   {filteredItems.slice(0, 4).map((mItem, idx) => (
                     <div key={idx} style={{ backgroundColor: '#f2f3ff', padding: 4, borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <div style={{ width: '100%', height: 32, borderRadius: 4, backgroundColor: '#e2e7ff', marginBottom: 4, overflow: 'hidden' }}>
-                        <img src={mItem.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img
+                          src={mItem.image}
+                          alt=""
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/images/shop/banner-01.jpg';
+                          }}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
                       </div>
                       <div style={{ width: '100%', height: 3, backgroundColor: '#c0c9c3', borderRadius: 2 }}></div>
                       <div style={{ width: 20, height: 3, backgroundColor: '#725b38', borderRadius: 2, marginTop: 2 }}></div>

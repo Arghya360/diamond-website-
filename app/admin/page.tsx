@@ -738,7 +738,14 @@ export default function AdminDashboardPage() {
                   <td style={{ padding: '14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: '#F2F3FF', overflow: 'hidden', flexShrink: 0, border: '1px solid #EAEDFF' }}>
-                        <img src={item.thumb} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img
+                          src={item.thumb}
+                          alt={item.title}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/images/diamonds/diamond-01.jpg';
+                          }}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#fff' }}
+                        />
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span style={{ fontSize: 13.5, fontWeight: 600, color: '#131B2E', fontFamily: 'var(--font-title)' }}>{item.title}</span>

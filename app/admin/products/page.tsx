@@ -171,7 +171,20 @@ export default function AdminProductsPage() {
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', background: C.surfaceLow, flexShrink: 0 }}>
-                          {thumb ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="material-symbols-outlined" style={{ fontSize: 22, color: C.outline }}>diamond</span></div>}
+                          {thumb ? (
+                            <img
+                              src={thumb}
+                              alt=""
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = '/images/shop/pro-21-300x300.png';
+                              }}
+                              style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#fff' }}
+                            />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: 22, color: C.outline }}>diamond</span>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 600, color: C.onSurface }}>{p.name}</div>

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { deleteDiamond, getDiamonds, updateDiamond } from '../../../lib/firebase/admin-service';
+import { deleteDiamond, getDiamonds, updateDiamond, subscribeDiamonds } from '../../../lib/firebase/admin-service';
 import type { Diamond } from '../../../types/admin';
 
 const SHAPES = ['Round Brilliant', 'Princess', 'Emerald', 'Oval', 'Radiant', 'Pear', 'Marquise', 'Cushion'];
@@ -40,12 +40,16 @@ export default function AdminDiamondsPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [dossierOpen, setDossierOpen] = useState(false);
 
-  useEffect(() => { void load(); }, []);
-
-  async function load() {
+  useEffect(() => {
     setLoading(true);
-    try { setDiamonds(await getDiamonds()); } catch (e) { console.error(e); } finally { setLoading(false); }
-  }
+    // Real-time listener: any added/updated/deleted diamond updates the view instantly!
+    const unsubscribe = subscribeDiamonds((liveDiamonds) => {
+      setDiamonds(liveDiamonds);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const allStones = useMemo(() => {
     if (diamonds.length === 0) return BASE_DIAMONDS as any[];
@@ -265,7 +269,20 @@ export default function AdminDiamondsPage() {
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', background: C.surfaceLow, flexShrink: 0 }}>
-                          {stone.image ? <img src={stone.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="material-symbols-outlined" style={{ fontSize: 24, color: C.outline }}>diamond</span></div>}
+                          {stone.image ? (
+                            <img
+                              src={stone.image}
+                              alt=""
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = '/images/diamonds/download.jpg';
+                              }}
+                              style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#F8FAFC' }}
+                            />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: 24, color: C.outline }}>diamond</span>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 600, color: C.onSurface, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -340,7 +357,20 @@ export default function AdminDiamondsPage() {
             </div>
             {/* Image */}
             <div style={{ height: 220, background: C.surfaceLow, overflow: 'hidden' }}>
-              {selectedStone.image ? <img src={selectedStone.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 16 }} /> : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="material-symbols-outlined" style={{ fontSize: 72, color: C.outline }}>diamond</span></div>}
+              {selectedStone.image ? (
+                <img
+                  src={selectedStone.image}
+                  alt=""
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/images/diamonds/download.jpg';
+                  }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 16 }}
+                />
+              ) : (
+                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 72, color: C.outline }}>diamond</span>
+                </div>
+              )}
             </div>
             {/* Specs */}
             <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>

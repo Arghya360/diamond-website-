@@ -10,6 +10,8 @@ import {
   query,
   limit,
   serverTimestamp,
+  onSnapshot,
+  type Unsubscribe,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, isFirebaseConfigured } from './client';
@@ -283,6 +285,80 @@ export async function updateDiamond(id: string, data: Partial<Diamond>): Promise
 export async function deleteDiamond(id: string): Promise<void> {
   if (!db) return;
   await deleteDoc(doc(db, COLLECTIONS.diamonds, id));
+}
+
+export function subscribeDiamonds(
+  onUpdate: (diamonds: Diamond[]) => void,
+  options?: { publishedOnly?: boolean; category?: 'white' | 'pink' }
+): Unsubscribe {
+  if (!isFirebaseConfigured || !db) {
+    onUpdate([]);
+    return () => {};
+  }
+  return onSnapshot(
+    collection(db, COLLECTIONS.diamonds),
+    (snapshot) => {
+      let diamonds: Diamond[] = [];
+      snapshot.forEach((docSnap) => diamonds.push(normalizeDiamond(docSnap.id, docSnap.data())));
+      if (options?.publishedOnly) diamonds = diamonds.filter((diamond) => diamond.published);
+      if (options?.category) diamonds = diamonds.filter((diamond) => diamond.category === options.category);
+      onUpdate(diamonds.sort((a, b) => (a.popularRank || 999) - (b.popularRank || 999)));
+    },
+    (error) => {
+      console.warn('Real-time diamonds subscription error:', error);
+    }
+  );
+}
+
+export function subscribeProducts(
+  onUpdate: (products: Product[]) => void,
+  options?: { category?: string; publishedOnly?: boolean }
+): Unsubscribe {
+  if (!isFirebaseConfigured || !db) {
+    onUpdate((INITIAL_PRODUCTS as any[]).map((p, i) => ({ id: `init-p-${i + 1}`, ...p } as Product)));
+    return () => {};
+  }
+  return onSnapshot(
+    collection(db, COLLECTIONS.products),
+    (snapshot) => {
+      if (snapshot.empty) {
+        onUpdate((INITIAL_PRODUCTS as any[]).map((p, i) => ({ id: `init-p-${i + 1}`, ...p } as Product)));
+        return;
+      }
+      let products: Product[] = [];
+      snapshot.forEach((docSnap) => products.push(normalizeProduct(docSnap.id, docSnap.data())));
+      if (options?.publishedOnly) products = products.filter((p) => p.published);
+      if (options?.category && options.category !== 'All') {
+        products = products.filter((p) => p.category?.toLowerCase() === options.category?.toLowerCase());
+      }
+      onUpdate(products);
+    },
+    (error) => {
+      console.warn('Real-time products subscription error:', error);
+    }
+  );
+}
+
+export function subscribeShopSettings(
+  onUpdate: (settings: ShopSettings | null) => void
+): Unsubscribe {
+  if (!isFirebaseConfigured || !db) {
+    onUpdate({ id: 'shop', ...INITIAL_SHOP_SETTINGS } as ShopSettings);
+    return () => {};
+  }
+  return onSnapshot(
+    doc(db, COLLECTIONS.settings, 'shop'),
+    (docSnap) => {
+      if (!docSnap.exists()) {
+        onUpdate({ id: 'shop', ...INITIAL_SHOP_SETTINGS } as ShopSettings);
+        return;
+      }
+      onUpdate({ id: docSnap.id, ...(docSnap.data() as ShopSettings) });
+    },
+    (error) => {
+      console.warn('Real-time shop settings subscription error:', error);
+    }
+  );
 }
 
 // ─── Categories Service ───────────────────────────────────────────
