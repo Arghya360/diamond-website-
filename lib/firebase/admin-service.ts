@@ -410,6 +410,32 @@ export async function deleteCategory(id: string): Promise<void> {
   await deleteDoc(docRef);
 }
 
+export function subscribeCategories(
+  onUpdate: (categories: Category[]) => void
+): Unsubscribe {
+  if (!isFirebaseConfigured || !db) {
+    onUpdate((INITIAL_CATEGORIES as any[]).map((c, i) => ({ id: `init-cat-${i + 1}`, ...c } as Category)));
+    return () => {};
+  }
+  return onSnapshot(
+    collection(db, COLLECTIONS.categories),
+    (snapshot) => {
+      if (snapshot.empty) {
+        onUpdate((INITIAL_CATEGORIES as any[]).map((c, i) => ({ id: `init-cat-${i + 1}`, ...c } as Category)));
+        return;
+      }
+      const categories: Category[] = [];
+      snapshot.forEach((docSnap) => {
+        categories.push(normalizeCategory(docSnap.id, docSnap.data()));
+      });
+      onUpdate(categories.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)));
+    },
+    (error) => {
+      console.warn('Real-time categories subscription error:', error);
+    }
+  );
+}
+
 // ─── Shop Settings ─────────────────────────────────────────────────
 export async function getShopSettings(): Promise<ShopSettings | null> {
   if (!isFirebaseConfigured || !db) {

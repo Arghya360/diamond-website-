@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo, useEffect } from 'react';
-import { getDiamonds } from '../../lib/firebase/admin-service';
+import { getDiamonds, subscribeDiamonds } from '../../lib/firebase/admin-service';
 
 // ── Complete Diamonds Catalog ─────────────────────────────────────
 const DIAMONDS_CATALOG = [
@@ -345,9 +345,9 @@ export default function DiamondGrid({ prefilterColour }) {
   const [diamondCatalog, setDiamondCatalog] = useState(DIAMONDS_CATALOG);
 
   useEffect(() => {
-    async function loadManagedDiamonds() {
+    // Real-time synchronization: Any update in the Admin Panel immediately displays here on the frontend!
+    const unsubscribe = subscribeDiamonds((managed) => {
       try {
-        const managed = await getDiamonds({ publishedOnly: true });
         if (managed && managed.length > 0) {
           const formatted = managed.map((diamond, index) => ({
             id: diamond.id || `managed-${index}`,
@@ -366,7 +366,6 @@ export default function DiamondGrid({ prefilterColour }) {
             img: diamond.image || '/wp-content/uploads/diamond/download.jpg',
           }));
           
-          // Merge managed diamonds with baseline catalog, prioritizing managed entries with matching IDs or prepending them
           const managedIds = new Set(formatted.map(d => d.id));
           const remainingBaseline = DIAMONDS_CATALOG.filter(b => !managedIds.has(b.id));
           setDiamondCatalog([...formatted, ...remainingBaseline]);
@@ -374,8 +373,9 @@ export default function DiamondGrid({ prefilterColour }) {
       } catch (error) {
         console.error('Using the preserved diamond catalogue fallback:', error);
       }
-    }
-    loadManagedDiamonds();
+    }, { publishedOnly: true });
+
+    return () => unsubscribe();
   }, []);
 
   // ── Filter State ──

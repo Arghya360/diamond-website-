@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getProducts } from '../../lib/firebase/admin-service';
+import { getProducts, subscribeProducts } from '../../lib/firebase/admin-service';
 
 const TABS = ['All', 'Rings', 'Earrings', 'Diamonds', 'Necklaces', 'Bracelets'];
 
@@ -85,11 +85,10 @@ export default function CrystoNewArrivals() {
   const gold = '#BFA37C';
 
   useEffect(() => {
-    async function loadFromFirebase() {
+    // Real-time synchronization: Instant updates when products are added/edited in Admin
+    const unsubscribe = subscribeProducts((firestoreProducts) => {
       try {
-        const firestoreProducts = await getProducts({ publishedOnly: true });
         if (firestoreProducts && firestoreProducts.length > 0) {
-          // Format Firestore products to match component shape
           const formatted = firestoreProducts
             .filter((p) => p.isNewArrival !== false)
             .map((p) => {
@@ -115,8 +114,9 @@ export default function CrystoNewArrivals() {
       } catch (err) {
         console.error('Using default products fallback:', err);
       }
-    }
-    loadFromFirebase();
+    }, { publishedOnly: true });
+
+    return () => unsubscribe();
   }, []);
 
   const visible = activeTab === 'All' ? productsList : productsList.filter((p) => p.tab === activeTab);

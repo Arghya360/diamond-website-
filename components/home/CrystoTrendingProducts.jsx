@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getProducts } from '../../lib/firebase/admin-service';
+import { getProducts, subscribeProducts } from '../../lib/firebase/admin-service';
 
 const DEFAULT_TRENDING = [
   {
@@ -84,9 +84,9 @@ export default function CrystoTrendingProducts() {
   const gold = '#BFA37C';
 
   useEffect(() => {
-    async function loadTrending() {
+    // Real-time synchronization: Instantly updates trending marquee products
+    const unsubscribe = subscribeProducts((firestoreProducts) => {
       try {
-        const firestoreProducts = await getProducts({ publishedOnly: true });
         if (firestoreProducts && firestoreProducts.length > 0) {
           const trending = firestoreProducts.filter((p) => p.isTrending || p.isFeatured);
           const sourceList = trending.length > 0 ? trending : firestoreProducts;
@@ -105,8 +105,9 @@ export default function CrystoTrendingProducts() {
       } catch (err) {
         console.error('Trending products fallback to default:', err);
       }
-    }
-    loadTrending();
+    }, { publishedOnly: true });
+
+    return () => unsubscribe();
   }, []);
 
   // Duplicate items for seamless continuous infinite marquee

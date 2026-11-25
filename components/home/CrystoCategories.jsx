@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getCategories } from '../../lib/firebase/admin-service';
+import { getCategories, subscribeCategories } from '../../lib/firebase/admin-service';
 
 const DEFAULT_CATEGORIES = [
   {
@@ -39,9 +39,9 @@ export default function CrystoCategories() {
   const [categoriesList, setCategoriesList] = useState(DEFAULT_CATEGORIES);
 
   useEffect(() => {
-    async function loadCats() {
+    // Real-time listener: Any category update/add/order in Admin immediately updates this storefront grid!
+    const unsubscribe = subscribeCategories((firestoreCats) => {
       try {
-        const firestoreCats = await getCategories();
         if (firestoreCats && firestoreCats.length > 0) {
           const published = firestoreCats.filter((c) => c.published !== false);
           if (published.length > 0) {
@@ -58,8 +58,9 @@ export default function CrystoCategories() {
       } catch (err) {
         console.error('Categories fallback to default:', err);
       }
-    }
-    loadCats();
+    });
+
+    return () => unsubscribe();
   }, []);
   return (
     <section
