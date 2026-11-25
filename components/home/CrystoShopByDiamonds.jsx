@@ -1,7 +1,10 @@
+'use client';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getCategories } from '../../lib/firebase/admin-service';
 
-const DIAMONDS = [
+const DEFAULT_DIAMONDS = [
   {
     img: '/wp-content/uploads/shop page/category-01.png',
     title: 'Round Brilliant',
@@ -26,6 +29,28 @@ const DIAMONDS = [
 
 export default function CrystoShopByDiamonds() {
   const gold = '#BFA37C';
+  const [shapes, setShapes] = useState(DEFAULT_DIAMONDS);
+
+  useEffect(() => {
+    async function loadShapes() {
+      try {
+        const cats = await getCategories();
+        if (cats && cats.length > 0) {
+          const shapeCats = cats.filter(c => c.subcategories && c.subcategories.includes('Shapes'));
+          if (shapeCats.length >= 4) {
+            setShapes(shapeCats.map(c => ({
+              img: c.image || '/wp-content/uploads/shop page/category-01.png',
+              title: c.name,
+              href: c.slug === 'pink-diamonds' ? '/diamonds/pink' : '/diamonds/white'
+            })));
+          }
+        }
+      } catch (e) {
+        // Fallback to default shapes cleanly
+      }
+    }
+    loadShapes();
+  }, []);
 
   return (
     <section style={{ background: '#f5f1ec', padding: '70px 24px', boxSizing: 'border-box' }}>
@@ -85,7 +110,7 @@ export default function CrystoShopByDiamonds() {
           className="diamonds-row"
           style={{ display: 'flex', gap: '32px', justifyContent: 'center', flexWrap: 'nowrap' }}
         >
-          {DIAMONDS.map((d) => (
+          {shapes.map((d) => (
             <Link key={d.title} href={d.href} className="diamond-shape-card">
               <div className="diamond-shape-img">
                 <Image

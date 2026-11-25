@@ -348,7 +348,7 @@ export default function DiamondGrid({ prefilterColour }) {
     async function loadManagedDiamonds() {
       try {
         const managed = await getDiamonds({ publishedOnly: true });
-        if (managed.length > 0) {
+        if (managed && managed.length > 0) {
           const formatted = managed.map((diamond, index) => ({
             id: diamond.id || `managed-${index}`,
             shape: diamond.shape,
@@ -362,10 +362,14 @@ export default function DiamondGrid({ prefilterColour }) {
             quickShip: diamond.quickShip,
             bestValue: diamond.bestValue,
             goingFast: false,
-            popularRank: diamond.popularRank || (index + 100),
+            popularRank: diamond.popularRank || (index + 1),
             img: diamond.image || '/wp-content/uploads/diamond/download.jpg',
           }));
-          setDiamondCatalog([...formatted, ...DIAMONDS_CATALOG]);
+          
+          // Merge managed diamonds with baseline catalog, prioritizing managed entries with matching IDs or prepending them
+          const managedIds = new Set(formatted.map(d => d.id));
+          const remainingBaseline = DIAMONDS_CATALOG.filter(b => !managedIds.has(b.id));
+          setDiamondCatalog([...formatted, ...remainingBaseline]);
         }
       } catch (error) {
         console.error('Using the preserved diamond catalogue fallback:', error);
