@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { getCategories, createCategory, updateCategory, deleteCategory } from '../../../lib/firebase/admin-service';
 import ImageUpload from '../../../components/admin/ImageUpload';
 import type { Category } from '../../../types/admin';
@@ -12,6 +13,7 @@ export default function AdminCategoriesPage() {
   const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Form inputs
   const [name, setName] = useState('');
@@ -45,12 +47,13 @@ export default function AdminCategoriesPage() {
     setName('');
     setSlug('');
     setDescription('');
-    setImage('/wp-content/uploads/shop page/banner-01.jpg');
-    setItemsCountText('5 Items');
+    setImage('/images/shop/banner-01.jpg');
+    setItemsCountText('7 Items');
     setDisplayOrder(categories.length + 1);
     setPublished(true);
     setTextDark(false);
-    setSubcategoriesStr('');
+    setSubcategoriesStr('Engagement Rings, Eternity Bands, Solitaire Rings');
+    setErrorMsg(null);
     setShowModal(true);
   };
 
@@ -59,18 +62,19 @@ export default function AdminCategoriesPage() {
     setName(cat.name || '');
     setSlug(cat.slug || '');
     setDescription(cat.description || '');
-    setImage(cat.image || '');
-    setItemsCountText(cat.itemsCountText || '');
+    setImage(cat.image || '/images/shop/banner-01.jpg');
+    setItemsCountText(cat.itemsCountText || '5 Items');
     setDisplayOrder(cat.displayOrder || 1);
     setPublished(cat.published !== false);
     setTextDark(!!cat.textDark);
     setSubcategoriesStr(cat.subcategories ? cat.subcategories.join(', ') : '');
+    setErrorMsg(null);
     setShowModal(true);
   };
 
   const handleNameChange = (val: string) => {
     setName(val);
-    if (!editingCat) {
+    if (!editingCat || !slug || slug === editingCat.slug) {
       setSlug(
         val
           .toLowerCase()
@@ -83,11 +87,13 @@ export default function AdminCategoriesPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert('Please provide a category title.');
+      setErrorMsg('Category title is required.');
       return;
     }
 
     setSaving(true);
+    setErrorMsg(null);
+
     const subcategories = subcategoriesStr
       .split(',')
       .map((s) => s.trim())
@@ -97,8 +103,8 @@ export default function AdminCategoriesPage() {
       name: name.trim(),
       slug: slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       description: description.trim(),
-      image,
-      itemsCountText: itemsCountText.trim(),
+      image: image || '/images/shop/banner-01.jpg',
+      itemsCountText: itemsCountText.trim() || '5 Items',
       displayOrder: Number(displayOrder) || 1,
       published,
       textDark,
@@ -108,7 +114,7 @@ export default function AdminCategoriesPage() {
     try {
       if (editingCat && editingCat.id) {
         await updateCategory(editingCat.id, payload);
-        setNotice(`Category "${name}" updated successfully.`);
+        setNotice(`Category "${name}" updated successfully in vault.`);
       } else {
         await createCategory(payload as Omit<Category, 'id'>);
         setNotice(`Category "${name}" created successfully.`);
@@ -118,7 +124,7 @@ export default function AdminCategoriesPage() {
       await loadCategories();
       setTimeout(() => setNotice(null), 3500);
     } catch (err: any) {
-      alert('Failed to save category: ' + err.message);
+      setErrorMsg('Failed to save category: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -130,7 +136,7 @@ export default function AdminCategoriesPage() {
 
     try {
       await deleteCategory(cat.id);
-      setNotice(`Category "${cat.name}" removed.`);
+      setNotice(`Category "${cat.name}" removed from vault.`);
       await loadCategories();
       setTimeout(() => setNotice(null), 3500);
     } catch (err: any) {
@@ -139,136 +145,243 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24, width: '100%' }}>
       {notice && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#003629] text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-[#baeed9]/20 font-body-md animate-fade-in">
-          <span className="material-symbols-outlined text-[20px] text-[#baeed9]">verified</span>
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            zIndex: 9999,
+            backgroundColor: '#003629',
+            color: '#FFFFFF',
+            padding: '12px 20px',
+            borderRadius: 8,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+            fontSize: 13,
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#BAEED9' }}>verified</span>
           <span>{notice}</span>
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col gap-space-sm mb-space-lg">
-        <div className="flex items-center gap-2 font-label-sm text-label-sm uppercase tracking-widest text-outline">
+      {/* Header Bar */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#707974' }}>
           <span>Catalogue</span>
-          <span className="text-xs">/</span>
-          <span className="text-secondary font-semibold">Categories</span>
+          <span>/</span>
+          <span style={{ color: '#725B38' }}>Architecture</span>
+          <span>/</span>
+          <span style={{ color: '#003629' }}>Categories</span>
         </div>
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
-          <div className="flex flex-col max-w-3xl">
-            <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
+
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <h1 style={{ fontFamily: 'EB Garamond, Georgia, serif', fontSize: 32, fontWeight: 500, color: '#131B2E', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
               Diamond &amp; Fine Jewellery Categories
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-              Configure diamond categories, hero showcase cards, subcategory filters, and storefront navigation hierarchy.
+            <p style={{ fontSize: 14, color: '#404945', margin: '4px 0 0' }}>
+              Configure diamond collection cards, storefront curation banners, subcategory navigation, and atelier catalog hierarchy.
             </p>
           </div>
-          <div className="flex items-center gap-space-sm shrink-0">
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button
               onClick={openAddModal}
-              className="flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-all shadow-md font-title-md text-title-md"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '9px 20px',
+                borderRadius: 8,
+                backgroundColor: '#003629',
+                color: '#FFFFFF',
+                border: 'none',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0,54,41,0.2)',
+              }}
             >
-              <span className="material-symbols-outlined text-[20px]">add</span>
-              <span>+ Add New Category</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#BAEED9' }}>add_circle</span>
+              <span>+ Add Category</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Categories Table Card */}
-      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-space-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+      <div style={cardStyle}>
+        <div style={cardHeaderStyle}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#725B38' }}>category</span>
+            <h2 style={cardTitleStyle}>Active Category Registry</h2>
+          </div>
+          <span style={{ fontSize: 12, color: '#707974' }}>
+            {categories.length} Collection{categories.length !== 1 ? 's' : ''} Configured
+          </span>
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr className="bg-surface-container-low text-outline font-label-sm text-label-sm uppercase tracking-wider">
-                <th className="py-3.5 px-6" style={{ width: '80px' }}>Banner</th>
-                <th className="py-3.5 px-6">Category Name</th>
-                <th className="py-3.5 px-6">Slug</th>
-                <th className="py-3.5 px-6">Subcategories</th>
-                <th className="py-3.5 px-6">Item Count</th>
-                <th className="py-3.5 px-6">Order</th>
-                <th className="py-3.5 px-6">Status</th>
-                <th className="py-3.5 px-6 text-right">Actions</th>
+              <tr style={{ backgroundColor: '#F8F9FE', borderBottom: '1px solid #EAEDFF' }}>
+                <th style={{ padding: '12px 18px', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974', width: 90 }}>Banner</th>
+                <th style={{ padding: '12px 18px', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Category Title</th>
+                <th style={{ padding: '12px 18px', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Storefront URL Slug</th>
+                <th style={{ padding: '12px 18px', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Subcategories</th>
+                <th style={{ padding: '12px 18px', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Items Badge</th>
+                <th style={{ padding: '12px 18px', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Order</th>
+                <th style={{ padding: '12px 18px', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974' }}>Status</th>
+                <th style={{ padding: '12px 18px', fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#707974', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-on-surface-variant">
-                    Loading categories...
+                  <td colSpan={8} style={{ padding: '48px', textAlign: 'center', color: '#707974', fontSize: 13.5 }}>
+                    Loading categories from vault...
                   </td>
                 </tr>
               ) : categories.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[36px] text-outline mb-2 block">category</span>
+                  <td colSpan={8} style={{ padding: '48px', textAlign: 'center', color: '#707974', fontSize: 13.5 }}>
                     No categories configured yet.
                   </td>
                 </tr>
               ) : (
                 categories.map((c) => (
-                  <tr key={c.id || c.name} className="hover:bg-surface-container-low/70 transition-colors">
-                    <td className="py-4 px-6">
+                  <tr
+                    key={c.id || c.name}
+                    style={{ borderBottom: '1px solid #EAEDFF', transition: 'background-color 0.12s' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F9FAFB')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  >
+                    <td style={{ padding: '14px 18px' }}>
                       <div
-                        className="w-14 h-14 rounded-lg bg-cover bg-center border border-surface-container shadow-xs"
                         style={{
-                          backgroundImage: c.image ? `url("${c.image}")` : 'none',
-                          backgroundColor: '#f2f3ff',
+                          width: 54,
+                          height: 54,
+                          borderRadius: 8,
+                          overflow: 'hidden',
+                          backgroundColor: '#F2F3FF',
+                          border: '1px solid #EAEDFF',
                         }}
-                      />
+                      >
+                        {c.image ? (
+                          <img
+                            src={c.image}
+                            alt={c.name}
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = '/images/shop/banner-01.jpg';
+                            }}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#707974' }}>category</span>
+                          </div>
+                        )}
+                      </div>
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="font-title-md text-title-md text-on-surface font-semibold">{c.name}</div>
+                    <td style={{ padding: '14px 18px' }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#131B2E' }}>{c.name}</div>
                       {c.description && (
-                        <div className="font-body-sm text-body-sm text-outline max-w-xs truncate">
+                        <div style={{ fontSize: 11.5, color: '#707974', maxWidth: 260, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>
                           {c.description}
                         </div>
                       )}
                     </td>
-                    <td className="py-4 px-6 font-mono text-outline font-body-sm text-body-sm">
+                    <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontSize: 12.5, color: '#707974' }}>
                       /{c.slug}
                     </td>
-                    <td className="py-4 px-6">
+                    <td style={{ padding: '14px 18px' }}>
                       {c.subcategories && c.subcategories.length > 0 ? (
-                        <div className="flex flex-wrap gap-1 max-w-xs">
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 260 }}>
                           {c.subcategories.map((sub, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface">
+                            <span
+                              key={i}
+                              style={{
+                                padding: '2px 8px',
+                                borderRadius: 4,
+                                backgroundColor: '#F2F3FF',
+                                fontSize: 11,
+                                fontWeight: 600,
+                                color: '#131B2E',
+                              }}
+                            >
                               {sub}
                             </span>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-outline text-body-sm">—</span>
+                        <span style={{ color: '#707974', fontSize: 12 }}>—</span>
                       )}
                     </td>
-                    <td className="py-4 px-6 font-semibold text-on-surface font-title-md text-title-md">
+                    <td style={{ padding: '14px 18px', fontSize: 13, fontWeight: 700, color: '#131B2E' }}>
                       {c.itemsCountText || '—'}
                     </td>
-                    <td className="py-4 px-6 font-mono text-outline font-body-sm text-body-sm">
+                    <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontSize: 13, color: '#707974' }}>
                       {c.displayOrder || 1}
                     </td>
-                    <td className="py-4 px-6">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm font-semibold ${
-                        c.published !== false ? 'bg-primary-fixed text-on-primary-fixed' : 'bg-surface-container text-outline'
-                      }`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                    <td style={{ padding: '14px 18px' }}>
+                      <span
+                        style={{
+                          padding: '3px 10px',
+                          borderRadius: 999,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          backgroundColor: c.published !== false ? '#BAEED9' : '#EAEDFF',
+                          color: c.published !== false ? '#002117' : '#131B2E',
+                        }}
+                      >
                         {c.published !== false ? 'Published' : 'Draft'}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td style={{ padding: '14px 18px', textAlign: 'right' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                         <button
                           onClick={() => openEditModal(c)}
-                          className="px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-title-md text-title-md transition-colors"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            padding: '6px 14px',
+                            borderRadius: 6,
+                            backgroundColor: '#003629',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            fontSize: 12.5,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(0,54,41,0.15)',
+                          }}
                         >
-                          Edit
+                          <span className="material-symbols-outlined" style={{ fontSize: 15, color: '#BAEED9' }}>edit</span>
+                          <span>Edit</span>
                         </button>
                         <button
                           onClick={() => handleDelete(c)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:text-red-700 hover:bg-red-50 transition-colors"
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 6,
+                            border: '1px solid #FFD6D6',
+                            backgroundColor: '#FFF5F5',
+                            color: '#BA1A1A',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
                           title="Delete Category"
                         >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
                         </button>
                       </div>
                     </td>
@@ -280,138 +393,370 @@ export default function AdminCategoriesPage() {
         </div>
       </div>
 
-      {/* Modal for Add / Edit Category */}
+      {/* ════ REDESIGNED LUXURY ATELIER MODAL / DOSSIER ════ */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-surface-container-lowest rounded-2xl max-w-xl w-full p-space-xl shadow-2xl border border-surface-container flex flex-col max-h-[90vh] overflow-y-auto">
-            <div className="flex items-start justify-between pb-space-md border-b border-surface-container-low">
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            backgroundColor: 'rgba(19, 27, 46, 0.45)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: 16,
+              maxWidth: 960,
+              width: '100%',
+              maxHeight: '92vh',
+              overflowY: 'auto',
+              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.18)',
+              border: '1px solid #EAEDFF',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                padding: '20px 28px',
+                borderBottom: '1px solid #EAEDFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <div>
-                <span className="font-label-sm text-label-sm uppercase tracking-widest text-secondary font-semibold">
-                  Catalogue Configuration
-                </span>
-                <h2 className="font-headline-md text-headline-md text-primary mt-1">
-                  {editingCat ? `Edit Category: ${editingCat.name}` : 'Create New Category'}
+                <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#725B38' }}>
+                  Atelier Architecture
+                </div>
+                <h2 style={{ fontFamily: 'EB Garamond, Georgia, serif', fontSize: 24, fontWeight: 500, color: '#131B2E', margin: '2px 0 0' }}>
+                  {editingCat ? `Edit Category: ${editingCat.name}` : 'Create New Collection Category'}
                 </h2>
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="w-9 h-9 rounded-full bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-outline transition-colors"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  backgroundColor: '#F8F9FE',
+                  border: '1px solid #EAEDFF',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#707974',
+                }}
               >
-                <span className="material-symbols-outlined text-[20px]">close</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="py-space-md space-y-space-md">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-                <div className="space-y-1">
-                  <label className="font-label-md text-label-md text-on-surface font-semibold">Category Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
-                    placeholder="e.g. Loose Diamonds"
-                  />
+            {errorMsg && (
+              <div style={{ margin: '16px 28px 0', padding: '12px 16px', borderRadius: 8, backgroundColor: '#FFDAD6', border: '1px solid #FFB4AB', color: '#BA1A1A', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>error</span>
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSave} style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 24 }}>
+              {/* Two-Column Split in Modal */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 24 }} className="admin-cat-modal-split">
+                
+                {/* Left Side: Identity & Details */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                  <div>
+                    <label style={labelStyle}>
+                      Category Title <span style={{ color: '#BA1A1A' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Diamond ring"
+                      value={name}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                    <div>
+                      <label style={labelStyle}>URL Slug</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="diamond-ring"
+                        value={slug}
+                        onChange={(e) => setSlug(e.target.value)}
+                        style={inputStyle}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Item Count Badge</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 7 Items"
+                        value={itemsCountText}
+                        onChange={(e) => setItemsCountText(e.target.value)}
+                        style={inputStyle}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Curator Description</label>
+                    <textarea
+                      rows={3}
+                      placeholder="Bespoke diamond engagement rings and fine bands handcrafted to perfection..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      style={{ ...inputStyle, height: 'auto', minHeight: 76, padding: '10px 14px', lineHeight: 1.5 }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Subcategories (Comma-separated)</label>
+                    <input
+                      type="text"
+                      placeholder="Engagement Rings, Eternity Bands, Solitaire Rings"
+                      value={subcategoriesStr}
+                      onChange={(e) => setSubcategoriesStr(e.target.value)}
+                      style={inputStyle}
+                    />
+                    <span style={{ fontSize: 11, color: '#707974', marginTop: 4, display: 'block' }}>
+                      Used for category pills and faceted navigation.
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                    <div>
+                      <label style={labelStyle}>Display Order</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={displayOrder}
+                        onChange={(e) => setDisplayOrder(Number(e.target.value))}
+                        style={inputStyle}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Overlay Typography</label>
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={textDark ? 'dark' : 'light'}
+                          onChange={(e) => setTextDark(e.target.value === 'dark')}
+                          style={selectStyle}
+                        >
+                          <option value="light">Light Typography (for dark image)</option>
+                          <option value="dark">Dark Typography (for cream image)</option>
+                        </select>
+                        <span className="material-symbols-outlined" style={selectArrowStyle}>expand_more</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="font-label-md text-label-md text-on-surface font-semibold">Slug (URL Path)</label>
-                  <input
-                    type="text"
-                    required
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none font-mono text-sm"
-                    placeholder="e.g. loose-diamonds"
-                  />
+
+                {/* Right Side: Showcase Banner & Publishing */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                  <div style={{ backgroundColor: '#F8F9FE', border: '1px solid #EAEDFF', borderRadius: 12, padding: 16 }}>
+                    <label style={{ ...labelStyle, marginBottom: 12 }}>Collection Showcase Banner</label>
+                    <ImageUpload
+                      label="Banner Image"
+                      value={image}
+                      onChange={(url) => setImage(url)}
+                      folder="categories"
+                    />
+
+                    {/* Live Preview Card */}
+                    <div style={{ marginTop: 14 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: '#707974', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>
+                        Storefront Card Preview
+                      </span>
+                      <div
+                        style={{
+                          height: 140,
+                          borderRadius: 10,
+                          position: 'relative',
+                          overflow: 'hidden',
+                          backgroundColor: '#111827',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'flex-end',
+                          padding: 16,
+                          color: textDark ? '#111827' : '#FFFFFF',
+                        }}
+                      >
+                        {image && (
+                          <img
+                            src={image}
+                            alt="preview"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = '/images/shop/banner-01.jpg';
+                            }}
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
+                          />
+                        )}
+                        <div style={{ position: 'relative', zIndex: 2 }}>
+                          <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8 }}>
+                            {itemsCountText || '5 Items'}
+                          </span>
+                          <h4 style={{ fontFamily: 'EB Garamond, Georgia, serif', fontSize: 18, margin: '2px 0 0', fontWeight: 600 }}>
+                            {name || 'Category Title'}
+                          </h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ backgroundColor: '#F8F9FE', border: '1px solid #EAEDFF', borderRadius: 12, padding: 16 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={published}
+                        onChange={(e) => setPublished(e.target.checked)}
+                        style={{ width: 18, height: 18, accentColor: '#003629', cursor: 'pointer' }}
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#131B2E' }}>Publish Category Live</span>
+                        <span style={{ fontSize: 11, color: '#707974' }}>Immediate visibility on /shop and navigation</span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
+
               </div>
 
-              <div className="space-y-1">
-                <label className="font-label-md text-label-md text-on-surface font-semibold">Description</label>
-                <textarea
-                  rows={2}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-3 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
-                  placeholder="Curated selection of certified loose diamonds..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="font-label-md text-label-md text-on-surface font-semibold">Banner Image (Local Upload or URL)</label>
-                <ImageUpload
-                  value={image}
-                  onChange={(url) => setImage(url)}
-                  folder="categories"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-                <div className="space-y-1">
-                  <label className="font-label-md text-label-md text-on-surface font-semibold">Items Count Text</label>
-                  <input
-                    type="text"
-                    value={itemsCountText}
-                    onChange={(e) => setItemsCountText(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
-                    placeholder="e.g. 12 Items"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-label-md text-label-md text-on-surface font-semibold">Display Order Priority</label>
-                  <input
-                    type="number"
-                    value={displayOrder}
-                    onChange={(e) => setDisplayOrder(Number(e.target.value))}
-                    className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-label-md text-label-md text-on-surface font-semibold">Subcategories (Comma-separated)</label>
-                <input
-                  type="text"
-                  value={subcategoriesStr}
-                  onChange={(e) => setSubcategoriesStr(e.target.value)}
-                  className="w-full h-11 px-3.5 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-none"
-                  placeholder="e.g. Solitaires, Halo Rings, Eternity Bands"
-                />
-              </div>
-
-              <div className="pt-2 flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={published}
-                    onChange={(e) => setPublished(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary accent-[#003629]"
-                  />
-                  <span className="font-title-md text-title-md text-on-surface">Publish Immediately on Storefront</span>
-                </label>
-              </div>
-
-              <div className="pt-space-md border-t border-surface-container-low flex items-center justify-end gap-space-sm">
+              {/* Modal Footer Actions */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, paddingTop: 16, borderTop: '1px solid #EAEDFF' }}>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-space-md py-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-title-md text-title-md transition-all"
+                  style={{
+                    padding: '9px 18px',
+                    borderRadius: 8,
+                    backgroundColor: '#FFFFFF',
+                    color: '#131B2E',
+                    border: '1px solid #EAEDFF',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-space-lg py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-title-md text-title-md shadow-md transition-all disabled:opacity-50"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '9px 24px',
+                    borderRadius: 8,
+                    backgroundColor: '#003629',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: saving ? 'wait' : 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,54,41,0.2)',
+                    opacity: saving ? 0.75 : 1,
+                  }}
                 >
-                  {saving ? 'Saving...' : editingCat ? 'Update Category' : 'Create Category'}
+                  <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#BAEED9' }}>save</span>
+                  <span>{saving ? 'Saving Category...' : editingCat ? 'Update Category' : 'Create Category'}</span>
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .admin-cat-modal-split {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
+
+// ── Reusable Component Styling Objects ──
+const cardStyle: React.CSSProperties = {
+  backgroundColor: '#FFFFFF',
+  borderRadius: 12,
+  border: '1px solid #EAEDFF',
+  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+  overflow: 'hidden',
+};
+
+const cardHeaderStyle: React.CSSProperties = {
+  padding: '16px 24px',
+  borderBottom: '1px solid #F2F3FF',
+  backgroundColor: '#FFFFFF',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+};
+
+const cardTitleStyle: React.CSSProperties = {
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  fontSize: 15,
+  fontWeight: 700,
+  color: '#131B2E',
+  margin: 0,
+};
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: 11.5,
+  fontWeight: 700,
+  color: '#404945',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+  marginBottom: 6,
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  height: 42,
+  padding: '0 14px',
+  borderRadius: 8,
+  border: '1px solid #EAEDFF',
+  backgroundColor: '#F8F9FE',
+  fontSize: 13.5,
+  color: '#131B2E',
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  outline: 'none',
+  transition: 'border-color 0.15s, background-color 0.15s',
+  boxSizing: 'border-box',
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  paddingRight: 36,
+  cursor: 'pointer',
+};
+
+const selectArrowStyle: React.CSSProperties = {
+  position: 'absolute',
+  right: 10,
+  top: 11,
+  fontSize: 20,
+  color: '#707974',
+  pointerEvents: 'none',
+};
